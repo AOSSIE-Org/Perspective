@@ -1,0 +1,9 @@
+fastapi==0.109.2
+uvicorn==0.27.1
+pydantic==2.6.1
+beautifulsoup4==4.12.3
+requests==2.31.0
+python-dotenv==1.0.1
+newspaper3k==0.2.8
+slowapi==0.1.9
+lxml[html_clean]>=5.1.0
