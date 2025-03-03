@@ -16,7 +16,8 @@ import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
-
+import ExportButton from '../components/Utils/ExportButton';
+  
 export default function Article() {
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
@@ -96,6 +97,10 @@ export default function Article() {
     "& .MuiCardContent-root": { borderRadius: "20px" }
   };
 
+  const handleExport = (format: string) => {
+    console.log(`Exporting in ${format} format`);
+  };
+
   return (
     <>
       <Navbar />
@@ -111,66 +116,18 @@ export default function Article() {
       >
         <Container maxWidth="lg">
           <Stack spacing={6}>
-            {/* Summary Section */}
-            {isSummaryLoading ? (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{ height: "150px" }}
-              >
-                <CircularProgress color="primary" />
-              </Box>
-            ) : (
-              <Card sx={cardStyle}>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    gutterBottom
-                    color="primary.main"
-                  >
-                    Article Summary
-                  </Typography>
+
+            <Card sx={cardStyle}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h5" fontWeight="bold" gutterBottom color="primary.main">
+                  Article Summary
+                </Typography>
+                <Typography variant="body1" paragraph>
+
+
                   <TextToSpeech text={summary} />
 
-                  <Typography variant="body1" paragraph>
-                    {summary}
-                  </Typography>
-                  <Typography
-                    variant="subtitle2"
-                    color="textSecondary"
-                    fontWeight="bold"
-                  >
-                    Source Article:
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    component="a"
-                    href={url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ wordBreak: "break-word" }}
-                  >
-                    {url}
-                  </Typography>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Perspective Section to render only the JSON snippet */}
-            {isPerspectiveLoading ? (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{ height: "150px" }}
-              >
-                <CircularProgress color="primary" />
-              </Box>
-            ) : (
-              <Card sx={cardStyle}>
                 <div className="p-4">
                 </div>
                 <CardContent sx={{ p: 4 }}>
@@ -195,8 +152,8 @@ export default function Article() {
 
             
 
-            {/* Discussion Section */}
             <Card sx={cardStyle}>
+
               <CardContent
                 sx={{
                   p: 4,
@@ -233,6 +190,7 @@ export default function Article() {
                   display="flex"
                   gap={2}
                 >
+
                   <TextField
                     fullWidth
                     variant="outlined"
@@ -241,8 +199,7 @@ export default function Article() {
                     onChange={(e) => setMessage(e.target.value)}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: "12px"
-                      }
+
                     }}
                   />
                   <Button

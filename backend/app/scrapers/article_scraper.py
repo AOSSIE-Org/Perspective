@@ -24,7 +24,6 @@ def scrape_website(url, headers=None):
 
 
 
-
 # # Example usage:
 # url = 'https://en.wikipedia.org/wiki/Bird'
 # raw_data = scrape_website(url)
