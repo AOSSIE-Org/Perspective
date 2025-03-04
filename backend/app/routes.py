@@ -31,7 +31,7 @@ async def scrape_article(article: ScrapURLRequest):
     # article.url is automatically validated as a non-null string
     data = scrape_website(article.url)
     print(data)
-    clean = clean_scraped_data("raw:"+data)
+    clean = clean_scraped_data(data)
     print("clean:"+ clean)
     
     
