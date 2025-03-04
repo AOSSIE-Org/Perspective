@@ -19,7 +19,8 @@ import TextToSpeech from '../components/TextToSpeech';
 
 export default function Article() {
   const [message, setMessage] = useState("");
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState<string | null>(null);
+
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -36,41 +37,37 @@ export default function Article() {
   }, [articleUrl]);
 
 
-
-  // Fetch summary and perspective from backend endpoints as soon as articleUrl is available
   useEffect(() => {
     if (articleUrl) {
       const fetchData = async () => {
         try {
           // Get article summary
-          const response = await fetch(
-            "http://localhost:8000/scrape-and-summarize",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: articleUrl })
-            }
-          );
+          const response = await fetch("http://localhost:8000/scrape-and-summarize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: articleUrl })
+          });
           const data = await response.json();
-          const dataParsed = JSON.parse(data.summary);
-          const summaryText = dataParsed[0].summary_text;
-
+          console.log("Received summary response:", data);
+          
+          // Adjust parsing based on the expected data structure.
+          // For example, if data.summary is an array:
+          const summaryText = data.summary[0]?.summary_text;
+          if (!summaryText) {
+            throw new Error("Summary text not found in response");
+          }
           setSummary(summaryText);
           setIsSummaryLoading(false);
-
-          // Request for AI perspective
-          const resPerspective = await fetch(
-            "http://localhost:8000/generate-perspective",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ summary: summaryText })
-            }
-          );
+  
+          // Request for AI perspective using the summary text
+          const resPerspective = await fetch("http://localhost:8000/generate-perspective", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ summary: summaryText })
+          });
           const dataPerspective = await resPerspective.json();
-          // Assume perspective is returned as a string containing the full response with the JSON snippet.
-          const data1 = JSON.stringify(dataPerspective.perspective)
-          setPerspective(data1);
+          console.log("Received perspective response:", dataPerspective);
+          setPerspective(dataPerspective.perspective);
           setIsPerspectiveLoading(false);
         } catch (error) {
           console.error("Error fetching article analysis:", error);
@@ -81,7 +78,7 @@ export default function Article() {
       fetchData();
     }
   }, [articleUrl]);
-
+  
   const handleSubmit = (e:any) => {
     e.preventDefault();
     if (message.trim()) {

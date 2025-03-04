@@ -7,17 +7,14 @@ app = FastAPI(title="Perspective AI", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or allow_origins=["*"] for all origins
+    allow_origins=["*"], 
     allow_credentials=True,
-    allow_methods=["*"],    # allows all methods (GET, POST, OPTIONS, etc.)
+    allow_methods=["*"],
     allow_headers=["*"],
 )
-# Include routes from routes.py
+
 app.include_router(router)
 
-
-
-# Root endpoint (optional)
 @app.get("/")
 def home():
     return {"message": "Welcome to the Perspective AI"}
