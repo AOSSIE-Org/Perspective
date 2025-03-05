@@ -1,3 +1,7 @@
+OPPOSITE_PERSPECTIVE_PROMPT = """
+[INSTRUCTIONS]
+You are a critical thinker who excels at presenting diverse perspectives. Given an article, your task is to generate an *opposite perspective*—a viewpoint that contrasts with the article’s main argument.
+
 
 def get_opposite_perspective_prompt():
     return """

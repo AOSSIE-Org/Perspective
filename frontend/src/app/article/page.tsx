@@ -9,7 +9,7 @@ import {
   CardContent,
   Box,
   Stack,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
@@ -21,7 +21,6 @@ import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
 export default function Article() {
   const [message, setMessage] = useState("");
   const [url, setUrl,] = useState<string | null>(null);
-
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -43,20 +42,22 @@ export default function Article() {
     setUrl(articleUrl);
   }, [articleUrl]);
 
-
   useEffect(() => {
     if (articleUrl) {
       const fetchData = async () => {
         try {
           // Get article summary
-          const response = await fetch("http://localhost:8000/scrape-and-summarize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: articleUrl })
-          });
+          const response = await fetch(
+            "http://localhost:8000/scrape-and-summarize",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: articleUrl }),
+            },
+          );
           const data = await response.json();
           console.log("Received summary response:", data);
-          
+
           // Adjust parsing based on the expected data structure.
           // For example, if data.summary is an array:
           const summaryText = data.summary;
@@ -66,13 +67,16 @@ export default function Article() {
           }
           setSummary(summaryText);
           setIsSummaryLoading(false);
-  
+
           // Request for AI perspective using the summary text
-          const resPerspective = await fetch("http://localhost:8000/generate-perspective", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ summary: summaryText })
-          });
+          const resPerspective = await fetch(
+            "http://localhost:8000/generate-perspective",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ summary: summaryText }),
+            },
+          );
           const dataPerspective = await resPerspective.json();
           console.log("Received perspective response:", dataPerspective);
           setPerspective(dataPerspective.perspective);
@@ -86,8 +90,8 @@ export default function Article() {
       fetchData();
     }
   }, [articleUrl]);
-  
-  const handleSubmit = (e:any) => {
+
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if (message.trim()) {
       setMessage("");
@@ -98,7 +102,7 @@ export default function Article() {
     bgcolor: "white",
     boxShadow: 3,
     borderRadius: "20px",
-    "& .MuiCardContent-root": { borderRadius: "20px" }
+    "& .MuiCardContent-root": { borderRadius: "20px" },
   };
 
   const handleExport = (format: string) => {
@@ -115,7 +119,7 @@ export default function Article() {
             "linear-gradient(90deg, rgba(7, 0, 40, 1) 0%, rgba(23, 6, 66, 1) 50%, rgba(19, 0, 47, 1) 100%)",
           color: "white",
           minHeight: "100vh",
-          py: 8
+          py: 8,
         }}
       >
         <Container 
@@ -141,8 +145,24 @@ export default function Article() {
                   <TextToSpeech text={summary} />
 
 
+
+            {/* Perspective Section to render only the JSON snippet */}
+            {isPerspectiveLoading ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ height: "150px" }}
+              >
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <Card sx={cardStyle}>
+                <div className="p-4"></div>
+
                 <div className="p-4">
                 </div>
+
                 <CardContent sx={{ p: 4 }}>
                   <Typography
                     variant="h5"
@@ -154,16 +174,10 @@ export default function Article() {
                   </Typography>
                   <TextToSpeech text={perspective} />
 
-                  <div>
-                    {perspective}
-                  </div>
-                  
+                  <div>{perspective}</div>
                 </CardContent>
               </Card>
             )}
-           
-
-            
 
             <Card sx={cardStyle}>
 
@@ -172,7 +186,7 @@ export default function Article() {
                   p: 4,
                   flexGrow: 1,
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
                 }}
               >
                 <Typography
@@ -189,7 +203,7 @@ export default function Article() {
                     overflowY: "auto",
                     maxHeight: 400,
                     mb: 3,
-                    borderRadius: "16px"
+                    borderRadius: "16px",
                   }}
                 >
                   <ChatMessage
@@ -212,7 +226,8 @@ export default function Article() {
                     onChange={(e) => setMessage(e.target.value)}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-
+                        borderRadius: "12px",
+                      },
                     }}
                   />
                   <Button

@@ -1,6 +1,3 @@
-
-
-
 import requests
 import os
 import json
@@ -19,8 +16,8 @@ headers = {
 
 logger = logging.getLogger("uvicorn.error")
 
+
 def summarize_text(payload):
-    print("h")
     try:
         openrouter_payload = json.dumps({
             "model": "deepseek/deepseek-chat",
@@ -56,4 +53,3 @@ def summarize_text(payload):
     
     except Exception as e:
         print("Error in summarization service: %s", e)
-        raise Exception("Error in summarization service: " + str(e))

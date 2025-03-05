@@ -7,8 +7,8 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 
+
 def generate_opposite_perspective(article_text):
-   
     PERSPECTIVE_URL = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -17,8 +17,6 @@ def generate_opposite_perspective(article_text):
     
    
     final_prompt = get_opposite_perspective_prompt(article_text)
-    
-    
     payload = {
         "model": "deepseek/deepseek-chat",
         "messages": [
