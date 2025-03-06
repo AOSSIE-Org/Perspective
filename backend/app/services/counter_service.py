@@ -16,8 +16,9 @@ def generate_opposite_perspective(article_text):
     }
     
    
-    final_prompt = get_opposite_perspective_prompt(article_text)
-    
+    # final_prompt = get_opposite_perspective_prompt(article_text)
+    final_prompt = get_opposite_perspective_prompt().format(article_text=article_text)
+
     
     payload = {
         "model": "deepseek/deepseek-chat",
