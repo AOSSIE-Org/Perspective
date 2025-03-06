@@ -127,20 +127,19 @@ export default function Article() {
           transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
         }}
       >
-          
           <Stack spacing={6}>
-
             <Card sx={cardStyle}>
               <CardContent sx={{ p: 4 }}>
+                
                 <Typography variant="h5" fontWeight="bold" gutterBottom color="primary.main">
                   Article Summary
                 </Typography>
                 <Typography variant="body1" paragraph>
-
-
                   <TextToSpeech text={summary} />
-
-
+                </Typography>
+              
+              </CardContent>
+                  
                 <div className="p-4">
                 </div>
                 <CardContent sx={{ p: 4 }}>
@@ -160,10 +159,6 @@ export default function Article() {
                   
                 </CardContent>
               </Card>
-            )}
-           
-
-            
 
             <Card sx={cardStyle}>
 
@@ -211,8 +206,8 @@ export default function Article() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     sx={{
-                      "& .MuiOutlinedInput-root": {
-
+                      // this styling object was not closed properly , commenting it out for now 
+                      // "& .MuiOutlinedInput-root": {
                     }}
                   />
                   <Button
