@@ -7,6 +7,7 @@ import Navbar from "@/app/components/Navbar";
 import AnalyzeButton from "@/app/components/Utils/AnalyzeButton";
 import DescCard from "@/app/components/Utils/DescCard";
 
+import ExtensionPopup from '@/app/components/ExtensionPopup';
 
 
 
@@ -26,6 +27,7 @@ export default function Home() {
   return (
     <Box sx={{ bgcolor: "#111827", color: "white", minHeight: "100vh" }}>
       <Navbar />
+      
       <Container maxWidth="lg" sx={{ py: 8, textAlign: "center" }}>
         <Typography
           variant="h2"

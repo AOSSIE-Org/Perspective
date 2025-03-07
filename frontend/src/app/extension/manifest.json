@@ -1,0 +1,17 @@
+
+  
+{
+    "name": "Perspective AI Extension",
+    "version": "1.0.0",
+    "description": "A Chrome Extension that uses the same backend calls to scrape, summarize, and generate a counter perspective.",
+    "manifest_version": 3,
+    "permissions": ["activeTab", "scripting", "storage"],
+    "host_permissions": [
+      "*://*/*" 
+    ],
+    "action": {
+      "default_popup": "popup.html",
+      "default_title": "Perspective AI Extension"
+    }
+  }
+  

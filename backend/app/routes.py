@@ -10,6 +10,7 @@ from typing import List, Optional
 import uuid
 from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
+import os
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
@@ -67,3 +68,18 @@ async def scrape_article(article: ScrapURLRequest):
 async def get_related_topics(request: RelatedTopicsRequest):
     related_topics = generate_related_topics(request.summary)
     return {"topics": related_topics}
+
+
+
+@router.get("/manifest.json")
+def get_manifest():
+    current_dir = os.path.dirname(__file__)              # backend/app
+    project_root = os.path.join(current_dir, "..", "..") 
+    manifest_path = os.path.join(project_root, "frontend", "src", "app", "extensions", "manifest.json")
+
+    try:
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+        return manifest
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading manifest.json: {e}")

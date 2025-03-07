@@ -1,0 +1,56 @@
+# Node.js dependencies
+node_modules/
+.next/
+.out/
+*.log
+
+# TypeScript build artifacts
+*.tsbuildinfo
+dist/
+
+# Vite/Next.js build output
+.cache/
+.vercel/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# Chrome extension build
+build/
+bundle.js
+
+# VSCode settings
+.vscode/
+
+# macOS system files
+.DS_Store
+
+# FastAPI cache and dependencies
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Virtual environment files
+.envrc
+.pdm.toml
+poetry.lock
+Pipfile.lock
+
+# Logs and debugging files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Miscellaneous
+.idea/
+*.swp
+*.swo
+*.bak
