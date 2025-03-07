@@ -1,0 +1,5 @@
+Klarna has reshaped global commerce with its consumer-centric, AI-powered payment and shopping solutions. With over 85 million active users and 2.5 million daily transactions on its platform, Klarna is a fintech leader that simplifies shopping while empowering consumers with smarter, more flexible financial solutions.
+
+Klarna’s flagship AI Assistant is revolutionizing the shopping and payments experience. Built on LangGraph and powered by LangSmith, the AI Assistant handles tasks ranging from customer payments, to refunds, to other payment escalations.
+
+With 2.5 million conversations to date, the AI Assistant is more than just a chatbot; it’s a transformative agent that performs the work equivalent of 700 full-time staff, delivering results quickly and improving company efficiency.
