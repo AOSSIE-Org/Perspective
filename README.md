@@ -124,15 +124,17 @@ npm run dev
 
 ### Backend Setup
 
-*Get HuggingFace Access Token:*
-- Go to HuggingFace website and create new access token.
-- copy that token
+*Get OpenRouter API Key:*
+- Go to [OpenRouter](https://openrouter.ai/) and log in to your account.
+- Navigate to the API Keys section and generate a new API key.
+- Copy the key for further setup.
+
 
 *Setup environment variables:*
   - add .env file in `/backend`directory.
   - add following environment variable in your .env file.
   ```
-  HF_TOKEN = <Your_hugging_face_access_token>
+  API_KEY = <Your_OpenRouter_API_Key>
   ```
 
 
