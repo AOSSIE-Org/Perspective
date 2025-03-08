@@ -1,12 +1,9 @@
 
-
-
 import requests
 import os
 import json
 from dotenv import load_dotenv
 import logging
-
 
 load_dotenv()
 openrouter_token = os.getenv("API_KEY")
@@ -23,7 +20,7 @@ def summarize_text(payload):
     print("h")
     try:
         openrouter_payload = json.dumps({
-            "model": "deepseek/deepseek-chat",
+            "model": "deepseek/deepseek-r1-zero:free",
             "messages": [
                 {
                     "role": "system", 
@@ -36,23 +33,19 @@ def summarize_text(payload):
             ],
         })
         print(openrouter_payload)
-        print(openrouter_token)
         
         response = requests.post(Summarization_URL, headers=headers, data=openrouter_payload)
         
         print("Summarization API response status: %s", response.status_code)
         print("Summarization API response text: %s", response.text)
         
-     
         if response.status_code != 200 or not response.text:
             raise Exception(f"Summarization API error, status code {response.status_code}")
         
-      
         summary_response = response.json()
         summary = summary_response['choices'][0]['message']['content']
         
         return summary
-    
     
     except Exception as e:
         print("Error in summarization service: %s", e)
