@@ -9,19 +9,18 @@ import {
   CardContent,
   Box,
   Stack,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
-import TextToSpeech from '../components/TextToSpeech';
+import TextToSpeech from "../components/TextToSpeech";
+import RelatedTopicsSidebar from "../components/RelatedTopicsSidebar";
+import MarkdownRenderer from "../components/MarkDownRenderer";
 
-import ExportButton from '../components/Utils/ExportButton';
-import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
 export default function Article() {
   const [message, setMessage] = useState("");
-  const [url, setUrl,] = useState<string | null>(null);
-
+  const [url, setUrl] = useState<string | null>(null);
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -31,32 +30,40 @@ export default function Article() {
 
   const searchParams = useSearchParams();
   const articleUrl = searchParams.get("url");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Add new state for chat history
+  const [chatHistory, setChatHistory] = useState<Array<{ isAI: boolean; message: string }>>([
+    { isAI: true, message: "Hello! I've analyzed the article. What would you like to know about it?" }
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isChatInitialized, setIsChatInitialized] = useState(false);
 
   const handleSidebarToggle = (isOpen: boolean) => {
-    setIsSidebarOpen(isOpen)
-  }
+    setIsSidebarOpen(isOpen);
+  };
 
   // Update URL state when articleUrl changes
   useEffect(() => {
     setUrl(articleUrl);
   }, [articleUrl]);
 
-
   useEffect(() => {
     if (articleUrl) {
       const fetchData = async () => {
         try {
           // Get article summary
-          const response = await fetch("http://localhost:8000/scrape-and-summarize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: articleUrl })
-          });
+          const response = await fetch(
+            "http://localhost:8000/scrape-and-summarize",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: articleUrl }),
+            },
+          );
           const data = await response.json();
           console.log("Received summary response:", data);
-          
+
           // Adjust parsing based on the expected data structure.
           // For example, if data.summary is an array:
           const summaryText = data.summary;
@@ -66,17 +73,32 @@ export default function Article() {
           }
           setSummary(summaryText);
           setIsSummaryLoading(false);
-  
+
           // Request for AI perspective using the summary text
-          const resPerspective = await fetch("http://localhost:8000/generate-perspective", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ summary: summaryText })
-          });
+          const resPerspective = await fetch(
+            "http://localhost:8000/generate-perspective",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ summary: summaryText }),
+            },
+          );
           const dataPerspective = await resPerspective.json();
           console.log("Received perspective response:", dataPerspective);
           setPerspective(dataPerspective.perspective);
           setIsPerspectiveLoading(false);
+
+          // Initialize chat session
+          await fetch(`http://localhost:8000/initialize-chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              url: articleUrl, 
+              summary: summaryText, 
+              perspective: dataPerspective.perspective 
+            }),
+          });
+          setIsChatInitialized(true);
         } catch (error) {
           console.error("Error fetching article analysis:", error);
           setIsSummaryLoading(false);
@@ -86,11 +108,36 @@ export default function Article() {
       fetchData();
     }
   }, [articleUrl]);
-  
-  const handleSubmit = (e:any) => {
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if (message.trim()) {
-      setMessage("");
+    if (!message.trim()) return;
+
+    // Add user message to chat
+    const userMessage = message;
+    setChatHistory(prev => [...prev, { isAI: false, message: userMessage }]);
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:8000/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: url, // Send the URL in the body
+          question: userMessage,
+        }),
+      });
+
+      const data = await response.json();
+      
+      // Add AI response to chat
+      setChatHistory(prev => [...prev, { isAI: true, message: data.response["content"] }]);
+    } catch (error) {
+      console.error("Error in chat:", error);
+      setChatHistory(prev => [...prev, { isAI: true, message: "Sorry, I encountered an error. Please try again." }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,11 +145,7 @@ export default function Article() {
     bgcolor: "white",
     boxShadow: 3,
     borderRadius: "20px",
-    "& .MuiCardContent-root": { borderRadius: "20px" }
-  };
-
-  const handleExport = (format: string) => {
-    console.log(`Exporting in ${format} format`);
+    "& .MuiCardContent-root": { borderRadius: "20px" },
   };
 
   return (
@@ -115,34 +158,78 @@ export default function Article() {
             "linear-gradient(90deg, rgba(7, 0, 40, 1) 0%, rgba(23, 6, 66, 1) 50%, rgba(19, 0, 47, 1) 100%)",
           color: "white",
           minHeight: "100vh",
-          py: 8
+          py: 8,
         }}
       >
-        <Container 
-        maxWidth="lg" 
-        sx={{ 
-          flexGrow: 1, 
-          pt: 4,
-          transition: 'transform 0.3s ease',
-          transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
-        }}
-      >
-          
+        <Container
+          maxWidth="lg"
+          sx={{
+            flexGrow: 1,
+            pt: 4,
+            transition: "transform 0.3s ease",
+            transform: isSidebarOpen ? "translateX(-190px)" : "translateX(0)",
+          }}
+        >
           <Stack spacing={6}>
-
-            <Card sx={cardStyle}>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom color="primary.main">
-                  Article Summary
-                </Typography>
-                <Typography variant="body1" paragraph>
-
-
+            {/* Summary Section */}
+            {isSummaryLoading ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ height: "150px" }}
+              >
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <Card sx={cardStyle}>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                    gutterBottom
+                    color="primary.main"
+                  >
+                    Article Summary
+                  </Typography>
                   <TextToSpeech text={summary} />
 
+                  <MarkdownRenderer content={summary} />
+                  <Typography
+                    variant="subtitle2"
+                    color="textSecondary"
+                    fontWeight="bold"
+                  >
+                    Source Article:
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    component="a"
+                    href={url || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ wordBreak: "break-word" }}
+                  >
+                    {url}
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
 
-                <div className="p-4">
-                </div>
+            {/* Perspective Section to render only the JSON snippet */}
+            {isPerspectiveLoading ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ height: "150px" }}
+              >
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <Card sx={cardStyle}>
+                <div className="p-4"></div>
                 <CardContent sx={{ p: 4 }}>
                   <Typography
                     variant="h5"
@@ -154,25 +241,19 @@ export default function Article() {
                   </Typography>
                   <TextToSpeech text={perspective} />
 
-                  <div>
-                    {perspective}
-                  </div>
-                  
+                  <MarkdownRenderer content={perspective} />
                 </CardContent>
               </Card>
             )}
-           
 
-            
-
+            {/* Discussion Section */}
             <Card sx={cardStyle}>
-
               <CardContent
                 sx={{
                   p: 4,
                   flexGrow: 1,
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
                 }}
               >
                 <Typography
@@ -189,13 +270,21 @@ export default function Article() {
                     overflowY: "auto",
                     maxHeight: 400,
                     mb: 3,
-                    borderRadius: "16px"
+                    borderRadius: "16px",
                   }}
                 >
-                  <ChatMessage
-                    isAI={true}
-                    message="Hello! I've analyzed the article. What would you like to know about it?"
-                  />
+                  {chatHistory.map((chat, index) => (
+                    <ChatMessage
+                      key={index}
+                      isAI={chat.isAI}
+                      message={chat.message}
+                    />
+                  ))}
+                  {isLoading && (
+                    <Box display="flex" justifyContent="center" my={2}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  )}
                 </Box>
                 <Box
                   component="form"
@@ -203,7 +292,6 @@ export default function Article() {
                   display="flex"
                   gap={2}
                 >
-
                   <TextField
                     fullWidth
                     variant="outlined"
@@ -212,7 +300,8 @@ export default function Article() {
                     onChange={(e) => setMessage(e.target.value)}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-
+                        borderRadius: "12px",
+                      },
                     }}
                   />
                   <Button
@@ -220,6 +309,7 @@ export default function Article() {
                     variant="contained"
                     color="primary"
                     sx={{ borderRadius: "12px", px: 4 }}
+                    disabled={isLoading || !isChatInitialized}
                   >
                     Send
                   </Button>
@@ -231,10 +321,10 @@ export default function Article() {
       </Box>
       {/* Related Topics Sidebar */}
       <RelatedTopicsSidebar
-          currentArticleUrl={url || undefined}
-          currentArticleSummary={summary || undefined}
-          onSidebarToggle={handleSidebarToggle}
-        />
+        currentArticleUrl={url || undefined}
+        currentArticleSummary={summary || undefined}
+        onSidebarToggle={handleSidebarToggle}
+      />
     </>
   );
 }

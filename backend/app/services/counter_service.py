@@ -18,7 +18,7 @@ def generate_opposite_perspective(article_text):
     final_prompt = get_opposite_perspective_prompt(article_text)
 
     payload = {
-        "model": "deepseek/deepseek-chat",
+        "model": "deepseek/deepseek-r1-zero:free",
         "messages": [
             {
                 "role": "user",
@@ -29,10 +29,12 @@ def generate_opposite_perspective(article_text):
 
     response = requests.post(PERSPECTIVE_URL, headers=headers, json=payload)
     result = response.json()['choices'][0]['message']['content']
+    perspective_raw = result.split("[RESPONSE]")[-1].strip()
 
-    if "Opposite Perspective:" in result:
-        perspective = result.split("Opposite Perspective:")[-1].strip()
+    if "Opposite Perspective:" in perspective_raw:
+        # format the response
+        perspective = perspective_raw.replace(
+            "Opposite Perspective:", "**Opposite Perspective:**\n")
     else:
-        perspective = result.strip()
-
+        perspective = f"**Opposite Perspective:**\n {perspective_raw}"
     return perspective

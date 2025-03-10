@@ -21,7 +21,7 @@ def summarize_text(payload):
     print("h")
     try:
         openrouter_payload = json.dumps({
-            "model": "deepseek/deepseek-chat",
+            "model": "deepseek/deepseek-r1-zero:free",
             "messages": [
                 {
                     "role": "system",
