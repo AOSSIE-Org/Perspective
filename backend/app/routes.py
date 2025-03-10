@@ -10,10 +10,13 @@ from typing import List, Optional
 import uuid
 from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
+from app.services.chat_service import generate_chat, create_chat_service
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
 
+# Store the ChatService instance for each URL
+chat_services = {}
 
 class ArticleRequest(BaseModel):
     summary: str  # summarized article text to generate opposite perspective
@@ -25,6 +28,11 @@ class ScrapURLRequest(BaseModel):
 
 class RelatedTopicsRequest(BaseModel):
     summary: str  # Ensure this matches the frontend's request
+
+class RelatedContext(BaseModel):
+    summary: str
+    perspective: str
+    question: str
 
 
 @router.post("/generate-perspective")
@@ -74,3 +82,18 @@ async def scrape_article(article: ScrapURLRequest):
 async def get_related_topics(request: RelatedTopicsRequest):
     related_topics = generate_related_topics(request.summary)
     return {"topics": related_topics}
+
+@router.post("/initialize-chat/{url_id}")
+async def initialize_chat(url_id: str, summary: str, perspective: str):
+    chat_services[url_id] = create_chat_service(summary, perspective)
+    return {"status": "initialized"}
+
+@router.post("/chat/{url_id}")
+async def chat(url_id: str, question: str):
+    if url_id not in chat_services:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    
+    chat_service = chat_services[url_id]
+    response = chat_service.generate_response(question)
+    return {"response": response}
+
