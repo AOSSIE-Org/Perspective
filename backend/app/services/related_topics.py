@@ -16,7 +16,7 @@ def generate_related_topics(summary: str):
     }
 
     payload = json.dumps({
-            "model": "deepseek/deepseek-chat",
+            "model": "deepseek/deepseek-r1-zero:free",
             "messages": [
                 {
                     "role": "system", 
