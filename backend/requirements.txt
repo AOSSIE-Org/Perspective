@@ -6,4 +6,16 @@ python-dotenv
 
 newspaper3k
 httpx
-python-dotenv
+numpy
+
+# LangChain and related packages
+langchain
+langchain-core
+langchain-huggingface
+langchain-community  # For HuggingFaceInferenceAPIEmbeddings and other community tools
+langchain-text-splitters
+langchain-openai
+
+# LangGraph packages
+langgraph
+
