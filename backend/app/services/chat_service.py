@@ -1,19 +1,10 @@
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_huggingface import HuggingFaceEndpointEmbeddings
-from huggingface_hub import InferenceClient
-import bs4
-from langchain import hub
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langgraph.graph import START, StateGraph, MessagesState
-from typing_extensions import List, TypedDict
+from langgraph.graph import StateGraph, MessagesState
 from langchain_openai import ChatOpenAI
-from langchain.chat_models import init_chat_model
-import langchain
-import requests
 import os
-import json
 from dotenv import load_dotenv
 import numpy as np
 from langchain_core.tools import tool
