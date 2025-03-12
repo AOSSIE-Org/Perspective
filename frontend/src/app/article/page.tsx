@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import {
@@ -9,19 +10,24 @@ import {
   CardContent,
   Box,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Tab,
+  Tabs
 } from "@mui/material";
 import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
-
 import ExportButton from '../components/Utils/ExportButton';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
+import ResearchDashboard from "../components/research-dashboard";
+import { SummaryData } from "../components/research-dashboard";
+
 export default function Article() {
   const [message, setMessage] = useState("");
   const [url, setUrl,] = useState<string | null>(null);
-
+  const [tabIndex, setTabIndex] = useState(0);
+  const[research, setResearch] = useState()
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -43,11 +49,26 @@ export default function Article() {
     setUrl(articleUrl);
   }, [articleUrl]);
 
+  const handleExport = (format: string) => {
+    console.log(`Exporting in ${format} format`);
+  };
 
   useEffect(() => {
     if (articleUrl) {
       const fetchData = async () => {
         try {
+
+          // API request to get Deep Research
+          const research_response = await fetch("http://localhost:8000/deep-research", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: articleUrl })
+          });
+          
+          const research_data = await research_response.json();
+          console.log(research_data.research)
+          setResearch(research_data.research)
+
           // Get article summary
           const response = await fetch("http://localhost:8000/scrape-and-summarize", {
             method: "POST",
@@ -77,6 +98,9 @@ export default function Article() {
           console.log("Received perspective response:", dataPerspective);
           setPerspective(dataPerspective.perspective);
           setIsPerspectiveLoading(false);
+
+          
+
         } catch (error) {
           console.error("Error fetching article analysis:", error);
           setIsSummaryLoading(false);
@@ -100,10 +124,10 @@ export default function Article() {
     borderRadius: "20px",
     "& .MuiCardContent-root": { borderRadius: "20px" }
   };
-
-  const handleExport = (format: string) => {
-    console.log(`Exporting in ${format} format`);
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
   };
+
 
   return (
     <>
@@ -127,108 +151,183 @@ export default function Article() {
           transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
         }}
       >
+        <Tabs
+            value={tabIndex}
+            onChange={handleTabChange}
+            centered
+            textColor="inherit"
+            indicatorColor="primary"
+            sx={{
+              borderBottom: "2px solid rgba(255, 255, 255, 0.2)"
+              
+            }}
+          >
+            <Tab label="AI Perspective" sx={{ fontSize: "1.6rem", textTransform: "none", color: "white" }} />
+            <Tab label="Deep Research" sx={{ fontSize: "1.6rem", textTransform: "none", color: "white" }} />
+          </Tabs>
+          {tabIndex === 0 && (
+
+<Stack spacing={6} className="mt-4">
+{/* Summary Section */}
+{isSummaryLoading ? (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    sx={{ height: "150px" }}
+  >
+    <CircularProgress color="primary" />
+  </Box>
+) : (
+  <Card sx={cardStyle}>
+    <CardContent sx={{ p: 4 }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        gutterBottom
+        color="primary.main"
+      >
+        Article Summary
+      </Typography>
+      <TextToSpeech text={summary} />
+
+      <Typography variant="body1" paragraph>
+        {summary}
+      </Typography>
+      <Typography
+        variant="subtitle2"
+        color="textSecondary"
+        fontWeight="bold"
+      >
+        Source Article:
+      </Typography>
+      <Typography
+        variant="body2"
+        color="primary"
+        component="a"
+        href={url || "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{ wordBreak: "break-word" }}
+      >
+        {url}
+      </Typography>
+    </CardContent>
+  </Card>
+)}
+
+{/* Perspective Section to render only the JSON snippet */}
+{isPerspectiveLoading ? (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    sx={{ height: "150px" }}
+  >
+    <CircularProgress color="primary" />
+  </Box>
+) : (
+  <Card sx={cardStyle}>
+    <div className="p-4">
+    </div>
+    <CardContent sx={{ p: 4 }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        gutterBottom
+        color="primary.main"
+      >
+        AI Perspective
+      </Typography>
+      <TextToSpeech text={perspective} />
+
+      <div>
+        {perspective}
+      </div>
+      
+    </CardContent>
+  </Card>
+)}
+
+
+
+
+{/* Discussion Section */}
+<Card sx={cardStyle}>
+  <CardContent
+    sx={{
+      p: 4,
+      flexGrow: 1,
+      display: "flex",
+      flexDirection: "column"
+      
+    }}
+    
+  >
+    <Typography
+      variant="h5"
+      fontWeight="bold"
+      gutterBottom
+      color="primary.main"
+    >
+      Discussion
+    </Typography>
+    <ExportButton />
+    <Box
+      sx={{
+        flexGrow: 1,
+        overflowY: "auto",
+        maxHeight: 400,
+        mb: 3,
+        borderRadius: "16px"
+      }}
+    >
+      <ChatMessage
+        isAI={true}
+        message="Hello! I've analyzed the article. What would you like to know about it?"
+      />
+    </Box>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      display="flex"
+      gap={2}
+    >
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Ask a question about the article..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "12px"
+          }
+        }}
+      />
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        sx={{ borderRadius: "12px", px: 4 }}
+      >
+        Send
+      </Button>
+    </Box>
+  </CardContent>
+</Card>
+</Stack>
+
+          )}
+
+          {tabIndex === 1 && research?(<ResearchDashboard data={research as SummaryData}/>):(tabIndex ===1 && 
+          <div className="flex justify-center items-center h-full w-full mt-10">
+            <CircularProgress/>
+          </div>)}
           
-          <Stack spacing={6}>
-
-            <Card sx={cardStyle}>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom color="primary.main">
-                  Article Summary
-                </Typography>
-                <Typography variant="body1" paragraph>
-
-
-                  <TextToSpeech text={summary} />
-
-
-                <div className="p-4">
-                </div>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    gutterBottom
-                    color="primary.main"
-                  >
-                    AI Perspective
-                  </Typography>
-                  <TextToSpeech text={perspective} />
-
-                  <div>
-                    {perspective}
-                  </div>
-                  
-                </CardContent>
-              </Card>
-            )}
-           
-
-            
-
-            <Card sx={cardStyle}>
-
-              <CardContent
-                sx={{
-                  p: 4,
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column"
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  fontWeight="bold"
-                  gutterBottom
-                  color="primary.main"
-                >
-                  Discussion
-                </Typography>
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    overflowY: "auto",
-                    maxHeight: 400,
-                    mb: 3,
-                    borderRadius: "16px"
-                  }}
-                >
-                  <ChatMessage
-                    isAI={true}
-                    message="Hello! I've analyzed the article. What would you like to know about it?"
-                  />
-                </Box>
-                <Box
-                  component="form"
-                  onSubmit={handleSubmit}
-                  display="flex"
-                  gap={2}
-                >
-
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Ask a question about the article..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-
-                    }}
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={{ borderRadius: "12px", px: 4 }}
-                  >
-                    Send
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Stack>
         </Container>
       </Box>
+      
       {/* Related Topics Sidebar */}
       <RelatedTopicsSidebar
           currentArticleUrl={url || undefined}

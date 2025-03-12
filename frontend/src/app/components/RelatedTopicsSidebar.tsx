@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState } from "react"
 import { 
   Drawer, 
   Box, 
@@ -8,127 +9,126 @@ import {
   IconButton, 
   List, 
   ListItem, 
-  ListItemText, 
-  ListItemIcon, 
-  Collapse, 
-  CircularProgress, 
-  Divider, 
-  ListItemButton,
-  Tooltip, 
-  Link,
+  Link, 
+  CircularProgress,
 } from "@mui/material"
 import {
-  ChevronRight as ChevronRightIcon,
-  Public as PublicIcon,
   Close as CloseIcon,
-  OpenInNew as OpenInNewIcon,
-  ExpandMore as ExpandMoreIcon,
-  Menu as MenuIcon,
+  ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material"
-import { ChevronLeftIcon } from "lucide-react"
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 
-interface Source {
-    url: string
-    domain: string
-    title: string
-    favicon?: string
-  }
-  
+interface RelatedTopicsSidebarProps {
+  currentArticleUrl?: string
+  currentArticleSummary?: string
+  width?: number
+  onSidebarToggle?: (isOpen: boolean) => void
+}
 
+export default function RelatedTopicsSidebar({
+  currentArticleUrl,
+  currentArticleSummary,
+  width = 380,
+  onSidebarToggle,
+}: RelatedTopicsSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [topics, setTopics] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  
-  interface RelatedTopicsSidebarProps {
-    currentArticleUrl?: string
-    currentArticleSummary?: string
-    width?: number
-    onSidebarToggle?: (isOpen: boolean) => void
-  }
-  
-  export default function RelatedTopicsSidebar({
-    currentArticleUrl,
-    currentArticleSummary,
-    width = 380,
-    onSidebarToggle,
-  }: RelatedTopicsSidebarProps) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [topics, setTopics] = useState(String)
-    const [isLoading, setIsLoading] = useState(false)
-    const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({})
-  
-    // Toggle sidebar and notify parent component
-    const toggleSidebar = (open: boolean) => {
-      setIsOpen(open)
-      if (onSidebarToggle) {
-        onSidebarToggle(open)
-      }
+  // Toggle sidebar and notify parent component
+  const toggleSidebar = (open: boolean) => {
+    setIsOpen(open)
+    if (onSidebarToggle) {
+      onSidebarToggle(open)
     }
-  
+  }
 
+  // Process topics string to extract links
+  const parseTopics = (topicsStr: string) => {
+    let parsedTopics: { linkText: string; linkUrl: string }[] = []
+    if (topicsStr.startsWith("\\boxed{") && topicsStr.endsWith("}")) {
+      // Remove the \boxed{ and trailing }
+      const cleaned = topicsStr.slice(7, -1).trim()
+      try {
+        const urls = JSON.parse(cleaned)
+        parsedTopics = urls.map((url: string) => ({
+          linkText: url,
+          linkUrl: url,
+        }))
+      } catch (err) {
+        console.error("Error parsing topics JSON:", err)
+      }
+    } else {
+      // Fallback: parse markdown links from the string
+      parsedTopics = topicsStr
+        .split("\n")
+        .filter((line) => line.includes("]("))
+        .map((line) => {
+          const match = line.match(/\[([^\]]+)\]\(([^)]+)\)/)
+          if (!match) return null
+          return { linkText: match[1], linkUrl: match[2] }
+        })
+        .filter((item): item is { linkText: string; linkUrl: string } => item !== null);
+    }
+    return parsedTopics
+  }
 
-    const generatelinks = () =>{
-      console.log("hello from useeffect")
-        if (currentArticleUrl) {
-          const fetchData = async () => {
-            try {
-              // Fetch article summary
-      
-              // Request for related topics using the summary text
-              const resTopics = await fetch("http://localhost:8000/related-topics", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ summary: currentArticleSummary }),
-              });
-      
-              const dataTopics = await resTopics.json();
-              console.log("Received related topics response:", dataTopics);
-              console.log(topics);
-      
-              setTopics(dataTopics.topics || []);
-            } catch (error) {
-              console.error("Error fetching related topics:", error);
-              setTopics("false");
-            } finally {
-              setIsLoading(false);
-            }
-          };
-      
-          fetchData();
+  const generatelinks = () => {
+    if (currentArticleUrl) {
+      setIsLoading(true)
+      const fetchData = async () => {
+        try {
+          const resTopics = await fetch("http://localhost:8000/related-topics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ summary: currentArticleSummary }),
+          })
+
+          const dataTopics = await resTopics.json()
+          console.log("Received related topics response:", dataTopics)
+          setTopics(dataTopics.topics || "")
+        } catch (error) {
+          console.error("Error fetching related topics:", error)
+          setTopics("")
+        } finally {
+          setIsLoading(false)
         }
-      };
-      
-      
-      
-      
+      }
+      fetchData()
+    }
+  }
+
+  // Parse the topics to display as a list
+  const parsedTopics = parseTopics(topics)
 
   return (
     <>
       <IconButton 
-  onClick={() => {
-    toggleSidebar(!isOpen);
-    generatelinks();
-  }}
-  sx={{
-    position: 'fixed', 
-    top: '50%', 
-    right: isOpen ? width : 0, 
-    transform: 'translateY(-50%)',
-    zIndex: 1200,
-    bgcolor: '#5F27CD',
-    color: 'white',
-    '&:hover': {
-      bgcolor: '#4B1E8F'
-    },
-    boxShadow: 3,
-    p: 2,
-    mr: isOpen ? 1 : -1, 
-    transition: 'right 0.3s ease',
-  }}
->
-<ChevronLeftIcon />
-</IconButton>
+        onClick={() => {
+          toggleSidebar(!isOpen)
+          generatelinks()
+        }}
+        sx={{
+          position: 'fixed', 
+          top: '50%', 
+          right: isOpen ? width : 0, 
+          transform: 'translateY(-50%)',
+          zIndex: 1200,
+          bgcolor: '#5F27CD',
+          color: 'white',
+          '&:hover': {
+            bgcolor: '#4B1E8F'
+          },
+          boxShadow: 3,
+          p: 2,
+          mr: isOpen ? 1 : -1, 
+          transition: 'right 0.3s ease',
+        }}
+      >
+        {/* You can change the icon as needed */}
+        <ArrowBackIcon />
+      </IconButton>
 
-       <Drawer
+      <Drawer
         variant="temporary"
         anchor="right"
         open={isOpen}
@@ -140,11 +140,10 @@ interface Source {
             borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
             background: "#F3E5F5",
             top: 0,
-            height: "100vh", 
+            height: "100vh",
           },
         }}
       >
-        
         <Box
           sx={{
             display: "flex",
@@ -182,45 +181,33 @@ interface Source {
             </Box>
           ) : (
             <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {topics
-                .split("\n")
-                .filter((line) => line.includes("]("))
-                .map((line, index) => {
-                  const match = line.match(/\[([^\]]+)\]\(([^)]+)\)/)
-                  if (!match) return null
-                  const linkText = match[1]
-                  const linkUrl = match[2]
-                  return (
-                    <ListItem key={index} disableGutters>
-                      <Box
-                        sx={{
-                          border: "1px solid rgba(0, 0, 0, 0.12)",
-                          borderRadius: 1,
-                          p: 1.5,
-                          width: "100%",
-                          background: "white",
-                        }}
-                      >
-                        <Link
-                          href={linkUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          underline="hover"
-                          sx={{ fontSize: "1rem", color: "#5F27CD", fontWeight: 500 }}
-                        >
-                          {linkText}
-                        </Link>
-                      </Box>
-                    </ListItem>
-                  )
-                })}
+              {parsedTopics.map((item, index) => (
+                <ListItem key={index} disableGutters>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(0, 0, 0, 0.12)",
+                      borderRadius: 1,
+                      p: 1.5,
+                      width: "100%",
+                      background: "white",
+                    }}
+                  >
+                    <Link
+                      href={item.linkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      underline="hover"
+                      sx={{ fontSize: "1rem", color: "#5F27CD", fontWeight: 500 }}
+                    >
+                      {item.linkText}
+                    </Link>
+                  </Box>
+                </ListItem>
+              ))}
             </List>
           )}
         </Box>
       </Drawer>
-
-
-      
     </>
   )
 }

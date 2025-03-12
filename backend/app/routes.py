@@ -10,6 +10,7 @@ from typing import List, Optional
 import uuid
 from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
+from app.services.deep_research import do_deep_research
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
@@ -19,6 +20,9 @@ class ArticleRequest(BaseModel):
 
 class ScrapURLRequest(BaseModel):
     url: str  # URL to scrape data from
+    
+class ResearchURLRequest(BaseModel):
+    url: str
 
 class RelatedTopicsRequest(BaseModel):
     summary: str  # Ensure this matches the frontend's request
@@ -67,3 +71,10 @@ async def scrape_article(article: ScrapURLRequest):
 async def get_related_topics(request: RelatedTopicsRequest):
     related_topics = generate_related_topics(request.summary)
     return {"topics": related_topics}
+
+@router.post("/deep-research")
+async def get_related_topics(request:ResearchURLRequest):
+    research = do_deep_research(request.url)
+    print("research")
+    print(research)
+    return {"research": research}
