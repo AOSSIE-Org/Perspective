@@ -18,6 +18,7 @@ import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
+import ExportButton from '../components/Utils/ExportButton';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
 import ResearchDashboard from "../components/research-dashboard";
 import { SummaryData } from "../components/research-dashboard";
@@ -48,6 +49,9 @@ export default function Article() {
     setUrl(articleUrl);
   }, [articleUrl]);
 
+  const handleExport = (format: string) => {
+    console.log(`Exporting in ${format} format`);
+  };
 
   useEffect(() => {
     if (articleUrl) {
@@ -256,7 +260,9 @@ export default function Article() {
       flexGrow: 1,
       display: "flex",
       flexDirection: "column"
+      
     }}
+    
   >
     <Typography
       variant="h5"
@@ -266,6 +272,7 @@ export default function Article() {
     >
       Discussion
     </Typography>
+    <ExportButton />
     <Box
       sx={{
         flexGrow: 1,
