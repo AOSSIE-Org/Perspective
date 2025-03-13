@@ -14,28 +14,42 @@ import {
   Tabs
 } from "@mui/material";
 import ChatMessage from "../components/ChatMessage";
-import Navbar from "../components/Navbar"; 
+import Navbar from "../components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
+import ExportButton from '../components/Utils/ExportButton';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
+import { usePathname } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import ResearchDashboard from "../components/research-dashboard";
 import { SummaryData } from "../components/research-dashboard";
+
 
 export default function Article() {
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
   const [research, setResearch] = useState();
+  const cleanText = (text: string) => {
+    return text.replace(/<p>/g, '').replace(/<\/p>/g, '\n').trim();
+  };
+
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
   const [perspective, setPerspective] = useState("");
   const [isSummaryLoading, setIsSummaryLoading] = useState(true);
   const [isPerspectiveLoading, setIsPerspectiveLoading] = useState(true);
+  const [articleUrl, setarticleUrl,] = useState<string | null>(null);
 
-  const searchParams = useSearchParams();
-  const articleUrl = searchParams.get("url");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const pathname = usePathname();
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      setarticleUrl(searchParams.get("url"));
+    }
+  }, [pathname]);
 
   const handleSidebarToggle = (isOpen: boolean) => {
     setIsSidebarOpen(isOpen);
@@ -46,7 +60,26 @@ export default function Article() {
     setUrl(articleUrl);
   }, [articleUrl]);
 
+  const handleExport = (format: string) => {
+    console.log(`Exporting in ${format} format`);
+  };
+  const cleanAndFormatPerspective = (rawText: string): string => {
+    const cleanText = rawText
+      .replace(/\\boxed{\n?/g, '')
+      .replace(/\\n/g, '\n')
+      .replace(/^"|"$/g, '')
+      .replace(/\\}/g, '')
+      .trim();
+
+    return cleanText
+      .split('\n\n')
+      .map((paragraph: string) => `<p>${paragraph.trim()}</p>`)
+      .join('');
+  };
+
+
   useEffect(() => {
+    console.log("articleUrl:", articleUrl);
     if (articleUrl) {
       const fetchData = async () => {
         try {
@@ -56,7 +89,7 @@ export default function Article() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: articleUrl })
           });
-          
+
           const research_data = await research_response.json();
           console.log(research_data.research);
           setResearch(research_data.research);
@@ -69,14 +102,18 @@ export default function Article() {
           });
           const data = await response.json();
           console.log("Received summary response:", data);
-          
+
           const summaryText = data.summary;
+          console.log("Summary text:", summaryText);
           if (!summaryText) {
             throw new Error("Summary text not found in response");
           }
-          setSummary(summaryText);
+          // Use the reusable function to clean and format the perspective text
+          const formattedSummary = cleanAndFormatPerspective(data.summary);
+          console.log("Formatted summary:", formattedSummary);
+          setSummary(formattedSummary);
           setIsSummaryLoading(false);
-  
+
           // Request for AI perspective using the summary text
           const resPerspective = await fetch("http://localhost:8000/generate-perspective", {
             method: "POST",
@@ -85,7 +122,9 @@ export default function Article() {
           });
           const dataPerspective = await resPerspective.json();
           console.log("Received perspective response:", dataPerspective);
-          setPerspective(dataPerspective.perspective);
+          const perspectiveText = dataPerspective.perspective;
+          const formattedPerspective = cleanAndFormatPerspective(perspectiveText);
+          setPerspective(formattedPerspective);
           setIsPerspectiveLoading(false);
         } catch (error) {
           console.error("Error fetching article analysis:", error);
@@ -96,7 +135,7 @@ export default function Article() {
       fetchData();
     }
   }, [articleUrl]);
-  
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
     if (message.trim()) {
@@ -110,7 +149,7 @@ export default function Article() {
     borderRadius: "20px",
     "& .MuiCardContent-root": { borderRadius: "20px" }
   };
-  
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
@@ -128,10 +167,10 @@ export default function Article() {
           py: 8
         }}
       >
-        <Container 
-          maxWidth="lg" 
-          sx={{ 
-            flexGrow: 1, 
+        <Container
+          maxWidth="lg"
+          sx={{
+            flexGrow: 1,
             pt: 4,
             transition: 'transform 0.3s ease',
             transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
@@ -174,8 +213,8 @@ export default function Article() {
                       Article Summary
                     </Typography>
                     <TextToSpeech text={summary} />
-                    <Typography variant="body1" paragraph>
-                      {summary}
+                    <Typography variant="body1"  component="div">
+                      <ReactMarkdown>{cleanText(summary)}</ReactMarkdown>
                     </Typography>
                     <Typography
                       variant="subtitle2"
@@ -220,7 +259,9 @@ export default function Article() {
                       AI Perspective
                     </Typography>
                     <TextToSpeech text={perspective} />
-                    <div>{perspective}</div>
+                    <Typography variant="body1" component="div">
+                      <ReactMarkdown>{cleanText(perspective)}</ReactMarkdown>
+                    </Typography>
                   </CardContent>
                 </Card>
               )}
@@ -242,6 +283,7 @@ export default function Article() {
                   >
                     Discussion
                   </Typography>
+                  <ExportButton summary={summary} perspective={perspective} />
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -293,6 +335,7 @@ export default function Article() {
             tabIndex === 1 && (
               <div className="flex justify-center items-center h-full w-full mt-10">
                 <CircularProgress />
+
               </div>
             )
           )}
