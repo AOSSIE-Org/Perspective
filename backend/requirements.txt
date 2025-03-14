@@ -7,3 +7,4 @@ python-dotenv
 newspaper3k
 httpx
 python-dotenv
+sqlalchemy
