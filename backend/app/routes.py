@@ -11,6 +11,8 @@ import uuid
 from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
 from app.services.deep_research import do_deep_research
+from app.services.youtube_service import get_transcription
+
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
@@ -26,6 +28,9 @@ class ResearchURLRequest(BaseModel):
 
 class RelatedTopicsRequest(BaseModel):
     summary: str  # Ensure this matches the frontend's request
+    
+class VideoRequest(BaseModel):
+    url: str  
 
 @router.post("/generate-perspective")
 def generate_ai_perspective(request: ArticleRequest):
@@ -78,3 +83,14 @@ async def get_related_topics(request:ResearchURLRequest):
     print("research")
     print(research)
     return {"research": research}
+
+
+@router.post("/analyze-video")
+async def analyze_video(request: VideoRequest):
+    video_text = get_transcription(request.url)
+
+    if video_text["status"] == "error":
+        return video_text  # Directly return the error message to the frontend
+
+    summary = summarize_text({"inputs": video_text["text"]})
+    return {"status": "success", "summary": summary}
