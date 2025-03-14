@@ -8,9 +8,10 @@ from app.services.counter_service import generate_opposite_perspective
 import logging
 from typing import List, Optional
 import uuid
-from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
 from app.services.deep_research import do_deep_research
+from app.services.fact_check_service import run_fact_check
+from app.models.schemas import FactCheckRequest, FactCheckResult
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
@@ -78,3 +79,24 @@ async def get_related_topics(request:ResearchURLRequest):
     print("research")
     print(research)
     return {"research": research}
+
+
+
+
+
+@router.post("/fact-check")
+async def fact_check_article(request: FactCheckRequest):
+   
+    if not request.url:
+        raise HTTPException(status_code=422, detail="URL is required")
+    try:
+        raw_data = scrape_website(request.url)
+        if raw_data is None:
+            logger.error("Scraped data is None for URL: %s", request.url)
+            raise HTTPException(status_code=500, detail="Error scraping the article")
+        clean_text = clean_scraped_data(raw_data)
+        result_state = run_fact_check(clean_text)
+        return result_state
+    except Exception as e:
+        logger.error("Error in fact-check endpoint: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Error processing fact check")

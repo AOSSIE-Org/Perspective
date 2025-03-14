@@ -6,3 +6,10 @@ python-dotenv
 urllib3
 newspaper3k
 httpx
+fastapi
+
+langgraph
+
+
+tavily-python
+langchain_community
