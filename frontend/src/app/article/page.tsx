@@ -15,14 +15,13 @@ import {
 } from "@mui/material";
 import ChatMessage from "../components/ChatMessage";
 import Navbar from "../components/Navbar";
-import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
 import ExportButton from '../components/Utils/ExportButton';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
 import { usePathname } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 import ResearchDashboard from "../components/research-dashboard";
 import { SummaryData } from "../components/research-dashboard";
+import MarkdownRenderer from "../components/MarkDownRenderer";
 
 
 export default function Article() {
@@ -214,7 +213,7 @@ export default function Article() {
                     </Typography>
                     <TextToSpeech text={summary} />
                     <Typography variant="body1"  component="div">
-                      <ReactMarkdown>{cleanText(summary)}</ReactMarkdown>
+                      <MarkdownRenderer content={cleanText(summary)}/>
                     </Typography>
                     <Typography
                       variant="subtitle2"
@@ -260,7 +259,7 @@ export default function Article() {
                     </Typography>
                     <TextToSpeech text={perspective} />
                     <Typography variant="body1" component="div">
-                      <ReactMarkdown>{cleanText(perspective)}</ReactMarkdown>
+                      <MarkdownRenderer content={cleanText(perspective)}/>
                     </Typography>
                   </CardContent>
                 </Card>
