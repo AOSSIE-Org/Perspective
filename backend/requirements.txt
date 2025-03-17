@@ -3,7 +3,13 @@ uvicorn
 requests
 beautifulsoup4
 python-dotenv
-
+urllib3
 newspaper3k
 httpx
-python-dotenv
+fastapi
+
+langgraph
+
+
+tavily-python
+langchain_community
