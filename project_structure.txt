@@ -1,0 +1,95 @@
+﻿\---Perspective
+    |   .gitignore
+    |   LICENSE
+    |   README.md
+    |   
+    +---backend
+    |   |   README.md
+    |   |   requirements.txt
+    |   |   
+    |   \---app
+    |       |   main.py
+    |       |   routes.py
+    |       |   test_perspective.py
+    |       |   __init__.py
+    |       |   
+    |       +---core
+    |       |       config.py
+    |       |       __init__.py
+    |       |       
+    |       +---db
+    |       |       database.py
+    |       |       models.py
+    |       |       __init__.py
+    |       |       
+    |       +---models
+    |       |       schemas.py
+    |       |       __init__.py
+    |       |       
+    |       +---prompts
+    |       |       opposite_perspective.py
+    |       |       related_topics.py
+    |       |       __init__.py
+    |       |       
+    |       +---scrapers
+    |       |       article_scraper.py
+    |       |       clean_data.py
+    |       |       __init__.py
+    |       |       
+    |       +---services
+    |       |       ai_service.py
+    |       |       analysis_service.py
+    |       |       counter_service.py
+    |       |       related_topics.py
+    |       |       summarization_service.py
+    |       |       __init__.py
+    |       |       
+    |       \---utils
+    |               helpers.py
+    |               logger.py
+    |               __init__.py
+    |               
+    \---frontend
+        |   .gitignore
+        |   components.json
+        |   eslint.config.mjs
+        |   next.config.ts
+        |   package-lock.json
+        |   package.json
+        |   postcss.config.mjs
+        |   README.md
+        |   SETUP.md
+        |   tailwind.config.ts
+        |   tsconfig.json
+        |   
+        +---public
+        |       file.svg
+        |       globe.svg
+        |       next.svg
+        |       vercel.svg
+        |       window.svg
+        |       
+        \---src
+            \---app
+                |   components.json
+                |   favicon.ico
+                |   globals.css
+                |   layout.tsx
+                |   page.tsx
+                |   
+                +---article
+                |       page.tsx
+                |       
+                \---components
+                    |   ChatMessage.tsx
+                    |   Navbar.tsx
+                    |   RelatedTopicsSidebar.tsx
+                    |   TextToSpeech.tsx
+                    |   
+                    \---Utils
+                            AnalyzeButton.tsx
+                            Background.tsx
+                            DescCard.tsx
+                            ExportButton.tsx
+                            NavbarButtons.tsx
+                            
