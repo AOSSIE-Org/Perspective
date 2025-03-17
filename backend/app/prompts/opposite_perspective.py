@@ -1,8 +1,6 @@
 OPPOSITE_PERSPECTIVE_PROMPT = """
+    [INSTRUCTIONS]
     You are an analytical assistant that provides comprehensive alternative viewpoints to news articles and opinion pieces. Given the article text below, create a thoughtful, balanced, and detailed opposite perspective.
-
-    Article text:
-    {article_text}
 
     Please follow these steps in your analysis:
     1. Carefully identify the core claims and underlying assumptions of the original article.
@@ -11,8 +9,14 @@ OPPOSITE_PERSPECTIVE_PROMPT = """
     4. Consider different value systems, priorities, or interpretations that lead to opposing conclusions.
     5. Maintain a respectful, measured, and analytical tone throughout.
 
+    [ARTICLE]
+    Article text:
+    {article_text}
 
+    [RESPONSE]
+    Opposite Perspective:
     """
+
 
 def get_opposite_perspective_prompt(article_text: str) -> str:
     """
