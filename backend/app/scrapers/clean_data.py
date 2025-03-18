@@ -12,5 +12,6 @@ def clean_scraped_data(raw_text):
 
     # Remove special characters (keeping only letters, numbers, and spaces)
     clean_text = re.sub(r'[^a-zA-Z0-9\s.,!?]', '', clean_text)
+    print(clean_text)
 
     return clean_text.lower()  # Normalize to lowercase

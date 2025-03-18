@@ -16,6 +16,7 @@ def scrape_website(url, headers=None):
 
         soup = BeautifulSoup(response.content, 'html.parser')
         return soup.get_text(separator=' ', strip=True)  # Extract only readable text
+    
 
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")

@@ -23,6 +23,7 @@ class AIService:
             return ""
         cleaned = article_text.strip()
         cleaned = "\n".join(line for line in cleaned.splitlines() if line.strip())
+        print("cleaned",cleaned)
         return cleaned
 
     def get_opposite_perspective(self, article_text):
@@ -46,6 +47,7 @@ class AIService:
             
             print("Response received from API, parsing result...")
             result = self._parse_llm_response(response.json())
+            print("result",result)
             return result
         except Exception as e:
             return {"error": str(e)}
@@ -76,6 +78,8 @@ class AIService:
         """
         try:
             formatted_output = "{{\n" + json.dumps(result, indent=2) + "\n}}"
+            print("formatted_output",formatted_output
+            )
             return formatted_output
         except Exception as e:
             return f"Error formatting result: {e}"

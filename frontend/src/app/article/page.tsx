@@ -15,13 +15,12 @@ import ChatMessage from "@/app/components/ChatMessage";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
-
 import ExportButton from '../components/Utils/ExportButton';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
+
 export default function Article() {
   const [message, setMessage] = useState("");
-  const [url, setUrl,] = useState<string | null>(null);
-
+  const [url, setUrl] = useState<string | null>(null);
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -31,18 +30,16 @@ export default function Article() {
 
   const searchParams = useSearchParams();
   const articleUrl = searchParams.get("url");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleSidebarToggle = (isOpen: boolean) => {
-    setIsSidebarOpen(isOpen)
-  }
+    setIsSidebarOpen(isOpen);
+  };
 
   // Update URL state when articleUrl changes
   useEffect(() => {
     setUrl(articleUrl);
   }, [articleUrl]);
-
 
   useEffect(() => {
     if (articleUrl) {
@@ -57,10 +54,7 @@ export default function Article() {
           const data = await response.json();
           console.log("Received summary response:", data);
           
-          // Adjust parsing based on the expected data structure.
-          // For example, if data.summary is an array:
           const summaryText = data.summary;
-          // const summaryText = data;
           if (!summaryText) {
             throw new Error("Summary text not found in response");
           }
@@ -87,7 +81,7 @@ export default function Article() {
     }
   }, [articleUrl]);
   
-  const handleSubmit = (e:any) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if (message.trim()) {
       setMessage("");
@@ -119,54 +113,49 @@ export default function Article() {
         }}
       >
         <Container 
-        maxWidth="lg" 
-        sx={{ 
-          flexGrow: 1, 
-          pt: 4,
-          transition: 'transform 0.3s ease',
-          transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
-        }}
-      >
-          
+          maxWidth="lg" 
+          sx={{ 
+            flexGrow: 1, 
+            pt: 4,
+            transition: 'transform 0.3s ease',
+            transform: isSidebarOpen ? 'translateX(-190px)' : 'translateX(0)'
+          }}
+        >
           <Stack spacing={6}>
 
+            {/* Article Summary */}
             <Card sx={cardStyle}>
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h5" fontWeight="bold" gutterBottom color="primary.main">
                   Article Summary
                 </Typography>
+                <TextToSpeech text={summary} />
                 <Typography variant="body1" paragraph>
+                  {summary}
+                </Typography>
+              </CardContent>
+            </Card>
 
-
-                  <TextToSpeech text={summary} />
-
-
-                <div className="p-4">
-                </div>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    gutterBottom
-                    color="primary.main"
-                  >
-                    AI Perspective
-                  </Typography>
-                  <TextToSpeech text={perspective} />
-
-                  <div>
-                    {perspective}
-                  </div>
-                  
-                </CardContent>
-              </Card>
-            )}
-           
-
-            
-
+            {/* AI Perspective */}
             <Card sx={cardStyle}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  gutterBottom
+                  color="primary.main"
+                >
+                  AI Perspective
+                </Typography>
+                <TextToSpeech text={perspective} />
+                <Typography variant="body1" paragraph>
+                  {perspective}
+                </Typography>
+              </CardContent>
+            </Card>
 
+            {/* Discussion Section */}
+            <Card sx={cardStyle}>
               <CardContent
                 sx={{
                   p: 4,
@@ -203,17 +192,12 @@ export default function Article() {
                   display="flex"
                   gap={2}
                 >
-
                   <TextField
                     fullWidth
                     variant="outlined"
                     placeholder="Ask a question about the article..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-
-                    }}
                   />
                   <Button
                     type="submit"
@@ -229,12 +213,13 @@ export default function Article() {
           </Stack>
         </Container>
       </Box>
+      
       {/* Related Topics Sidebar */}
       <RelatedTopicsSidebar
-          currentArticleUrl={url || undefined}
-          currentArticleSummary={summary || undefined}
-          onSidebarToggle={handleSidebarToggle}
-        />
+        currentArticleUrl={url || undefined}
+        currentArticleSummary={summary || undefined}
+        onSidebarToggle={handleSidebarToggle}
+      />
     </>
-  );
+  );  
 }
