@@ -1,38 +1,42 @@
-'use client';
-
-import Link from 'next/link';
-import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
-import { Brain } from 'lucide-react';
-import NavbarButtons from './Utils/NavbarButtons';
+import Link from "next/link";
+import { Brain } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 
 const Navbar = () => {
+
   return (
-    <AppBar
-      position="static"
-      sx={{ bgcolor: '#5F27CD', boxShadow: 3 }}
-      className="w-full mt-0 p-4"
-    >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Box
-          display="flex"
-          alignItems="center"
-          component={Link}
-          href="/"
-          sx={{ textDecoration: 'none', color: 'inherit' }}
-        >
-          <IconButton edge="start" color="inherit" aria-label="logo" sx={{ mr: 1 }}>
-            <Brain size={32} />
-          </IconButton>
-          <Typography variant="h5" fontWeight="bold">
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-teal-600 to-emerald-500 shadow-md">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="relative w-8 h-8">
+            <Brain className="w-8 h-8 text-white" />
+            <div className="absolute inset-0 bg-white opacity-20 rounded-full blur-sm"></div>
+          </div>
+          <Link
+            href="/"
+            className="text-xl font-bold text-white tracking-tight"
+          >
             Perspective AI
-          </Typography>
-        </Box>
-        <Box display="flex" gap={2}>
-          <NavbarButtons text="Home" href="/" />
-          <NavbarButtons text="GitHub" href="https://github.com/AOSSIE-Org/Perspective-AI" />
-        </Box>
-      </Toolbar>
-    </AppBar>
+          </Link>
+        </div>
+        <nav className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-sm font-medium text-white hover:text-white/80 transition-colors"
+          >
+            HOME
+          </Link>
+          <Link
+            href="https://github.com/AOSSIE-Org/Perspective"
+            className="text-sm font-medium text-white hover:text-white/80 transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GITHUB
+          </Link>
+        </nav>
+      </div>
+    </header>
   );
 };
 
