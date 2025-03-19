@@ -1,35 +1,28 @@
-
-import requests
-from app.prompts.opposite_perspective import get_opposite_perspective_prompt
-from dotenv import load_dotenv
 import os
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
+from app.prompts.opposite_perspective import get_opposite_perspective_prompt
 
+# Load environment variables
 load_dotenv()
-API_KEY = os.getenv("API_KEY")
 
+class LLMHelper:
+    """Helper class to interact with ChatGroq's Llama3 model."""
+    def __init__(self):
+        self.llm = ChatGroq(groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama3-8b-8192")
+
+    def get_response(self, prompt):
+        """Send the prompt to ChatGroq and return the response."""
+        response = self.llm.invoke(prompt)
+        return response.content  # Extract and return the response content
 
 def generate_opposite_perspective(article_text):
-    PERSPECTIVE_URL = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
+    """Generate an opposite perspective using ChatGroq."""
+    llm_helper = LLMHelper()
     final_prompt = get_opposite_perspective_prompt(article_text)
     
-    payload = {
-        "model": "deepseek/deepseek-r1-zero:free",
-        "messages": [
-            {
-                "role": "user", 
-                "content": final_prompt
-            }
-        ],
-    }
-    
-    response = requests.post(PERSPECTIVE_URL, headers=headers, json=payload)
-    result = response.json()['choices'][0]['message']['content']
-    
+    result = llm_helper.get_response(final_prompt)
+
     if "Opposite Perspective:" in result:
         perspective = result.split("Opposite Perspective:")[-1].strip()
     else:

@@ -1,39 +1,29 @@
-
-import requests
 import os
-import json
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 
+# Load environment variables
 load_dotenv()
-API_KEY = os.getenv("API_KEY")
+
+class LLMHelper:
+    """Helper class to interact with ChatGroq's Llama3 model."""
+    def __init__(self):
+        self.llm = ChatGroq(groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama3-8b-8192")
+
+    def get_response(self, prompt):
+        """Send the prompt to ChatGroq and return the response."""
+        response = self.llm.invoke(prompt)
+        return response.content  # Extract and return the response content
 
 def generate_related_topics(summary: str):
-    url = "https://openrouter.ai/api/v1/chat/completions"
+    """Generate a list of relevant topics using ChatGroq."""
+    llm_helper = LLMHelper()
     
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = json.dumps({
-        "model": "deepseek/deepseek-r1-zero:free",
-        "messages": [
-            {
-                "role": "system", 
-                "content": "You are an AI that only generates relevant links to topics based on a given summary."
-            },
-            {
-                "role": "user",
-                "content": f"Generate a list of 5 relevant online links based on this summary:\n{summary}"
-            }
-        ],
-    })
-
-    response = requests.post(url, data=payload, headers=headers)
-    print(response)
-    if response.status_code == 200:
-        data = response.json()
-        ai_response = data["choices"][0]["message"]["content"]
-        return ai_response
-    else:
-        return ["Error fetching related topics"]
+    prompt = (
+        "You are an AI that only generates relevant links to topics based on a given summary.\n"
+        f"Generate a list of 5 relevant online links which should not show this page not found error the link should be working based on this summary:\n{summary}"
+    )
+    
+    result = llm_helper.get_response(prompt)
+    
+    return result if result else ["Error fetching related topics"]

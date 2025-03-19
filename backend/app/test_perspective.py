@@ -5,11 +5,15 @@ import os
 import sys
 import json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 from app.services.ai_service import AIService
 
 def test_opposite_perspective():
-    api_key = os.environ.get('HF_API_KEY', None)  # set this as an environment variable
+    api_key = os.getenv('HF_API_KEY', None)  # set this as an environment variable
     ai_service = AIService(api_key=api_key)
     
     print("=" * 80)
