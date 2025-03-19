@@ -4,6 +4,7 @@ import React from 'react';
 interface ChatMessageProps {
   isAI: boolean;
   message: string;
+  blogsammary: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ isAI, message }) => {

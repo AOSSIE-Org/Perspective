@@ -122,21 +122,34 @@ npm install
 npm run dev
 ```
 
-### Backend Setup
+# Backend Setup
 
-*Get HuggingFace Access Token:*
-- Go to HuggingFace website and create new access token.
-- copy that token
+### Get Groq API Key:
+- Go to Groq's website and create a new API key.
+- Copy that key for later use.
 
-*Setup environment variables:*
-  - add .env file in `/backend`directory.
-  - add following environment variable in your .env file.
-  ```
-  HF_TOKEN = <Your_hugging_face_access_token>
-  ```
+### Setup Environment Variables:
+1. Add a `.env` file in the `/backend` directory.
+2. Add the following environment variable in your `.env` file:
+   ```
+   GROQ_API_KEY=<your_groq_api_key>
+   ```
 
 
-```bash
+# Frontend Setup
+
+### Setup Environment Variables:
+1. Add a `.env.local` file in the `/frontend` directory.
+2. Add the following environment variable in your `.env.local` file:
+   ```
+   NEXT_PUBLIC_GROQCLOUD_API_KEY=<your_groq_api_key>
+   ```
+
+
+### Important Notes:
+- **Do not expose sensitive keys** publicly.
+- **Restart the server** after changing `.env` files.
+- If deploying to **Vercel**, add `NEXT_PUBLIC_GROQCLOUD_API_KEY` in **Vercel Dashboard > Project > Environment Variables**.
 cd backend
 pip install -r requirements.txt
 python -m app.main

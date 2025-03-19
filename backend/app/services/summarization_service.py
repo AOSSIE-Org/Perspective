@@ -1,52 +1,37 @@
-
-import requests
 import os
-import json
 from dotenv import load_dotenv
 import logging
+from langchain_groq import ChatGroq
 
+# Load environment variables
 load_dotenv()
-openrouter_token = os.getenv("API_KEY")
-
-Summarization_URL = "https://openrouter.ai/api/v1/chat/completions"
-headers = {
-    "Authorization": f"Bearer {openrouter_token}",
-    "Content-Type": "application/json",
-}
 
 logger = logging.getLogger("uvicorn.error")
 
+class LLMHelper:
+    """Helper class to interact with ChatGroq's Llama3 model."""
+    def __init__(self):
+        self.llm = ChatGroq(groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama3-8b-8192")
+
+    def get_response(self, prompt):
+        """Send the prompt to ChatGroq and return the response."""
+        response = self.llm.invoke(prompt)
+        return response.content  # Extract and return the response content
+
 def summarize_text(payload):
-    print("h")
+    """Summarize the given text using ChatGroq."""
     try:
-        openrouter_payload = json.dumps({
-            "model": "deepseek/deepseek-r1-zero:free",
-            "messages": [
-                {
-                    "role": "system", 
-                    "content": "You are a helpful assistant that provides concise and accurate summaries."
-                },
-                {
-                    "role": "user", 
-                    "content": f"Please provide a concise summary of the following text:\n\n{payload['inputs']}"
-                }
-            ],
-        })
-        print(openrouter_payload)
+        llm_helper = LLMHelper()
         
-        response = requests.post(Summarization_URL, headers=headers, data=openrouter_payload)
+        prompt = (
+            "You are a helpful assistant that provides concise and accurate summaries.\n"
+            f"Please provide a concise summary of the following text:\n\n{payload['inputs']}"
+        )
         
-        print("Summarization API response status: %s", response.status_code)
-        print("Summarization API response text: %s", response.text)
-        
-        if response.status_code != 200 or not response.text:
-            raise Exception(f"Summarization API error, status code {response.status_code}")
-        
-        summary_response = response.json()
-        summary = summary_response['choices'][0]['message']['content']
+        summary = llm_helper.get_response(prompt)
         
         return summary
     
     except Exception as e:
-        print("Error in summarization service: %s", e)
+        logger.error("Error in summarization service: %s", e)
         raise Exception("Error in summarization service: " + str(e))

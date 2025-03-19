@@ -3,7 +3,7 @@ uvicorn
 requests
 beautifulsoup4
 python-dotenv
-
+urllib3
 newspaper3k
 httpx
-python-dotenv
+yt_dlp

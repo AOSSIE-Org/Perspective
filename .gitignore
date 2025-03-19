@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -50,6 +49,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+.env
 
 # Translations
 *.mo

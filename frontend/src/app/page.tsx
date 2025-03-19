@@ -2,26 +2,21 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Box, Typography, Stack } from "@mui/material";
+import { Container, Box, Typography, Stack, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import Navbar from "@/app/components/Navbar";
 import AnalyzeButton from "@/app/components/Utils/AnalyzeButton";
 import DescCard from "@/app/components/Utils/DescCard";
 
-
-
-
 export default function Home() {
-  const [article_url,setArticleURL] = useState("")
+  const [article_url, setArticleURL] = useState("");
+  const [selectedType, setSelectedType] = useState("article"); // default to article
   const router = useRouter();
-
-
 
   const handleSubmit = useCallback(() => {
     if (!article_url.trim()) return; // Prevents navigation if the input is empty
     const encodedURL = encodeURIComponent(article_url);
-    router.push(`/article?url=${encodedURL}`);
-  }, [article_url, router]);
-  
+    router.push(`/${selectedType}?url=${encodedURL}`);
+  }, [article_url, router, selectedType]);
 
   return (
     <Box sx={{ bgcolor: "#111827", color: "white", minHeight: "100vh" }}>
@@ -40,13 +35,12 @@ export default function Home() {
           Discover Different Perspectives
         </Typography>
         <Typography variant="h6" sx={{ maxWidth: 600, mx: "auto" }}>
-          Enter an article URL to analyze multiple viewpoints and engage in
-          discussions.
+          Enter an article URL to analyze multiple viewpoints and engage in discussions.
         </Typography>
 
-        {/* Input field */}
-        <Box maxWidth="sm" mx="auto" mt={4}>
-          <div className="relative">
+        {/* Input field and dropdown selection inline */}
+        <Box maxWidth="sm" mx="auto" mt={4} display="flex" alignItems="center" gap={2}>
+          <div className="relative" style={{ flex: 1 }}>
             <input
               type="text"
               placeholder="Type a URL..."
@@ -57,23 +51,33 @@ export default function Home() {
             />
             <span className="absolute bottom-0 left-0 w-0 peer-focus:w-full h-[3px] transition-[width_0.4s_cubic-bezier(0.42,0,0.58,1)] bg-[linear-gradient(90deg,#707070_0%,#909090_25%,#00BFFF_50%,#909090_75%,#707070_100%)]" />
           </div>
-
-          {/* Analyze button */}
-          <Box
-            display="flex"
-            justifyContent="center"
-            mt={2}
-            onClick={handleSubmit}
-          >
-            <AnalyzeButton />
-          </Box>
+          <FormControl sx={{ minWidth: 120 }} size="small">
+            <InputLabel id="select-type-label" sx={{ color: "white" }}>Type</InputLabel>
+            <Select
+              labelId="select-type-label"
+              id="select-type"
+              value={selectedType}
+              label="Type"
+              onChange={(e) => setSelectedType(e.target.value)}
+              sx={{
+                color: "white",
+                ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "white" },
+                ".MuiSvgIcon-root": { color: "white" }
+              }}
+            >
+              <MenuItem value="article">Article</MenuItem>
+              <MenuItem value="video">Video</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
-        <Stack
-          spacing={4}
-          direction={{ xs: "column", md: "row" }}
-          justifyContent="center"
-          mt={6}
-        >
+
+        {/* Analyze button */}
+        <Box display="flex" justifyContent="center" mt={2} onClick={handleSubmit}>
+          <AnalyzeButton />
+        </Box>
+
+        <Stack spacing={4} direction={{ xs: "column", md: "row" }} justifyContent="center" mt={6}>
           {[
             {
               title: "Multiple Perspectives",
@@ -87,7 +91,9 @@ export default function Home() {
               title: "Interactive Discussion",
               description: "Engage in meaningful conversations."
             }
-          ].map((feature, index) => <DescCard key={index} {...feature} />)}
+          ].map((feature, index) => (
+            <DescCard key={index} {...feature} />
+          ))}
         </Stack>
       </Container>
     </Box>
