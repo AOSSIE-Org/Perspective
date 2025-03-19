@@ -15,18 +15,23 @@ import {
   Tabs
 } from "@mui/material";
 import ChatMessage from "@/app/components/ChatMessage";
+import { config } from "dotenv";
 import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
 import ResearchDashboard from "../components/research-dashboard";
 import { SummaryData } from "../components/research-dashboard";
+import axios from "axios";
+config();
 
 export default function Article() {
   const [message, setMessage] = useState("");
+  const [chat, setChat] = useState("Hello! I've analyzed the article. What would you like to know about it?");
   const [url, setUrl,] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
   const[research, setResearch] = useState()
+  const [chatHistory, setChatHistory] = useState<{ isAI: boolean; message: string }[]>([]);
 
   // States for API responses and loading flags
   const [summary, setSummary] = useState("");
@@ -107,13 +112,62 @@ export default function Article() {
     }
   }, [articleUrl]);
   
-  const handleSubmit = (e:any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if (message.trim()) {
-      setMessage("");
-    }
-  };
+    if (!message.trim()) return;
+    console.log("groqcloud api key", process.env.NEXT_PUBLIC_GROQCLOUD_API_KEY);
 
+    const userMessage = message;
+    setMessage(""); // Clear input field immediately
+    setChatHistory((prev) => [...prev, { isAI: false, message: userMessage }]); // Add user message to chat
+
+    const MAX_RETRIES = 5;
+    const RETRY_DELAY = 2000;
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const messages = [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: `Search query: ${userMessage}\n\nArticle Summary:\n${summary}` }
+        ];
+
+        const response = await axios.post(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            model: "llama3-8b-8192",
+            messages,
+            max_completion_tokens: 150,
+            temperature: 1.0
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQCLOUD_API_KEY}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        if (response.data?.choices?.[0]?.message?.content) {
+          const aiResponse = response.data.choices[0].message.content.trim();
+          setChat(aiResponse);
+          setChatHistory((prev) => [...prev, { isAI: true, message: aiResponse }]);
+          return;
+        } else {
+          throw new Error("No valid message content in the response.");
+        }
+      } catch (error: any) {
+        console.error("LLM Query Error:", error.response?.data || error.message);
+        if (error.response?.status === 503) {
+          console.log(`Retrying in ${RETRY_DELAY * (attempt + 1)}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY * (attempt + 1)));
+        } else {
+          throw new Error("Failed to process query with LLM");
+        }
+      }
+    }
+
+    throw new Error("Max retries exceeded for LLM query");
+  };
   const cardStyle = {
     bgcolor: "white",
     boxShadow: 3,
@@ -277,7 +331,8 @@ export default function Article() {
     >
       <ChatMessage
         isAI={true}
-        message="Hello! I've analyzed the article. What would you like to know about it?"
+        message={chat}
+        blogsammary={summary}
       />
     </Box>
     <Box
