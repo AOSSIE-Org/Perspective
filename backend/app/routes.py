@@ -10,13 +10,10 @@ from typing import List, Optional
 import uuid
 from sqlalchemy.orm import Session
 from app.services.related_topics import generate_related_topics
-from app.services.chat_service import  create_chat_service
+from app.services.chat_manager import chat_manager
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
-
-# Store the ChatService instance for each URL
-chat_services = {}
 
 class ArticleRequest(BaseModel):
     summary: str  # summarized article text to generate opposite perspective
@@ -94,32 +91,18 @@ async def get_related_topics(request: RelatedTopicsRequest):
 
 @router.post("/initialize-chat")
 async def initialize_chat(request: InitializeChatRequest):
-    """
-    Initialize a chat session for a given URL.
-    """
-    url = request.url
-    summary = request.summary
-    perspective = request.perspective
-
-    # Create and store the chat service
-    chat_services[url] = create_chat_service(summary, perspective)
-    return {"status": "initialized"}
+    """Initialize a chat session for a given URL."""
+    return chat_manager.initialize_chat(
+        request.url,
+        request.summary,
+        request.perspective
+    )
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
-    """
-    Handle a chat message for a given URL.
-    """
-    url = request.url
-    question = request.question
-
-    # Check if the chat session exists
-    if url not in chat_services:
-        raise HTTPException(status_code=404, detail="Chat session not found")
-    
-    # Generate a response using the chat service
-    chat_service = chat_services[url]
-    response, thread_id = chat_service.generate_response(question)
-    print("response", response)
-    return {"response": response, "thread_id": thread_id}
+    """Handle a chat message for a given URL."""
+    return chat_manager.get_chat_response(
+        request.url,
+        request.question
+    )
 
