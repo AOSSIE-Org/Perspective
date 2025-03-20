@@ -119,7 +119,7 @@ async def chat(request: ChatRequest):
     
     # Generate a response using the chat service
     chat_service = chat_services[url]
-    response = chat_service.generate_response(question)
+    response, thread_id = chat_service.generate_response(question)
     print("response", response)
-    return {"response": response}
+    return {"response": response, "thread_id": thread_id}
 

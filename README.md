@@ -142,9 +142,9 @@ _Get OpenRouter API Key:_
 - Navigate to the API Keys section and generate a new API key.
 - Copy the key for further setup.
 
-_Get HuggingFace Access Token:_
+_Get OPENAI Access Token:_
 
-- Go to HuggingFace website and create new access token.
+- Go to OPENAI website and create new access token.
 - copy that token
 
 _Setup environment variables:_
@@ -154,7 +154,7 @@ _Setup environment variables:_
 
 ```
 API_KEY = <Your_OpenRouter_API_Key>
-HF_TOKEN = <Your_hugging_face_access_token>
+OPENAI_API_KEY = <Your_openai_api_access_token>
 ```
 
 ```bash

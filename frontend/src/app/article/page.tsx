@@ -39,6 +39,9 @@ export default function Article() {
   const [isLoading, setIsLoading] = useState(false);
   const [isChatInitialized, setIsChatInitialized] = useState(false);
 
+  // Add new state for thread ID
+  const [threadId, setThreadId] = useState<string | null>(null);
+
   const handleSidebarToggle = (isOpen: boolean) => {
     setIsSidebarOpen(isOpen);
   };
@@ -124,12 +127,18 @@ export default function Article() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: url, // Send the URL in the body
+          url: url,
           question: userMessage,
+          thread_id: threadId // Include thread ID if it exists
         }),
       });
 
       const data = await response.json();
+      
+      // Store the thread ID from the response if it exists
+      if (data.thread_id) {
+        setThreadId(data.thread_id);
+      }
       
       // Add AI response to chat
       setChatHistory(prev => [...prev, { isAI: true, message: data.response["content"] }]);

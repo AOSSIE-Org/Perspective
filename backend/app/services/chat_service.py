@@ -4,6 +4,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph import StateGraph, MessagesState
 from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
 import os
 from dotenv import load_dotenv
 import numpy as np
@@ -13,12 +14,12 @@ from langgraph.graph import END
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 import uuid
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
+
 
 # Load environment variables
 load_dotenv()
 openrouter_token = os.getenv("API_KEY")
-hf_token = os.getenv("HF_TOKEN")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 class ChatService:
     def __init__(self, content_summary: str, content_perspective: str):
@@ -28,8 +29,9 @@ class ChatService:
             openai_api_base="https://openrouter.ai/api/v1",
             temperature=0.7
         )
-        self.embeddings = HuggingFaceInferenceAPIEmbeddings(
-            api_key=hf_token
+        self.embeddings = OpenAIEmbeddings(
+            openai_api_key=openai_api_key,
+            model="text-embedding-3-small"
         )
         self.vector_store = self._initialize_vector_store(content_summary, content_perspective)
         self.graph = self._build_graph()
@@ -132,16 +134,19 @@ class ChatService:
         memory = MemorySaver()
         return graph_builder.compile(checkpointer=memory)
 
-    def generate_response(self, user_question: str):
-        # Generate unique thread ID for each conversation
-        thread_id = str(uuid.uuid4())
+    
+    def generate_response(self, user_question: str, thread_id=None):
+        # Use provided thread_id or create a new one if this is a new conversation
+        if thread_id is None:
+            thread_id = str(uuid.uuid4())
         config = {"configurable": {"thread_id": thread_id}}
         
         result = self.graph.invoke(
             {"messages": [{"role": "user", "content": user_question}]},
             config=config,
         )
-        return result["messages"][-1]
+        # Return both the response and the thread_id
+        return result["messages"][-1], thread_id
 
 # Usage example:
 def create_chat_service(content_summary: str, content_perspective: str) -> ChatService:
