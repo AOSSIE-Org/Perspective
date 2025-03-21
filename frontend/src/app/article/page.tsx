@@ -17,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 import TextToSpeech from "../components/TextToSpeech";
 import RelatedTopicsSidebar from "../components/RelatedTopicsSidebar";
 import MarkdownRenderer from "../components/MarkDownRenderer";
+import { getOrCreateMachineId } from "../utils/machineId";
 
 export default function Article() {
   const [message, setMessage] = useState("");
@@ -33,9 +34,7 @@ export default function Article() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Add new state for chat history
-  const [chatHistory, setChatHistory] = useState<Array<{ isAI: boolean; message: string }>>([
-    { isAI: true, message: "Hello! I've analyzed the article. What would you like to know about it?" }
-  ]);
+  const [chatHistory, setChatHistory] = useState<Array<{ isAI: boolean; message: string }>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isChatInitialized, setIsChatInitialized] = useState(false);
 
@@ -67,10 +66,7 @@ export default function Article() {
           const data = await response.json();
           console.log("Received summary response:", data);
 
-          // Adjust parsing based on the expected data structure.
-          // For example, if data.summary is an array:
           const summaryText = data.summary;
-          // const summaryText = data;
           if (!summaryText) {
             throw new Error("Summary text not found in response");
           }
@@ -98,9 +94,30 @@ export default function Article() {
             body: JSON.stringify({ 
               url: articleUrl, 
               summary: summaryText, 
-              perspective: dataPerspective.perspective 
+              perspective: dataPerspective.perspective,
+              machine_id: getOrCreateMachineId()
             }),
           });
+          
+          // Fetch existing chat history
+          const historyResponse = await fetch(`http://localhost:8000/chat-history`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              url: articleUrl,
+              machine_id: getOrCreateMachineId()
+            }),
+          });
+          const historyData = await historyResponse.json();
+          
+          // Always include the greeting message at the beginning
+          const greetingMessage = { isAI: true, message: "Hello! I've analyzed the article. What would you like to know about it?" };
+          if (historyData && historyData.length > 0) {
+            setChatHistory([greetingMessage, ...historyData]);
+          } else {
+            setChatHistory([greetingMessage]);
+          }
+          
           setIsChatInitialized(true);
         } catch (error) {
           console.error("Error fetching article analysis:", error);
@@ -112,7 +129,7 @@ export default function Article() {
     }
   }, [articleUrl]);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
 
@@ -129,7 +146,8 @@ export default function Article() {
         body: JSON.stringify({
           url: url,
           question: userMessage,
-          thread_id: threadId // Include thread ID if it exists
+          thread_id: threadId,
+          machine_id: getOrCreateMachineId()
         }),
       });
 
@@ -141,7 +159,7 @@ export default function Article() {
       }
       
       // Add AI response to chat
-      setChatHistory(prev => [...prev, { isAI: true, message: data.response["content"] }]);
+      setChatHistory(prev => [...prev, { isAI: true, message: data.response }]);
     } catch (error) {
       console.error("Error in chat:", error);
       setChatHistory(prev => [...prev, { isAI: true, message: "Sorry, I encountered an error. Please try again." }]);

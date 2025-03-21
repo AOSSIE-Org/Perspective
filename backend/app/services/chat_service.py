@@ -14,19 +14,19 @@ from langgraph.graph import END
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 import uuid
+from app.db.database import SessionLocal
+from app.db.models import ChatMessage
 
 
 # Load environment variables
 load_dotenv()
-openrouter_token = os.getenv("API_KEY")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 class ChatService:
     def __init__(self, content_summary: str, content_perspective: str):
         self.llm = ChatOpenAI(
-            model="anthropic/claude-3-haiku",  # Free Claude 3 Haiku model on OpenRouter
-            openai_api_key=openrouter_token,
-            openai_api_base="https://openrouter.ai/api/v1",
+            model="gpt-3.5-turbo",  # Using OpenAI's model directly
+            openai_api_key=openai_api_key,
             temperature=0.7
         )
         self.embeddings = OpenAIEmbeddings(
@@ -141,12 +141,41 @@ class ChatService:
             thread_id = str(uuid.uuid4())
         config = {"configurable": {"thread_id": thread_id}}
         
-        result = self.graph.invoke(
-            {"messages": [{"role": "user", "content": user_question}]},
-            config=config,
-        )
-        # Return both the response and the thread_id
-        return result["messages"][-1], thread_id
+        # Get chat history from the database
+        db = SessionLocal()
+        try:
+            # Get the most recent messages for this thread
+            messages = db.query(ChatMessage).filter(
+                ChatMessage.thread_id == thread_id
+            ).order_by(ChatMessage.timestamp).all()
+            
+            # Convert messages to the format expected by the LLM
+            conversation_history = [
+                {"role": "user" if not msg.is_ai else "assistant", "content": msg.message}
+                for msg in messages
+            ]
+            
+            # Add the current question
+            conversation_history.append({"role": "user", "content": user_question})
+            
+            result = self.graph.invoke(
+                {"messages": conversation_history},
+                config=config,
+            )
+            
+            # Store the new message in the database
+            new_message = ChatMessage(
+                thread_id=thread_id,
+                is_ai=1,
+                message=result["messages"][-1].content
+            )
+            db.add(new_message)
+            db.commit()
+            
+            return result["messages"][-1], thread_id
+            
+        finally:
+            db.close()
 
 # Usage example:
 def create_chat_service(content_summary: str, content_perspective: str) -> ChatService:
