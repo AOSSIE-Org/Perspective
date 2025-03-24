@@ -292,7 +292,7 @@ export default function Article() {
         try {
           // Get article summary
           let requestUrl: string = "http://localhost:8000/scrape-and-summarize";
-          const response = await scrapeAndSummarize(requestUrl);
+          const response = await scrapeAndSummarize(requestUrl, articleUrl);
           console.log("Received summary response:", response);
           
           // Adjust parsing based on the expected data structure.

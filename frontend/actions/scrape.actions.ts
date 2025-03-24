@@ -2,7 +2,7 @@
 
 export async function scrapeAndSummarize(requestURL: string) {
   try {
-    const response = await fetch("http://localhost:8000/scrape-and-summarize", {
+    const response = await fetch(requestURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: requestURL }),
@@ -21,12 +21,12 @@ export async function scrapeAndSummarize(requestURL: string) {
   }
 }
 
-export async function generatePerspective(summaryText: string) {
+export async function generatePerspective(requestURL: string) {
   try {
-    const response = await fetch("http://localhost:8000/generate-perspective", {
+    const response = await fetch(requestURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ summary: summaryText }),
+      body: JSON.stringify({ summary: requestURL }),
     });
 
     if (!response.ok) {
@@ -38,6 +38,26 @@ export async function generatePerspective(summaryText: string) {
     
   } catch (error) {
     console.error("Error calling FastAPI /generate-perspective:", error);
+    throw error;
+  }
+}
+
+export async function getRelatedTopics(requestURL: string, summary?: string | undefined) {
+  try {
+    const response = await fetch(requestURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ summary }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch related topics");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error in getRelatedTopics:", error);
     throw error;
   }
 }
