@@ -16,6 +16,7 @@ import {
   Close as CloseIcon,
   ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material"
+import { getRelatedTopics } from "../../../actions/scrape.actions"
 
 interface RelatedTopicsSidebarProps {
   currentArticleUrl?: string
@@ -77,15 +78,11 @@ export default function RelatedTopicsSidebar({
       setIsLoading(true)
       const fetchData = async () => {
         try {
-          const resTopics = await fetch("http://localhost:8000/related-topics", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ summary: currentArticleSummary }),
-          })
+          const requestURL: string = "http://localhost:8000/related-topics"
+          const resTopics = await getRelatedTopics(requestURL, currentArticleSummary);
 
-          const dataTopics = await resTopics.json()
-          console.log("Received related topics response:", dataTopics)
-          setTopics(dataTopics.topics || "")
+          console.log("Received related topics response:", resTopics)
+          setTopics(resTopics.topics || "")
         } catch (error) {
           console.error("Error fetching related topics:", error)
           setTopics("")

@@ -258,6 +258,7 @@ import Navbar from "@/app/components/Navbar";
 import { useSearchParams } from "next/navigation";
 import TextToSpeech from '../components/TextToSpeech';
 import RelatedTopicsSidebar from '../components/RelatedTopicsSidebar';
+import { generatePerspective, scrapeAndSummarize } from "../../../actions/scrape.actions";
 
 export default function Article() {
   const [message, setMessage] = useState("");
@@ -290,17 +291,13 @@ export default function Article() {
       const fetchData = async () => {
         try {
           // Get article summary
-          const response = await fetch("http://localhost:8000/scrape-and-summarize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: articleUrl })
-          });
-          const data = await response.json();
-          console.log("Received summary response:", data);
+          let requestUrl: string = "http://localhost:8000/scrape-and-summarize";
+          const response = await scrapeAndSummarize(requestUrl, articleUrl);
+          console.log("Received summary response:", response);
           
           // Adjust parsing based on the expected data structure.
           // For example, if data.summary is an array:
-          const summaryText = data.summary;
+          const summaryText = response.summary;
           // const summaryText = data;
           if (!summaryText) {
             throw new Error("Summary text not found in response");
@@ -309,14 +306,10 @@ export default function Article() {
           setIsSummaryLoading(false);
   
           // Request for AI perspective using the summary text
-          const resPerspective = await fetch("http://localhost:8000/generate-perspective", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ summary: summaryText })
-          });
-          const dataPerspective = await resPerspective.json();
-          console.log("Received perspective response:", dataPerspective);
-          setPerspective(dataPerspective.perspective);
+          let perspectiveURL: string = "http://localhost:8000/generate-perspective";
+          const resPerspective = await generatePerspective(perspectiveURL);
+          console.log("Received perspective response:", resPerspective);
+          setPerspective(resPerspective.perspective);
           setIsPerspectiveLoading(false);
         } catch (error) {
           console.error("Error fetching article analysis:", error);
