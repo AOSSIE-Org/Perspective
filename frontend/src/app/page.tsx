@@ -11,16 +11,16 @@ import DescCard from "@/app/components/Utils/DescCard";
 
 
 export default function Home() {
-  const [article_url,setArticleURL] = useState("")
+  const [articleUrl,setArticleURL] = useState("")
   const router = useRouter();
 
 
 
   const handleSubmit = useCallback(() => {
-    if (!article_url.trim()) return; // Prevents navigation if the input is empty
-    const encodedURL = encodeURIComponent(article_url);
+    if (!articleUrl.trim()) return; // Prevents navigation if the input is empty
+    const encodedURL = encodeURIComponent(articleUrl);
     router.push(`/article?url=${encodedURL}`);
-  }, [article_url, router]);
+  }, [articleUrl, router]);
   
 
   return (
@@ -51,7 +51,7 @@ export default function Home() {
               type="text"
               placeholder="Type a URL..."
               required
-              value={article_url}
+              value={articleUrl}
               onChange={(e) => setArticleURL(e.target.value)}
               className="peer text-white text-[1.2rem] bg-transparent w-full box-border px-[1em] py-[0.8em] border-0 border-b-[var(--border-height)] border-b-solid border-b-[var(--border-before-color)] shadow-[0_4px_8px_rgba(0,0,0,0.1)] focus:outline-none"
             />
