@@ -307,7 +307,7 @@ export default function Article() {
   
           // Request for AI perspective using the summary text
           let perspectiveURL: string = "http://localhost:8000/generate-perspective";
-          const resPerspective = await generatePerspective(perspectiveURL);
+          const resPerspective = await generatePerspective(perspectiveURL, summaryText);
           console.log("Received perspective response:", resPerspective);
           setPerspective(resPerspective.perspective);
           setIsPerspectiveLoading(false);
