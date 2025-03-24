@@ -1,11 +1,11 @@
 'use server'
 
-export async function scrapeAndSummarize(requestURL: string) {
+export async function scrapeAndSummarize(requestURL: string,  articleUrl: string) {
   try {
     const response = await fetch(requestURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: requestURL }),
+      body: JSON.stringify({ url: articleUrl }),
     });
 
     if (!response.ok) {
