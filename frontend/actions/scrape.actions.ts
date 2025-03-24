@@ -21,12 +21,12 @@ export async function scrapeAndSummarize(requestURL: string,  articleUrl: string
   }
 }
 
-export async function generatePerspective(requestURL: string) {
+export async function generatePerspective(requestURL: string, summaryText: string) {
   try {
     const response = await fetch(requestURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ summary: requestURL }),
+      body: JSON.stringify({ summary: summaryText }),
     });
 
     if (!response.ok) {
