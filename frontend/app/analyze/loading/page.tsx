@@ -7,6 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Globe, Brain, Shield, CheckCircle, Database, Sparkles, Zap } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 
+/**
+ * Displays a multi-step animated loading and progress interface for the article analysis workflow.
+ *
+ * Guides the user through sequential analysis steps—fetching the article, AI analysis, bias detection, fact checking, and generating perspectives—while visually indicating progress and status. Retrieves the article URL from session storage, automatically advances through each step, and redirects to the results page upon completion. If no article URL is found, redirects to the analysis input page.
+ *
+ * @remark This component manages its own navigation and redirects based on session state.
+ */
 export default function LoadingPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [progress, setProgress] = useState(0)

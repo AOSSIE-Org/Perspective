@@ -7,6 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, Brain, Database, CheckCircle, Globe, ArrowRight, Sparkles } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 
+/**
+ * Renders the main landing page for the Perspective application, showcasing its features, technology stack, and calls to action.
+ *
+ * The page includes animated backgrounds, a header with branding and theme toggle, a hero section with statistics and navigation, sections explaining the app's purpose and workflow, a technology showcase, and a footer with attribution.
+ *
+ * @returns The complete landing page React element for the Perspective app.
+ */
 export default function Home() {
   const router = useRouter()
   const features = [
