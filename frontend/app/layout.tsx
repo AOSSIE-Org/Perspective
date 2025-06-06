@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   description: "Combat bias and one-sided narratives with AI-generated alternative perspectives.",
 }
 
+/**
+ * Root layout component that sets up global HTML structure, font, and theming for the application.
+ *
+ * Wraps all page content with the Inter font and a theme provider supporting system-based theming.
+ *
+ * @param children - The content to be rendered within the layout.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
