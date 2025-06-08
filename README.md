@@ -143,7 +143,8 @@ npm run dev
 *Run backend:*
 ```bash
 cd new-backend
-uv run main.py
+uv sync # Creating virtual environment at: .venv
+uv run main.py #Runs the backend server
 ```
 
 ---
