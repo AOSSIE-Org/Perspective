@@ -14,6 +14,11 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import BiasMeter from "@/components/bias-meter"
 
+/**
+ * Renders the article analysis page with summary, perspectives, fact checks, bias meter, AI chat, and sources.
+ *
+ * Provides an interactive interface for users to review an article's summary, explore alternative perspectives, verify factual claims, and engage in AI-assisted discussion. Includes responsive navigation, a bias visualization, and a curated list of references.
+ */
 export default function AnalyzePage() {
   const [activeTab, setActiveTab] = useState("summary")
   const [message, setMessage] = useState("")
