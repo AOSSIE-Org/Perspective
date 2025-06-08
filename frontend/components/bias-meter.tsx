@@ -4,6 +4,13 @@ interface BiasMeterProps {
   score: number
 }
 
+/**
+ * Displays a circular progress meter visualizing a bias score with color-coded feedback and descriptive labeling.
+ *
+ * Renders the given score as a circular progress indicator, where the color and label reflect the bias level: green for low, yellow for moderate, and red for high bias.
+ *
+ * @param score - The bias score to display, expected to be between 0 and 100.
+ */
 export default function BiasMeter({ score }: BiasMeterProps) {
   const getScoreColor = (score: number) => {
     if (score <= 30) return "text-green-500"

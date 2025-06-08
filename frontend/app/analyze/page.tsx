@@ -11,6 +11,11 @@ import { Globe, ArrowRight, Link, Sparkles, Shield, Brain, CheckCircle } from "l
 import { useRouter } from "next/navigation"
 import ThemeToggle from "@/components/theme-toggle"
 
+/**
+ * Renders the main page for submitting an article URL to initiate AI-powered analysis.
+ *
+ * Provides a user interface for entering and validating an article URL, displays real-time feedback on URL validity, and enables users to trigger analysis. Features include a branded header, a hero section, a URL input card with validation, a grid highlighting analysis capabilities, and example article URLs for quick testing. On valid submission, the URL is stored in sessionStorage and the user is navigated to a loading page for further processing.
+ */
 export default function AnalyzePage() {
   const [url, setUrl] = useState("")
   const [isValidUrl, setIsValidUrl] = useState(false)
