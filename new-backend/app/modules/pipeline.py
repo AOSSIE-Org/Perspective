@@ -6,6 +6,17 @@ import json
 
 
 def run_scraper_pipeline(url: str) -> dict:
+    """
+    Extracts and processes article content from a given URL.
+    
+    The function retrieves the article text from the specified URL, cleans the extracted text, and identifies relevant keywords. Returns a dictionary containing the cleaned text and extracted keywords.
+    	
+    Args:
+    	url: The URL of the article to process.
+    
+    Returns:
+    	A dictionary with 'cleaned_text' and 'keywords' keys.
+    """
     extractor = Article_extractor(url)
     raw_text = extractor.extract()
 
@@ -25,6 +36,15 @@ def run_scraper_pipeline(url: str) -> dict:
 
 
 def run_langgraph_workflow(state: dict):
+    """
+    Executes a language graph workflow with the provided state.
+    
+    Args:
+        state: A dictionary representing the initial state for the workflow.
+    
+    Returns:
+        The result produced by invoking the language graph workflow with the given state.
+    """
     langgraph_workflow = build_langgraph()
     result = langgraph_workflow.invoke(state)
     return result
