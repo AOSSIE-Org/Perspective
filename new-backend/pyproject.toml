@@ -5,7 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "bs4>=0.0.2",
     "fastapi>=0.115.12",
+    "logging>=0.4.9.6",
+    "newspaper3k>=0.2.8",
+    "rake-nltk>=1.0.6",
+    "readability-lxml>=0.8.4.1",
     "requests>=2.32.3",
+    "trafilatura>=2.0.0",
     "uvicorn>=0.34.3",
 ]
