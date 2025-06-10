@@ -1,6 +1,7 @@
 from app.modules.scraper.extractor import Article_extractor
 from app.modules.scraper.cleaner import clean_extracted_text
 from app.modules.scraper.keywords import extract_keywords
+from app.modules.langgraph_builder import build_langgraph
 import json
 
 
@@ -20,4 +21,10 @@ def run_scraper_pipeline(url: str) -> dict:
     # Optional: pretty print raw_text for debugging
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
+    return result
+
+
+def run_langgraph_workflow(state: dict):
+    langgraph_workflow = build_langgraph()
+    result = langgraph_workflow.invoke(state)
     return result
