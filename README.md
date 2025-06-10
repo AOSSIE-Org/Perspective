@@ -1,4 +1,5 @@
 # Perspective-AI
+![Perspective banner](frontend/public/perspective_banner.jpg)
 
 ### Table of Contents
 - [System Overview](#system-overview)
@@ -128,18 +129,22 @@ npm run dev
 - Go to HuggingFace website and create new access token.
 - copy that token
 
+*Install uv:*
+- install **uv** from [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
+
+
 *Setup environment variables:*
-  - add .env file in `/backend`directory.
+  - add .env file in `/new-backend`directory.
   - add following environment variable in your .env file.
   ```
   HF_TOKEN = <Your_hugging_face_access_token>
   ```
 
-
+*Run backend:*
 ```bash
-cd backend
-pip install -r requirements.txt
-python -m app.main
+cd new-backend
+uv sync # Creating virtual environment at: .venv
+uv run main.py #Runs the backend server
 ```
 
 ---
