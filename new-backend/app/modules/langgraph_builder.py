@@ -9,6 +9,11 @@ from app.modules.langgraph_nodes import (
 
 
 def build_langgraph():
+    """
+    Constructs and compiles a state graph workflow for sequential text processing tasks.
+    
+    The workflow consists of sentiment analysis, fact checking, perspective generation, and judgment steps, with conditional reruns based on a score threshold. The process concludes by storing and sending the results. Returns the compiled graph ready for execution.
+    """
     graph = StateGraph()
 
     graph.add_node(
