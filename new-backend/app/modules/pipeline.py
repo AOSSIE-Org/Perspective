@@ -4,6 +4,9 @@ from app.modules.scraper.keywords import extract_keywords
 from app.modules.langgraph_builder import build_langgraph
 import json
 
+# Compile once when module loads
+_LANGGRAPH_WORKFLOW = build_langgraph()
+
 
 def run_scraper_pipeline(url: str) -> dict:
     extractor = Article_extractor(url)
@@ -25,6 +28,6 @@ def run_scraper_pipeline(url: str) -> dict:
 
 
 def run_langgraph_workflow(state: dict):
-    langgraph_workflow = build_langgraph()
-    result = langgraph_workflow.invoke(state)
+    """Execute the pre-compiled LangGraph workflow."""
+    result = _LANGGRAPH_WORKFLOW.invoke(state)
     return result
