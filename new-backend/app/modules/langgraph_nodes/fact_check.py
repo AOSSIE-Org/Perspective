@@ -9,4 +9,7 @@ def run_fact_check(state):
     keywords = state["keywords"]
     results = search_web(text + " " + " ".join(keywords))
     sources = [{"snippet": r.text, "url": r.link} for r in results]
-    return {"facts": sources}
+    return {
+        **state,
+        "facts": sources
+        }

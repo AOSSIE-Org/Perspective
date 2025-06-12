@@ -19,7 +19,10 @@ chain = LLMChain(prompt=prompt, llm=my_llm)
 
 
 def generate_perspective(state):
-    text = state["text"]
+    text = state["cleaned_text"]
     facts = "\n".join([f["snippet"] for f in state["facts"]])
     result = chain.run({"text": text, "facts": facts})
-    return {"perspective": result}
+    return {
+        **state,
+        "perspective": result
+        }

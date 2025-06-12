@@ -6,7 +6,12 @@ def store_and_send(state):
     save_to_vector_db({
         "text": state["text"],
         "perspective": state["perspective"],
-        "facts": state["facts"]
+        "facts": state["facts"],
+        "sentiment": state["label"],
+        "sentiment_score": state["score"]
     })
     #  sending to frontend
-    return {"status": "success"}
+    return {
+        **state,
+        "status": "success"
+        }
