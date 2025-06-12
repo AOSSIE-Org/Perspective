@@ -9,10 +9,10 @@ def clean_extracted_text(text: str):
     if not text:
         return ""
 
-    # 1. Remove multiple line breaks to single line break
+    # 1. Removing multiple line breaks to single line break
     text = re.sub(r'\n{2,}', '\n\n', text)
 
-    # 2. Remove common boilerplate patterns
+    # 2. Removing common boilerplate patterns
     # (example: "Read more at...", "Subscribe", etc.)
     boilerplate_phrases = [
         r"read more at.*",

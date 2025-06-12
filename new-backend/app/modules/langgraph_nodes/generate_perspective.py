@@ -19,9 +19,15 @@ chain = LLMChain(prompt=prompt, llm=my_llm)
 
 
 def generate_perspective(state):
-    text = state["cleaned_text"]
-    facts = "\n".join([f["snippet"] for f in state["facts"]])
-    result = chain.run({"text": text, "facts": facts})
+    try:
+        text = state["cleaned_text"]
+        facts = "\n".join([f["snippet"] for f in state["facts"]])
+        result = chain.run({"text": text, "facts": facts})
+    except Exception as e:
+        print(f"some error occured:{e}")
+        return {
+            "error": str(e)
+        }
     return {
         **state,
         "perspective": result

@@ -5,10 +5,16 @@ def search_web():
 
 
 def run_fact_check(state):
-    text = state["text"]
-    keywords = state["keywords"]
-    results = search_web(text + " " + " ".join(keywords))
-    sources = [{"snippet": r.text, "url": r.link} for r in results]
+    try:
+        text = state["text"]
+        keywords = state["keywords"]
+        results = search_web(text + " " + " ".join(keywords))
+        sources = [{"snippet": r.text, "url": r.link} for r in results]
+    except Exception as e:
+        print(f"some error occured:{e}")
+        return {
+            "error": str(e)
+        }
     return {
         **state,
         "facts": sources

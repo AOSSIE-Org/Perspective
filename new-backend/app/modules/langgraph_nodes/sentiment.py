@@ -5,7 +5,13 @@ sentiment_pipeline = pipeline("sentiment-analysis")
 
 def run_sentiment(state):
     text = state["text"]
-    result = sentiment_pipeline(text)[0]
+    try:
+        result = sentiment_pipeline(text)[0]
+    except Exception as e:
+        print(f"some error occured:{e}")
+        return {
+            "error": str(e)
+        }
     return {
         **state,  # Keep all existing keys
         "sentiment": result["label"],
