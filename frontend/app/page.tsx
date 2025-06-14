@@ -115,7 +115,10 @@ export default function Home() {
             Get Started
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2 md:ml-3 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>
-
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 animate-fade-in delay-600">
+             No sign in required. It’s completely free.
+          </p>
+          
           {/* Floating stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-12 md:mt-20 animate-fade-in delay-700">
             {stats.map((stat, index) => (

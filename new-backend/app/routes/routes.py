@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline
+from app.modules.pipeline import run_langgraph_workflow
 import json
 
 router = APIRouter()
@@ -19,4 +20,5 @@ async def home():
 async def run_pipelines(request: URlRequest):
     article_text = run_scraper_pipeline(request.url)
     print(json.dumps(article_text, indent=2))
-    return article_text
+    data = run_langgraph_workflow(article_text)
+    return data

@@ -37,6 +37,7 @@ class Article_extractor:
             return {}
         result = trafilatura.extract(
             downloaded,
+            no_fallback=True,
             include_comments=False,
             include_tables=False,
             favor_recall=True,
