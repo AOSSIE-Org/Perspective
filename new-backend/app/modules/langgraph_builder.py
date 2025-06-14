@@ -71,10 +71,13 @@ def build_langgraph():
         lambda state: (
             "error_handler"
             if state.get("status") == "error"
-            else ("generate_perspective"
-                  if state.get("score", 0) < 70
-                  else "store_and_send"
-                  )
+            else (
+                "store_and_send"
+                if state.get("retries", 0) >= 3
+                else "generate_perspective"
+            )
+            if state.get("score", 0) < 70
+            else "store_and_send"
             )
     )
     graph.set_conditional_edges(

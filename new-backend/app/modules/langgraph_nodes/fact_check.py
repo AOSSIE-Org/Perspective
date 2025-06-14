@@ -6,8 +6,14 @@ def search_web():
 
 def run_fact_check(state):
     try:
-        text = state["text"]
+        text = state.get("cleaned_text")
         keywords = state["keywords"]
+
+        if not text:
+            raise ValueError("Missing or empty 'cleaned_text' in state")
+        elif not keywords:
+            raise ValueError("Missing or empty 'keywords' in state")
+
         results = search_web(text + " " + " ".join(keywords))
         sources = [{"snippet": r.text, "url": r.link} for r in results]
     except Exception as e:

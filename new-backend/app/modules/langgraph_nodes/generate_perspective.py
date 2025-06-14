@@ -20,7 +20,17 @@ chain = LLMChain(prompt=prompt, llm=my_llm)
 
 def generate_perspective(state):
     try:
+        retries = state.get("retries", 0)
+        state["retries"] = retries + 1
+
         text = state["cleaned_text"]
+        facts = state.get("facts")
+
+        if not text:
+            raise ValueError("Missing or empty 'cleaned_text' in state")
+        elif not facts:
+            raise ValueError("Missing or empty 'facts' in state")
+
         facts = "\n".join([f["snippet"] for f in state["facts"]])
         result = chain.run({"text": text, "facts": facts})
     except Exception as e:
