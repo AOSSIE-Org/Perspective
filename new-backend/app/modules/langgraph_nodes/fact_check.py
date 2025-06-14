@@ -1,7 +1,7 @@
 # web search + fact  check
 
 def search_web():
-    return None
+    return []
 
 
 def run_fact_check(state):
