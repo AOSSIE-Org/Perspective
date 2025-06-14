@@ -8,9 +8,11 @@ def store_and_send(state):
             **state
         })
     except Exception as e:
-        print(f"some error occured:{e}")
+        print(f"some error occured in store_and_send:{e}")
         return {
-            "error": str(e)
+            "status": "error",
+            "error_from": "store_and_send",
+            "message": f"{e}",
         }
     #  sending to frontend
     return {

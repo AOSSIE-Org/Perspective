@@ -11,11 +11,14 @@ def run_fact_check(state):
         results = search_web(text + " " + " ".join(keywords))
         sources = [{"snippet": r.text, "url": r.link} for r in results]
     except Exception as e:
-        print(f"some error occured:{e}")
+        print(f"some error occured in fact_checking:{e}")
         return {
-            "error": str(e)
-        }
+            "status": "error",
+            "error_from": "fact_checking",
+            "message": f"{e}",
+            }
     return {
         **state,
-        "facts": sources
+        "facts": sources,
+        "status": "success"
         }

@@ -4,7 +4,8 @@ from app.modules.langgraph_nodes import (
     fact_check,
     generate_perspective,
     judge,
-    store_and_send
+    store_and_send,
+    error_handler
     )
 
 
@@ -31,30 +32,58 @@ def build_langgraph():
                     "store_and_send",
                     store_and_send.store_and_send
                     )
+    graph.add_node(
+                    "error_handler",
+                    error_handler
+                    )
 
     graph.set_entry_point(
                     "sentiment_analysis"
                     )
-    graph.add_edge(
-                    "sentiment_analysis",
-                    "fact_checking"
-                    )
-    graph.add_edge(
-                    "fact_checking",
-                    "generate_perspective"
-                    )
-    graph.add_edge(
-                    "generate_perspective",
-                    "judge_perspective"
-                    )
 
-    graph.add_conditional_edges(
+    graph.set_conditional_edges(
+        "sentiment_analysis",
+        lambda x: (
+            "error_handler" if x.get("status") == "error" else "fact_checking"
+            )
+    )
+
+    graph.set_conditional_edges(
+        "fact_checking",
+        lambda x: (
+            "error_handler"
+            if x.get("status") == "error"
+            else "generate_perspective"
+            )
+    )
+
+    graph.set_conditional_edges(
+        "generate_perspective",
+        lambda x: (
+            "error_handler"
+            if x.get("status") == "error"
+            else "judge_perspective"
+            )
+    )
+
+    graph.set_conditional_edges(
         "judge_perspective",
-        lambda state: "rerun" if state.get("score", 0) < 70 else "pass",
-        {
-            "rerun": "generate_perspective",
-            "pass": "store_and_send"
-        }
+        lambda state: (
+            "error_handler"
+            if state.get("status") == "error"
+            else ("generate_perspective"
+                  if state.get("score", 0) < 70
+                  else "store_and_send"
+                  )
+            )
+    )
+    graph.set_conditional_edges(
+        "store_and_send",
+        lambda x: (
+            "error_handler"
+            if x.get("status") == "error"
+            else None
+            )
     )
 
     graph.set_finish_point("store_and_send")

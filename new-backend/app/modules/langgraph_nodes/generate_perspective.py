@@ -24,11 +24,14 @@ def generate_perspective(state):
         facts = "\n".join([f["snippet"] for f in state["facts"]])
         result = chain.run({"text": text, "facts": facts})
     except Exception as e:
-        print(f"some error occured:{e}")
+        print(f"some error occured in generate_perspective:{e}")
         return {
-            "error": str(e)
+            "status": "error",
+            "error_from": "generate_perspective",
+            "message": f"{e}",
         }
     return {
         **state,
-        "perspective": result
+        "perspective": result,
+        "status": "success"
         }
