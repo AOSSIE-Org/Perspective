@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bs4>=0.0.2",
+    "dotenv>=0.9.9",
     "fastapi>=0.115.12",
+    "groq>=0.28.0",
     "langchain>=0.3.25",
     "langgraph>=0.4.8",
     "logging>=0.4.9.6",
@@ -15,6 +17,5 @@ dependencies = [
     "readability-lxml>=0.8.4.1",
     "requests>=2.32.3",
     "trafilatura>=2.0.0",
-    "transformers>=4.52.4",
     "uvicorn>=0.34.3",
 ]
