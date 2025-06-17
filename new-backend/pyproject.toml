@@ -6,7 +6,11 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bs4>=0.0.2",
+    "dotenv>=0.9.9",
     "fastapi>=0.115.12",
+    "groq>=0.28.0",
+    "langchain>=0.3.25",
+    "langgraph>=0.4.8",
     "logging>=0.4.9.6",
     "newspaper3k>=0.2.8",
     "rake-nltk>=1.0.6",
