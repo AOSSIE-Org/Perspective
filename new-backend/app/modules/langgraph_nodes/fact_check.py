@@ -1,4 +1,5 @@
-from app.modules.pipeline import run_fact_check_pipeline
+# from app.modules.pipeline import run_fact_check_pipeline\
+from app.utils.fact_check_utils import run_fact_check_pipeline
 
 
 def run_fact_check(state):

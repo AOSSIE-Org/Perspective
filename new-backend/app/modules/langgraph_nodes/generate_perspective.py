@@ -1,21 +1,27 @@
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+from app.utils.prompt_templates import generation_prompt
+from langchain_groq import ChatGroq
+from pydantic import BaseModel, Field
 
-prompt = PromptTemplate(
-    input_variables=["text", "facts"],
-    template="""Given the following article:
-{text}
 
-And the following verified facts:
-{facts}
+prompt = generation_prompt
 
-Generate a reasoned opposing perspective using chain-of-thought logic.
-"""
+
+class PerspectiveOutput(BaseModel):
+    reasoning: str = Field(..., description="Chain-of-thought reasoning steps")
+    perspective: str = Field(..., description="Generated opposite perspective")
+
+
+my_llm = "llama-3.3-70b-versatile"
+
+llm = ChatGroq(
+    model=my_llm,
+    temperature=0.7
 )
 
-my_llm = "groq llm"
+structured_llm = llm.with_structured_output(PerspectiveOutput)
 
-chain = LLMChain(prompt=prompt, llm=my_llm)
+
+chain = prompt | structured_llm
 
 
 def generate_perspective(state):
@@ -31,8 +37,15 @@ def generate_perspective(state):
         elif not facts:
             raise ValueError("Missing or empty 'facts' in state")
 
-        facts = "\n".join([f["snippet"] for f in state["facts"]])
-        result = chain.run({"text": text, "facts": facts})
+        facts_str = "\n".join([f"Claim: {f['original_claim']}\n"
+                               "Verdict: {f['verdict']}\nExplanation: "
+                               "{f['explanation']}" for f in state["facts"]])
+
+        result = chain.invoke({
+            "cleaned_article": text,
+            "facts": facts_str,
+            "sentiment": state.get("sentiment", "neutral")
+        })
     except Exception as e:
         print(f"some error occured in generate_perspective:{e}")
         return {
