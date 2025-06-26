@@ -1,7 +1,11 @@
 from app.modules.scraper.extractor import Article_extractor
 from app.modules.scraper.cleaner import clean_extracted_text
 from app.modules.scraper.keywords import extract_keywords
+from app.modules.langgraph_builder import build_langgraph
 import json
+
+# Compile once when module loads
+_LANGGRAPH_WORKFLOW = build_langgraph()
 
 
 def run_scraper_pipeline(url: str) -> dict:
@@ -20,4 +24,10 @@ def run_scraper_pipeline(url: str) -> dict:
     # Optional: pretty print raw_text for debugging
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
+    return result
+
+
+def run_langgraph_workflow(state: dict):
+    """Execute the pre-compiled LangGraph workflow."""
+    result = _LANGGRAPH_WORKFLOW.invoke(state)
     return result
