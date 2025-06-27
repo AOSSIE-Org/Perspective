@@ -1,21 +1,14 @@
-# web search + fact  check
-
-def search_web():
-    return []
+from app.modules.pipeline import run_fact_check_pipeline
 
 
 def run_fact_check(state):
     try:
         text = state.get("cleaned_text")
-        keywords = state["keywords"]
 
         if not text:
             raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not keywords:
-            raise ValueError("Missing or empty 'keywords' in state")
 
-        results = search_web(text + " " + " ".join(keywords))
-        sources = [{"snippet": r.text, "url": r.link} for r in results]
+        verifications = run_fact_check_pipeline(state)
     except Exception as e:
         print(f"some error occured in fact_checking:{e}")
         return {
@@ -25,6 +18,6 @@ def run_fact_check(state):
             }
     return {
         **state,
-        "facts": sources,
+        "facts": verifications,
         "status": "success"
         }

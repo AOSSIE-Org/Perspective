@@ -1,4 +1,13 @@
 import re
+import nltk
+
+try:
+    nltk.data.find('corpora/stopwords')
+    nltk.data.find('corpora/punkt_tab')
+
+except LookupError:
+    nltk.download('stopwords')
+    nltk.download('punkt_tab')
 
 
 def clean_extracted_text(text: str):
