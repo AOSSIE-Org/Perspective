@@ -12,4 +12,5 @@ def search_duckduckgo(query, max_results=1):
                 "link": r["href"]
             }
             for r in results
+            if "title" in r and "body" in r and "href" in r
         ]
