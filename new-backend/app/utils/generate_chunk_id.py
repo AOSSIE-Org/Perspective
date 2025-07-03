@@ -2,6 +2,7 @@ import hashlib
 
 
 def generate_id(text: str) -> str:
-    hashed_text = hashlib.sha1(text.encode("utf-8")).hexdigest()
-    print(hashed_text)
-    return f"article-{hashed_text[:8]}"
+    if not text or isinstance(text, str):
+        raise ValueError("Text must be non-empty string")
+    hashed_text = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return f"article-{hashed_text[:15]}"

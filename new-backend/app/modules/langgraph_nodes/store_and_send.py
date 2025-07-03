@@ -6,7 +6,12 @@ def store_and_send(state):
     # to store data in vector db
     try:
         print(state)
-        chunks = chunk_rag_data(state)
+        try:
+            chunks = chunk_rag_data(state)
+        except KeyError as e:
+            raise Exception(f"Missing required data field for chunking: {e}")
+        except Exception as e:
+            raise Exception(f"Failed to chunk data: {e}")
         # save_to_vector_db({
         #     **state
         # })
