@@ -20,8 +20,8 @@ def run_claim_extractor_sdk(state):
                 {
                     "role": "system",
                     "content": (
-                        "You are an assistant that extracts v"
-                        "erifiable factual claims from articles. "
+                        "You are an assistant that extracts "
+                        "verifiable factual claims from articles. "
                         "Each claim must be short, fact-based, and"
                         " independently verifiable through internet search. "
                         "Only return a list of 3 clear bullet-point claims."
@@ -76,7 +76,7 @@ def run_fact_verifier_sdk(search_results):
                         "content": (
                             "You are a fact-checking assistant. "
                             "Your job is to determine whether the given"
-                            " claim is True, False, or Unverifiable "
+                            " claim is True, False"
                             "based on the provided web search evidence."
                             " Keep it concise and structured."
                         ),
@@ -89,7 +89,7 @@ def run_fact_verifier_sdk(search_results):
                             "Based on this evidence, is the claim true?\n"
                             "Respond only in this JSON format:\n\n"
                             "{\n"
-                            '  "verdict": "True" | "False" | "Unverifiable",\n'
+                            '  "verdict": "True" | "False",\n'
                             '  "explanation": "...",\n'
                             f'  "original_claim": "{claim}",\n'
                             f'  "source_link": "{source}"\n'
@@ -113,12 +113,6 @@ def run_fact_verifier_sdk(search_results):
                 parsed = json.loads(content)
             except Exception as parse_err:
                 print(f"❌ LLM JSON parse error: {parse_err}")
-                parsed = {
-                    "verdict": "Unverifiable",
-                    "explanation": "Failed to parse LLM output",
-                    "original_claim": claim,
-                    "source_link": source,
-                }
 
             results_list.append(parsed)
 

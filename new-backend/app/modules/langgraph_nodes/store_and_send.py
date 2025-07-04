@@ -1,6 +1,7 @@
-# from app.utils.vector_store import save_to_vector_db
 from app.modules.vector_store.chunk_rag_data import chunk_rag_data
 from app.modules.vector_store.embed import embed_chunks
+from app.utils.store_vectors import store
+
 
 def store_and_send(state):
     # to store data in vector db
@@ -18,9 +19,10 @@ def store_and_send(state):
                 print("embedding generated successfully!")
         except Exception as e:
             raise Exception(f"failed to embed chunks: {e}")
-        # save_to_vector_db({
-        #     **state
-        # })
+
+        store(vectors)
+        print("Vectors saved to Pinecone!")
+
     except Exception as e:
         print(f"some error occured in store_and_send:{e}")
         return {
