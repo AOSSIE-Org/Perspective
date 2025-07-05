@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Globe, Brain, Shield, CheckCircle, Database, Sparkles, Zap } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
+import axios from "axios"
 
 /**
  * Displays a multi-step animated loading and progress interface for the article analysis workflow.
@@ -54,47 +55,64 @@ export default function LoadingPage() {
   ]
 
   useEffect(() => {
-    // Get the article URL from sessionStorage
+  const runAnalysis = async () => {
     const storedUrl = sessionStorage.getItem("articleUrl")
     if (storedUrl) {
       setArticleUrl(storedUrl)
-    } else {
-      // Redirect back if no URL found
-      router.push("/analyze")
-      return
-    }
 
-    // Simulate processing steps
-    const stepInterval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev < steps.length - 1) {
-          return prev + 1
-        } else {
-          clearInterval(stepInterval)
-          // After all steps complete, redirect to results
-          setTimeout(() => {
-            router.push("/analyze/results")
-          }, 2000)
+      try {
+        const res = await axios.post("http://localhost:8000/api/process", {
+          url: storedUrl,
+        })
+
+        // Save response to sessionStorage
+        sessionStorage.setItem("analysisResult", JSON.stringify(res.data))
+
+        // optional logging
+        console.log("Analysis result saved")
+        console.log(res)
+      } catch (err) {
+        console.error("Failed to process article:", err)
+        router.push("/analyze") // fallback in case of error
+        return
+      }
+
+      // Progress and step simulation
+      const stepInterval = setInterval(() => {
+        setCurrentStep((prev) => {
+          if (prev < steps.length - 1) {
+            return prev + 1
+          } else {
+            clearInterval(stepInterval)
+            setTimeout(() => {
+              router.push("/analyze/results")
+            }, 2000)
+            return prev
+          }
+        })
+      }, 2000)
+
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev < 100) {
+            return prev + 1
+          }
           return prev
-        }
-      })
-    }, 2000)
+        })
+      }, 100)
 
-    // Progress animation
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev < 100) {
-          return prev + 1
-        }
-        return prev
-      })
-    }, 100)
-
-    return () => {
-      clearInterval(stepInterval)
-      clearInterval(progressInterval)
+      return () => {
+        clearInterval(stepInterval)
+        clearInterval(progressInterval)
+      }
+    } else {
+      router.push("/analyze")
     }
-  }, [router])
+  }
+
+  runAnalysis()
+}, [router])
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 transition-colors duration-300 overflow-hidden">
