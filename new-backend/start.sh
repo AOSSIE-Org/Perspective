@@ -1,7 +1,3 @@
-#!/bin/bash
-
-# Step 1: Sync virtual environment from pyproject.toml
 uv sync
-
-# Step 2: Run FastAPI app
+echo "Render PORT is: $PORT"
 uv run main.py
