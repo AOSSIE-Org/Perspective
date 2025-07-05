@@ -2,7 +2,7 @@ from serpapi import GoogleSearch
 import os
 
 
-def search_with_serpapi(query, max_results=2):
+def search_with_serpapi(query, max_results=1):
     api_key = os.getenv("SERPAPI_KEY")
     if not api_key:
         raise ValueError("SERPAPI_KEY not set in environment")
