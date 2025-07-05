@@ -1,12 +1,28 @@
-from utils.vector_store import save_to_vector_db
+from app.modules.vector_store.chunk_rag_data import chunk_rag_data
+from app.modules.vector_store.embed import embed_chunks
+from app.utils.store_vectors import store
 
 
 def store_and_send(state):
     # to store data in vector db
     try:
-        save_to_vector_db({
-            **state
-        })
+        print(state)
+        try:
+            chunks = chunk_rag_data(state)
+        except KeyError as e:
+            raise Exception(f"Missing required data field for chunking: {e}")
+        except Exception as e:
+            raise Exception(f"Failed to chunk data: {e}")
+        try:
+            vectors = embed_chunks(chunks)
+            if vectors:
+                print("embedding generated successfully!")
+        except Exception as e:
+            raise Exception(f"failed to embed chunks: {e}")
+
+        store(vectors)
+        print("Vectors saved to Pinecone!")
+
     except Exception as e:
         print(f"some error occured in store_and_send:{e}")
         return {

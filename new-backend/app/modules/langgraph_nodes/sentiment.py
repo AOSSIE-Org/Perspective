@@ -32,10 +32,11 @@ def run_sentiment_sdk(state):
             ],
             model="gemma2-9b-it",
             temperature=0.2,
-            max_tokens=10,
+            max_tokens=3,
         )
 
         sentiment = chat_completion.choices[0].message.content.strip()
+        sentiment = sentiment.lower()
 
         return {
             **state,

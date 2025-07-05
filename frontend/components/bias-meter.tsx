@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 interface BiasMeterProps {
-  score: number
+  score: number;
 }
 
 /**
@@ -13,26 +13,28 @@ interface BiasMeterProps {
  */
 export default function BiasMeter({ score }: BiasMeterProps) {
   const getScoreColor = (score: number) => {
-    if (score <= 30) return "text-green-500"
-    if (score <= 60) return "text-yellow-500"
-    return "text-red-500"
-  }
+    if (score <= 30) return "text-green-500";
+    if (score <= 60) return "text-yellow-500";
+    return "text-red-500";
+  };
 
   const getScoreLabel = (score: number) => {
-    if (score <= 30) return "Low Bias"
-    if (score <= 60) return "Moderate Bias"
-    return "High Bias"
-  }
+    if (score <= 30) return "Low Bias";
+    if (score <= 60) return "Moderate Bias";
+    return "High Bias";
+  };
 
-  const circumference = 2 * Math.PI * 45
-  const strokeDasharray = circumference
-  const strokeDashoffset = circumference - (score / 100) * circumference
+  const circumference = 2 * Math.PI * 45;
+  const strokeDasharray = circumference;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="font-medium text-sm">Bias Score</h3>
-        <span className={`text-sm font-semibold ${getScoreColor(score)}`}>{score}/100</span>
+        <span className={`text-sm font-semibold ${getScoreColor(score)}`}>
+          {score}/100
+        </span>
       </div>
       <div className="flex items-center justify-center">
         <div className="relative w-24 h-24">
@@ -55,16 +57,22 @@ export default function BiasMeter({ score }: BiasMeterProps) {
               fill="transparent"
               strokeDasharray={strokeDasharray}
               strokeDashoffset={strokeDashoffset}
-              className={`transition-all duration-1000 ease-out ${getScoreColor(score)}`}
+              className={`transition-all duration-1000 ease-out ${getScoreColor(
+                score
+              )}`}
               strokeLinecap="round"
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
+            <span className={`text-lg font-bold ${getScoreColor(score)}`}>
+              {score}
+            </span>
           </div>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground text-center">{getScoreLabel(score)}</p>
+      <p className="text-xs text-muted-foreground text-center">
+        {getScoreLabel(score)}
+      </p>
     </div>
-  )
+  );
 }
