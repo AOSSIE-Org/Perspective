@@ -1,3 +1,9 @@
+#!/bin/bash
+set -e
+
+# Install uv if not present
+pip install uv
+
+# Sync environment and run app
 uv sync
-echo "Render PORT is: $PORT"
 uv run main.py
