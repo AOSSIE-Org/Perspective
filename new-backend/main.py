@@ -25,5 +25,8 @@ app.include_router(article_router, prefix="/api", tags=["Articles"])
 
 if __name__ == "__main__":
     import uvicorn
-    print("server is running on http://localhost:8000/api")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    import os
+    port = int(os.environ.get("PORT", 8000))  # Get port from environment
+    print(f"Server is running on http://localhost:{port}/api")
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+

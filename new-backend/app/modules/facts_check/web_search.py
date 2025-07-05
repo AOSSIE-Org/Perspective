@@ -22,7 +22,7 @@ def search_with_serpapi(query, max_results=1):
         {
             "title": r.get("title", ""),
             "snippet": r.get("snippet", ""),
-            "link": r.get("link", "")
+            "link": r.get("link", ""),
         }
         for r in organic
     ]

@@ -59,15 +59,16 @@ def run_claim_extractor_sdk(state):
 
 def run_fact_verifier_sdk(search_results):
     try:
-
         results_list = []
 
         for result in search_results:
             source = result.get("link", "N/A")
             claim = result.get("claim", "N/A")
-            evidence = (f"{result.get('title', '')}"
-                        f"\n{result.get('snippet', '')}"
-                        f"\nLink: {source}")
+            evidence = (
+                f"{result.get('title', '')}"
+                f"\n{result.get('snippet', '')}"
+                f"\nLink: {source}"
+            )
 
             chat_completion = client.chat.completions.create(
                 messages=[
@@ -104,7 +105,7 @@ def run_fact_verifier_sdk(search_results):
 
             content = chat_completion.choices[0].message.content.strip()
 
-# Strip markdown code blocks if present
+            # Strip markdown code blocks if present
             content = re.sub(r"^```json|```$", "", content).strip()
             print(content)
 
