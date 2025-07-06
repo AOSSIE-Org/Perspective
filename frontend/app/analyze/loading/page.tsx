@@ -61,7 +61,7 @@ export default function LoadingPage() {
       setArticleUrl(storedUrl)
 
       try {
-        const res = await axios.post("http://localhost:8000/api/process", {
+        const res = await axios.post("https://Thunder1245-perspective1.hf.space/api/process", {
           url: storedUrl,
         })
 

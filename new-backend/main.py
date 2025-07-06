@@ -6,9 +6,9 @@ app = FastAPI(
     title="Perspective API",
     version="1.0.0",
     description=(
-                'An API to generate alternative'
-                'perspectives on biased articles'
-                )
+        'An API to generate alternative'
+        ' perspectives on biased articles'
+    )
 )
 
 app.add_middleware(
@@ -19,14 +19,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(article_router, prefix="/api", tags=["Articles"])
-
 
 if __name__ == "__main__":
     import uvicorn
     import os
 
-    port = int(os.environ.get("PORT", 8000))  # Use Render's port!
+    port = int(os.environ.get("PORT", 8000))
     print(f"Server is running on http://0.0.0.0:{port}")
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)
