@@ -1,3 +1,13 @@
+---
+title: Perspective API 🧠
+emoji: 🧠
+colorFrom: green
+colorTo: blue
+sdk: docker
+sdk_version: "0.100.0"
+app_file: Dockerfile
+pinned: false
+---
 
 # Perspective Backend
 

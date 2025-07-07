@@ -1,28 +1,30 @@
-FROM python:3.11-slim
+FROM python:3.13-slim-bookworm
 
-# Optional: install build tools (for C deps)
+COPY --from=ghcr.io/astral-sh/uv:0.7.12 /uv /bin/uv
+
+# Install OS dependencies
 RUN apt-get update && apt-get install -y curl build-essential
 
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Add uv to PATH (it's installed at /root/.cargo/bin)
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Set workdir
+# Create app dir and set it as working directory
 WORKDIR /app
 
-# Copy lock and pyproject
-COPY uv.lock pyproject.toml ./
+# Create a writable cache dir & change ownership to a non-root user
+ENV UV_CACHE_DIR=/app/.uv-cache
+RUN mkdir -p /app/.uv-cache && \
+    adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
 
-# Sync deps using uv
-RUN uv sync
+# Copy project code
+COPY . /app
 
-# Copy full project
-COPY . .
+# Switch to non-root user
+USER appuser
 
-# Expose HF port
+# Install dependencies
+RUN uv sync --locked --no-cache
+
+# Expose the port Hugging Face looks for
 EXPOSE 7860
 
-# Run app using uv
+# Start the app
 CMD ["uv", "run", "main.py"]

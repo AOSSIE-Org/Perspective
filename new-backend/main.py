@@ -25,6 +25,6 @@ if __name__ == "__main__":
     import uvicorn
     import os
 
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT",  7860))
     print(f"Server is running on http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
