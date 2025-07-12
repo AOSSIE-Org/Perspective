@@ -1,0 +1,59 @@
+name: 🚀 Deploy Backend to HF Space
+
+on:
+  push:
+    branches:
+      - main # or your primary branch
+    paths:
+      - "backend/**" # only trigger when anything under backend/ changes
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 👉 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔒 Install HF CLI
+        run: pip install huggingface_hub
+
+      - name: 🔑 HF login
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: huggingface-cli login --token "$HF_TOKEN"
+
+      - name: 📂 Prepare Space repo
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          rm -rf space-backend
+          git clone https://Thunder1245:${HF_TOKEN}@huggingface.co/spaces/Thunder1245/perspective-backend.git space-backend
+
+      - name: 📦 Install rsync
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync
+
+      - name: 📤 Sync backend code
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd space-backend
+
+          # Only remove tracked files (preserve .git and config)
+          git rm -r . || true
+          cd ..
+
+          # Copy new backend files in
+          cp -R backend/. space-backend/
+
+          # Push new code to HF Space
+          cd space-backend
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit -m "Auto‑deploy backend: ${{ github.sha }}" || echo "No changes to commit"
+          git push origin main
+
