@@ -20,6 +20,7 @@ import BiasMeter from "@/components/bias-meter"
  * Provides an interactive interface for users to review an article's summary, explore alternative perspectives, verify factual claims, and engage in AI-assisted discussion. Includes responsive navigation, a bias visualization, and a curated list of references.
  */
 export default function AnalyzePage() {
+  const [analysisData, setAnalysisData] = useState(null)
   const [activeTab, setActiveTab] = useState("summary")
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -38,6 +39,14 @@ export default function AnalyzePage() {
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 1500)
+    const storedData = sessionStorage.getItem("analysisResult")
+    if (storedData) {
+      setAnalysisData(JSON.parse(storedData))
+    } else {
+      // fallback if user visits results page directly
+      // maybe redirect or show error
+      console.warn("No analysis result found")
+    }
 
     return () => clearTimeout(timer)
   }, [])
@@ -66,6 +75,12 @@ export default function AnalyzePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Analysis Results</h1>
+      <pre className="bg-black p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
+        {JSON.stringify(analysisData, null, 2)}
+      </pre>
+    </div>
       <header className="px-4 lg:px-6 h-14 md:h-16 flex items-center border-b backdrop-blur-sm bg-background/80 fixed w-full z-10">
         <Link className="flex items-center justify-center" href="/">
           <Globe className="h-5 w-5 md:h-6 md:w-6 mr-2 text-primary" />
