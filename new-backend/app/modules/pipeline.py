@@ -2,6 +2,7 @@ from app.modules.scraper.extractor import Article_extractor
 from app.modules.scraper.cleaner import clean_extracted_text
 from app.modules.scraper.keywords import extract_keywords
 from app.modules.langgraph_builder import build_langgraph
+
 import json
 
 # Compile once when module loads

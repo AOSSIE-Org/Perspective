@@ -9,9 +9,9 @@ def run_fact_check_pipeline(state):
 
     result = run_claim_extractor_sdk(state)
 
+
     if state["status"] != "success":
         return result
-
     # Step 1: Extract claims
     raw_output = result["verifiable_claims"]
 
@@ -30,6 +30,7 @@ def run_fact_check_pipeline(state):
         except Exception as e:
             print(f"❌ Search failed for: {claim} -> {e}")
         time.sleep(4)  # Add 4 second delay to prevent rate-limit
+
 
     if not search_results:
         return [], "All claim searches failed or returned no results."
