@@ -1,3 +1,4 @@
+
 from app.utils.fact_check_utils import run_fact_check_pipeline
 
 
