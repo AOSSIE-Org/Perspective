@@ -19,7 +19,6 @@ dependencies = [
     "newspaper3k>=0.2.8",
     "nltk>=3.9.1",
     "pinecone>=7.3.0",
-    "pinecone-client>=6.0.0",
     "rake-nltk>=1.0.6",
     "readability-lxml>=0.8.4.1",
     "requests>=2.32.3",
