@@ -1,4 +1,4 @@
-from app.modules.facts_check.web_search import search_with_serpapi
+from app.modules.facts_check.web_search import search_google
 from app.modules.facts_check.llm_processing import (
     run_claim_extractor_sdk,
     run_fact_verifier_sdk
@@ -28,7 +28,7 @@ def run_fact_check_pipeline(state):
     for claim in claims:
         print(f"\n🔍 Searching for claim: {claim}")
         try:
-            results = search_with_serpapi(claim, max_results=1)
+            results = search_google(claim)
             if results:
                 results[0]["claim"] = claim
                 search_results.append(results[0])
@@ -37,7 +37,6 @@ def run_fact_check_pipeline(state):
                 print(f"⚠️ No search result for: {claim}")
         except Exception as e:
             print(f"❌ Search failed for: {claim} -> {e}")
-        time.sleep(5)  # ⏱️ Gentle delay to avoid DuckDuckGo ratelimit
 
     if not search_results:
         return [], "All claim searches failed or returned no results."
