@@ -1,12 +1,20 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Globe, Brain, Shield, CheckCircle, Database, Sparkles, Zap } from "lucide-react"
-import ThemeToggle from "@/components/theme-toggle"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Globe,
+  Brain,
+  Shield,
+  CheckCircle,
+  Database,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import ThemeToggle from "@/components/theme-toggle";
+import axios from "axios";
 
 /**
  * Displays a multi-step animated loading and progress interface for the article analysis workflow.
@@ -16,10 +24,10 @@ import axios from "axios"
  * @remark This component manages its own navigation and redirects based on session state.
  */
 export default function LoadingPage() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [articleUrl, setArticleUrl] = useState("")
-  const router = useRouter()
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [articleUrl, setArticleUrl] = useState("");
+  const router = useRouter();
 
   const steps = [
     {
@@ -52,76 +60,85 @@ export default function LoadingPage() {
       description: "Creating balanced alternative viewpoints",
       color: "from-pink-500 to-rose-500",
     },
-  ]
+  ];
 
   useEffect(() => {
-  const runAnalysis = async () => {
-    const storedUrl = sessionStorage.getItem("articleUrl")
-    if (storedUrl) {
-      setArticleUrl(storedUrl)
+    const runAnalysis = async () => {
+      const storedUrl = sessionStorage.getItem("articleUrl");
+      if (storedUrl) {
+        setArticleUrl(storedUrl);
 
-      try {
-        const res = await axios.post("https://Thunder1245-perspective-backend.hf.space/api/process", {
-          url: storedUrl,
-        })
-        const bias_score = await axios.post("http://localhost:8000/api/bias",{
-          url: storedUrl,
-        })
+        try {
+          const [processRes, biasRes] = await Promise.all([
+            axios.post(
+              "https://Thunder1245-perspective-backend.hf.space/api/process",
+              {
+                url: storedUrl,
+              }
+            ),
+            axios.post(
+              "https://Thunder1245-perspective-backend.hf.space/api/bias",
+              {
+                url: storedUrl,
+              }
+            ),
+          ]);
 
-        // Save response to sessionStorage
-        sessionStorage.setItem("analysisResult", JSON.stringify(res.data))
+          // Save response to sessionStorage
+          sessionStorage.setItem(
+            "analysisResult",
+            JSON.stringify(processRes.data)
+          );
 
-        console.log("Analysis result saved")
-        console.log(res)
+          console.log("Analysis result saved");
+          console.log(processRes);
 
-        sessionStorage.setItem("biasScore", JSON.stringify(bias_score.data))
+          sessionStorage.setItem("biasScore", JSON.stringify(biasRes.data));
 
-        console.log("Bias score saved")
-        console.log(bias_score)
-        // optional logging
-        
-      } catch (err) {
-        console.error("Failed to process article:", err)
-        router.push("/analyze") // fallback in case of error
-        return
+          console.log("Bias score saved");
+          console.log(biasRes);
+          // optional logging
+        } catch (err) {
+          console.error("Failed to process article:", err);
+          router.push("/analyze"); // fallback in case of error
+          return;
+        }
+
+        // Progress and step simulation
+        const stepInterval = setInterval(() => {
+          setCurrentStep((prev) => {
+            if (prev < steps.length - 1) {
+              return prev + 1;
+            } else {
+              clearInterval(stepInterval);
+              setTimeout(() => {
+                router.push("/analyze/results");
+              }, 2000);
+              return prev;
+            }
+          });
+        }, 2000);
+
+        const progressInterval = setInterval(() => {
+          setProgress((prev) => {
+            if (prev < 100) {
+              return prev + 1;
+            }
+            return prev;
+          });
+        }, 100);
+
+        return () => {
+          clearInterval(stepInterval);
+          clearInterval(progressInterval);
+        };
+      } else {
+        router.push("/analyze");
       }
+    };
 
-      // Progress and step simulation
-      const stepInterval = setInterval(() => {
-        setCurrentStep((prev) => {
-          if (prev < steps.length - 1) {
-            return prev + 1
-          } else {
-            clearInterval(stepInterval)
-            setTimeout(() => {
-              router.push("/analyze/results")
-            }, 2000)
-            return prev
-          }
-        })
-      }, 2000)
-
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev < 100) {
-            return prev + 1
-          }
-          return prev
-        })
-      }, 100)
-
-      return () => {
-        clearInterval(stepInterval)
-        clearInterval(progressInterval)
-      }
-    } else {
-      router.push("/analyze")
-    }
-  }
-
-  runAnalysis()
-}, [router])
-
+    runAnalysis();
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 transition-colors duration-300 overflow-hidden">
@@ -171,8 +188,12 @@ export default function LoadingPage() {
 
           {/* Article URL Display */}
           <div className="mb-8 md:mb-12 p-3 md:p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg backdrop-blur-sm">
-            <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm mb-2">Processing:</p>
-            <p className="text-blue-600 dark:text-blue-400 font-medium truncate text-sm md:text-base">{articleUrl}</p>
+            <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm mb-2">
+              Processing:
+            </p>
+            <p className="text-blue-600 dark:text-blue-400 font-medium truncate text-sm md:text-base">
+              {articleUrl}
+            </p>
           </div>
 
           {/* Progress Bar */}
@@ -180,7 +201,9 @@ export default function LoadingPage() {
             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 md:h-3 mb-3 md:mb-4 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-full transition-all duration-300 ease-out relative"
-                style={{ width: `${Math.min(progress, (currentStep + 1) * 20)}%` }}
+                style={{
+                  width: `${Math.min(progress, (currentStep + 1) * 20)}%`,
+                }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse"></div>
               </div>
@@ -199,8 +222,8 @@ export default function LoadingPage() {
                   index === currentStep
                     ? "bg-white dark:bg-slate-800 shadow-2xl scale-105 ring-2 ring-blue-500/50"
                     : index < currentStep
-                      ? "bg-white/80 dark:bg-slate-800/80 shadow-lg opacity-75"
-                      : "bg-white/40 dark:bg-slate-800/40 shadow-md opacity-50"
+                    ? "bg-white/80 dark:bg-slate-800/80 shadow-lg opacity-75"
+                    : "bg-white/40 dark:bg-slate-800/40 shadow-md opacity-50"
                 }`}
               >
                 <div className="flex items-center space-x-3 md:space-x-4">
@@ -209,8 +232,8 @@ export default function LoadingPage() {
                       index === currentStep
                         ? `bg-gradient-to-br ${step.color} animate-pulse shadow-lg`
                         : index < currentStep
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md"
-                          : "bg-slate-200 dark:bg-slate-700"
+                        ? "bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md"
+                        : "bg-slate-200 dark:bg-slate-700"
                     }`}
                   >
                     {index < currentStep ? (
@@ -230,13 +253,15 @@ export default function LoadingPage() {
                         index === currentStep
                           ? "text-blue-600 dark:text-blue-400"
                           : index < currentStep
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-slate-500 dark:text-slate-400"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-slate-500 dark:text-slate-400"
                       }`}
                     >
                       {step.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm">{step.description}</p>
+                    <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm">
+                      {step.description}
+                    </p>
                   </div>
                   {index === currentStep && (
                     <div className="flex space-x-1">
@@ -271,5 +296,5 @@ export default function LoadingPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
