@@ -5,13 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Globe,
-  MessageSquare,
   Send,
-  ThumbsDown,
-  ThumbsUp,
-  Menu,
   Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,11 +17,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import BiasMeter from "@/components/bias-meter";
+
 
 /**
  * Renders the article analysis page with summary, perspectives, fact checks, bias meter, AI chat, and sources.
@@ -40,7 +33,6 @@ export default function AnalyzePage() {
   const [activeTab, setActiveTab] = useState("summary");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     [
       {
@@ -52,15 +44,18 @@ export default function AnalyzePage() {
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    const storedData = sessionStorage.getItem("analysisResult");
     const storedBiasScore = sessionStorage.getItem("BiasScore");
+    const storedData = sessionStorage.getItem("analysisResult");
+    if (storedBiasScore && storedData){
+      setIsLoading(false);
+      }
+
     if (storedBiasScore) setBiasScore(JSON.parse(storedBiasScore).bias_score);
     else console.warn("No bias score found.");
 
     if (storedData) setAnalysisData(JSON.parse(storedData));
     else console.warn("No analysis result found");
-    return () => clearTimeout(timer);
+  
   }, []);
 
   useEffect(() => {
@@ -68,38 +63,20 @@ export default function AnalyzePage() {
       return;
     }
 
-    const timer = setTimeout(() => setIsLoading(false), 1500);
+    
     const storedData = sessionStorage.getItem("analysisResult");
+    const storedBiasScore = sessionStorage.getItem("BiasScore");
 
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      const requiredFields = [
-        "cleaned_text",
-        "facts",
-        "sentiment",
-        "perspective",
-        "score",
-      ];
-      const isDataValid = requiredFields.every(
-        (field) => parsedData[field] !== undefined && parsedData[field] !== null
-      );
-
-      if (isDataValid) {
-        setAnalysisData(parsedData);
-      } else {
-        console.warn("Incomplete analysis data. Redirecting...");
-
-        isRedirecting.current = true;
-        router.push("/analyze");
-      }
-    } else {
-      console.warn("No analysis result found. Redirecting...");
-
-      isRedirecting.current = true;
-      router.push("/analyze");
+    if (storedBiasScore && storedData) {
+    // inside here TS knows storedBiasScore and storedData are strings
+    setBiasScore(JSON.parse(storedBiasScore).bias_score);
+    setAnalysisData(JSON.parse(storedData));
+    setIsLoading(false);
+  } else {
+    console.warn("No bias or data found. Redirecting...");
+    router.push("/analyze");
     }
 
-    return () => clearTimeout(timer);
   }, [router]);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -120,7 +97,7 @@ export default function AnalyzePage() {
     }, 1000);
   };
 
-  if (isLoading || !analysisData) {
+  if (isLoading || !analysisData || !biasScore) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-muted-foreground">Analyzing content...</div>
@@ -156,7 +133,7 @@ export default function AnalyzePage() {
           </Badge>
         </div>
         <div className="bg-card rounded-lg border p-4 mb-8">
-          <BiasMeter score={score} />
+          <BiasMeter score={biasScore} />
           <p className="text-sm mt-2">Bias Score: {biasScore}</p>
         </div>
 

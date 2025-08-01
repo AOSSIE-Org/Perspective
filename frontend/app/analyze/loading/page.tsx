@@ -77,12 +77,18 @@ export default function LoadingPage() {
               }
             ),
             axios.post(
-              "https://Thunder1245-perspective-backend.hf.space/api/bias",
+              "http://Thunder1245-perspective-backend.hf.space/api/bias",
               {
                 url: storedUrl,
               }
             ),
           ]);
+
+
+          sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
+
+          console.log("Bias score saved");
+          console.log(biasRes);
 
           // Save response to sessionStorage
           sessionStorage.setItem(
@@ -93,10 +99,7 @@ export default function LoadingPage() {
           console.log("Analysis result saved");
           console.log(processRes);
 
-          sessionStorage.setItem("biasScore", JSON.stringify(biasRes.data));
-
-          console.log("Bias score saved");
-          console.log(biasRes);
+          
           // optional logging
         } catch (err) {
           console.error("Failed to process article:", err);
