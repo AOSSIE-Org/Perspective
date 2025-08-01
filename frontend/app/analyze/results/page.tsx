@@ -19,6 +19,7 @@ import BiasMeter from "@/components/bias-meter"
  */
 export default function AnalyzePage() {
   const [analysisData, setAnalysisData] = useState<any>(null)
+  const [biasScore, setBiasScore] = useState<any>(null)
   const router = useRouter()
   const isRedirecting = useRef(false);
   const [activeTab, setActiveTab] = useState("summary")
@@ -36,6 +37,10 @@ export default function AnalyzePage() {
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
     const storedData = sessionStorage.getItem("analysisResult")
+    const storedBiasScore = sessionStorage.getItem("BiasScore")
+    if(storedBiasScore) setBiasScore(JSON.parse(storedBiasScore).bias_score)
+    else console.warn("No bias score found.")
+
     if (storedData) setAnalysisData(JSON.parse(storedData))
     else console.warn("No analysis result found")
     return () => clearTimeout(timer)
@@ -109,7 +114,7 @@ export default function AnalyzePage() {
         </div>
         <div className="bg-card rounded-lg border p-4 mb-8">
           <BiasMeter score={score} />
-          <p className="text-sm mt-2">Bias Score: {score}</p>
+          <p className="text-sm mt-2">Bias Score: {biasScore}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

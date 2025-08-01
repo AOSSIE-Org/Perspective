@@ -64,13 +64,22 @@ export default function LoadingPage() {
         const res = await axios.post("https://Thunder1245-perspective-backend.hf.space/api/process", {
           url: storedUrl,
         })
+        const bias_score = await axios.post("http://localhost:8000/api/bias",{
+          url: storedUrl,
+        })
 
         // Save response to sessionStorage
         sessionStorage.setItem("analysisResult", JSON.stringify(res.data))
 
-        // optional logging
         console.log("Analysis result saved")
         console.log(res)
+
+        sessionStorage.setItem("biasScore", JSON.stringify(bias_score.data))
+
+        console.log("Bias score saved")
+        console.log(bias_score)
+        // optional logging
+        
       } catch (err) {
         console.error("Failed to process article:", err)
         router.push("/analyze") // fallback in case of error
