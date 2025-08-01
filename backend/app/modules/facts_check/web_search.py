@@ -1,28 +1,19 @@
-from serpapi import GoogleSearch
+import requests
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
-def search_with_serpapi(query, max_results=1):
-    api_key = os.getenv("SERPAPI_KEY")
-    if not api_key:
-        raise ValueError("SERPAPI_KEY not set in environment")
+GOOGLE_SEARCH = os.getenv("SEARCH_KEY")
 
-    params = {
-        "engine": "google",
-        "q": query,
-        "api_key": api_key,
-        "num": max_results,
-    }
-
-    search = GoogleSearch(params)
-    results = search.get_dict()
-    organic = results.get("organic_results", [])
-
+def search_google(query):
+    results = requests.get(f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_SEARCH}&cx=f637ab77b5d8b4a3c&q={query}")
+    res = results.json()
+    first = {}
+    first["title"] = res["items"][0]["title"]
+    first["link"] = res["items"][0]["link"]
+    first["snippet"] = res["items"][0]["snippet"]
+    
     return [
-        {
-            "title": r.get("title", ""),
-            "snippet": r.get("snippet", ""),
-            "link": r.get("link", ""),
-        }
-        for r in organic
+        first,
     ]
