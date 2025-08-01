@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, Brain, Database, CheckCircle, Globe, ArrowRight, Sparkles, Quote, User, TrendingUp, Play, Star, Users, Clock, Zap, Heart, Eye, MessageSquare, CheckSquare, ArrowUp, Camera, FileText, BarChart3, Search, Layers, Wand2, Target, Lightbulb, MousePointer, Volume2 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
-export default function FrankensteinHero() {
+export default function Home() {
   const router = useRouter()
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [currentAnimation, setCurrentAnimation] = useState(0)
