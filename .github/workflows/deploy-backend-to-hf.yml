@@ -65,4 +65,5 @@ jobs:
           git push origin main
 
       - name: ✅ Done
-        run: echo "Backend deployed to Hugging Face Space: https://huggingface.co/spaces/${HF_USER}/${HF_REPO}"
+        run: |
+          echo "Backend deployed to Hugging Face Space: https://huggingface.co/spaces/${HF_USER}/${HF_REPO}"
