@@ -2,15 +2,32 @@
 ![Perspective banner](frontend/public/perspective_banner.jpg)
 
 ### Table of Contents
-- [System Overview](#system-overview)
-- [Architecture Components](#architecture-components)
-- [Technical Stack](#technical-stack)
-- [Core Features](#core-features)
-- [Data Flow & Security](#data-flow--security)
-- [Setup & Deployment](#setup--deployment)
-- [Detailed Architecture Diagram](#detailed-architecture-diagram)
-- [Expected Outcomes](#expected-outcomes)
-- [Required Skills](#required-skills)
+- [Perspective-AI](#perspective-ai)
+    - [Table of Contents](#table-of-contents)
+  - [System Overview](#system-overview)
+    - [High-Level Concept](#high-level-concept)
+  - [Architecture Components](#architecture-components)
+    - [1. Frontend Layer](#1-frontend-layer)
+    - [3. Core Backend](#3-core-backend)
+    - [4. AI \& NLP Integration](#4-ai--nlp-integration)
+    - [5. Data Storage](#5-data-storage)
+  - [Technical Stack](#technical-stack)
+    - [Frontend Technologies](#frontend-technologies)
+    - [Backend Technologies](#backend-technologies)
+    - [I Integration](#i-integration)
+  - [Core Features](#core-features)
+    - [1. Counter-Perspective Generation](#1-counter-perspective-generation)
+    - [2. Reasoned Thinking](#2-reasoned-thinking)
+    - [3. Updated Facts](#3-updated-facts)
+    - [4. Seamless Integration](#4-seamless-integration)
+    - [5. Real-Time Analysis](#5-real-time-analysis)
+  - [Data Flow \& Security](#data-flow--security)
+  - [Setup \& Deployment](#setup--deployment)
+    - [Frontend Setup](#frontend-setup)
+    - [Backend Setup](#backend-setup)
+  - [Architecture Diagram](#architecture-diagram)
+  - [Expected Outcomes](#expected-outcomes)
+  - [Required Skills](#required-skills)
 
 ---
 
@@ -137,12 +154,15 @@ npm run dev
   - add .env file in `/new-backend`directory.
   - add following environment variable in your .env file.
   ```
-  HF_TOKEN = <Your_hugging_face_access_token>
+  GROQ_API_KEY= <groq_api_key>
+PINECONE_API_KEY = <your_pinecone_API_KEY>
+PORT = 8000
+SEARCH_KEY = <your_Google_custom_search_engine_API_key>
   ```
 
 *Run backend:*
 ```bash
-cd new-backend
+cd backend
 uv sync # Creating virtual environment at: .venv
 uv run main.py #Runs the backend server
 ```
