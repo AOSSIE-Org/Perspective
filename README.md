@@ -169,7 +169,9 @@ uv run main.py #Runs the backend server
 
 ---
 
+
 ## Architecture Diagram
+
 
 ```mermaid
 graph TB
@@ -188,6 +190,7 @@ graph TB
         Analyzer[Content Analyzer]
         CNEngine[Counter-Narrative Engine]
         Context[Context Manager]
+
     end
 
     subgraph AI & NLP Layer
@@ -232,7 +235,7 @@ graph TB
 
 ## Required Skills
 
-- **Frontend Development**: Experience with Next.js and modern UI frameworks.
+- **Frontend Development**:  Experience with Next.js and modern UI frameworks.
 - **Backend Development**: Proficiency in Python and FastAPI.
 - **AI & NLP**: Familiarity with LangChain, Langgraph, and prompt engineering techniques.
 - **Database Management**: Knowledge of vector databases system.
