@@ -3,32 +3,37 @@ name: 🚀 Deploy Backend to HF Space
 on:
   push:
     branches:
-      - main # or your primary branch
+      - main
     paths:
-      - "backend/**" # only trigger when anything under backend/ changes
+      - "backend/**"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # set your HF username here (or replace with a secret if you prefer)
+    env:
+      HF_USER: Thunder1245
+      HF_REPO: perspective-backend
+
     steps:
       - name: 👉 Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 🔒 Install HF CLI
-        run: pip install huggingface_hub
+      - name: 🔍 Ensure HF_TOKEN is set
+        run: |
+          if [ -z "${{ secrets.HF_TOKEN }}" ]; then
+            echo "ERROR: HF_TOKEN secret is not set. Add it in repository secrets: Settings → Secrets & variables → Actions."
+            exit 1
+          fi
 
-      - name: 🔑 HF login
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: huggingface-cli login --token "$HF_TOKEN"
-
-      - name: 📂 Prepare Space repo
+      - name: 📂 Prepare Space repo (clone)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          rm -rf space-backend
+          rm -rf space-backend || true
+          # clone using token in URL (this authenticates the clone)
           git clone https://Thunder1245:${HF_TOKEN}@huggingface.co/spaces/Thunder1245/perspective-backend.git space-backend
 
       - name: 📦 Install rsync
@@ -36,24 +41,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y rsync
 
-      - name: 📤 Sync backend code
+      - name: 📤 Sync backend code to Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          set -e
+
           cd space-backend
 
-          # Only remove tracked files (preserve .git and config)
+          # Remove tracked files while preserving .git and config (ignore failure)
           git rm -r . || true
           cd ..
 
-          # Copy new backend files in
+          # Copy backend files into the cloned space directory
           cp -R backend/. space-backend/
 
-          # Push new code to HF Space
+          # Commit & push
           cd space-backend
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add --all
-          git commit -m "Auto‑deploy backend: ${{ github.sha }}" || echo "No changes to commit"
+          git commit -m "Auto-deploy backend: ${{ github.sha }}" || echo "No changes to commit"
           git push origin main
 
+      - name: ✅ Done
+        run: echo "Backend deployed to Hugging Face Space: https://huggingface.co/spaces/${HF_USER}/${HF_REPO}"
