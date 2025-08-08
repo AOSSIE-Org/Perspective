@@ -28,3 +28,4 @@ def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "metadata": chunk["metadata"]
         })
     return vectors
+
