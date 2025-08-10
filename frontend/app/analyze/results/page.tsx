@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import BiasMeter from "@/components/bias-meter";
+import axios from "axios";
 
 
 /**
@@ -79,23 +80,24 @@ export default function AnalyzePage() {
 
   }, [router]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  async function handleSendMessage(e: React.FormEvent){
     e.preventDefault();
     if (!message.trim()) return;
     const newMessages = [...messages, { role: "user", content: message }];
     setMessages(newMessages);
     setMessage("");
-    setTimeout(() => {
-      setMessages([
-        ...newMessages,
-        {
-          role: "system",
-          content:
-            "Based on the article... let me know if you want more details.",
-        },
-      ]);
-    }, 1000);
-  };
+
+  const res = await axios.post("http://Thunder1245-perspective-backend.hf.space/api/chat", {
+    message: message
+    });
+  const data = res.data;
+
+  console.log(data)
+
+  // 🔹 Step 2: Append LLM’s response
+  setMessages([...newMessages, { role: "assistant", content: data.answer }]);
+};
+
 
   if (isLoading || !analysisData || !biasScore) {
     return (
@@ -113,7 +115,7 @@ export default function AnalyzePage() {
     score,
   } = analysisData;
 
-  return (
+  return(
     <div className="flex flex-col min-h-screen">
       {/* Header omitted for brevity */}
       <main className="flex-1 pt-16 container mx-auto px-4">
