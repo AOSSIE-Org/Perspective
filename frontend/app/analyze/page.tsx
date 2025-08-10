@@ -1,15 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Globe, ArrowRight, Link, Sparkles, Shield, Brain, CheckCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
-import ThemeToggle from "@/components/theme-toggle"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Globe,
+  ArrowRight,
+  Link,
+  Sparkles,
+  Shield,
+  Brain,
+  CheckCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/theme-toggle";
 
 /**
  * Renders the main page for submitting an article URL to initiate AI-powered analysis.
@@ -17,36 +31,36 @@ import ThemeToggle from "@/components/theme-toggle"
  * Provides a user interface for entering and validating an article URL, displays real-time feedback on URL validity, and enables users to trigger analysis. Features include a branded header, a hero section, a URL input card with validation, a grid highlighting analysis capabilities, and example article URLs for quick testing. On valid submission, the URL is stored in sessionStorage and the user is navigated to a loading page for further processing.
  */
 export default function AnalyzePage() {
-  const [url, setUrl] = useState("")
-  const [isValidUrl, setIsValidUrl] = useState(false)
-  const router = useRouter()
+  const [url, setUrl] = useState("");
+  const [isValidUrl, setIsValidUrl] = useState(false);
+  const router = useRouter();
 
   const validateUrl = (inputUrl: string) => {
     try {
-      new URL(inputUrl)
-      setIsValidUrl(true)
+      new URL(inputUrl);
+      setIsValidUrl(true);
     } catch {
-      setIsValidUrl(false)
+      setIsValidUrl(false);
     }
-  }
+  };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputUrl = e.target.value
-    setUrl(inputUrl)
+    const inputUrl = e.target.value;
+    setUrl(inputUrl);
     if (inputUrl.length > 0) {
-      validateUrl(inputUrl)
+      validateUrl(inputUrl);
     } else {
-      setIsValidUrl(false)
+      setIsValidUrl(false);
     }
-  }
+  };
 
   const handleAnalyze = () => {
     if (isValidUrl && url) {
       // Store the URL in sessionStorage to pass to loading page
-      sessionStorage.setItem("articleUrl", url)
-      router.push("/analyze/loading")
+      sessionStorage.setItem("articleUrl", url);
+      router.push("/analyze/loading");
     }
-  }
+  };
 
   const features = [
     {
@@ -64,7 +78,7 @@ export default function AnalyzePage() {
       title: "Fact Verification",
       description: "Cross-references claims with reliable sources",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 transition-colors duration-300">
@@ -109,8 +123,8 @@ export default function AnalyzePage() {
             </h1>
 
             <p className="text-lg md:text-xl lg:text-2xl text-slate-600 dark:text-slate-300 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300 px-4">
-              Paste the URL of any online article and get AI-powered bias detection, fact-checking, and alternative
-              perspectives in seconds.
+              Paste the URL of any online article and get AI-powered bias
+              detection, fact-checking, and alternative perspectives in seconds.
             </p>
           </div>
 
@@ -121,7 +135,8 @@ export default function AnalyzePage() {
                 Enter Article URL
               </CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-300 text-sm md:text-base">
-                Provide the link to the article you want to analyze for bias and alternative perspectives
+                Provide the link to the article you want to analyze for bias and
+                alternative perspectives
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0">
@@ -157,7 +172,9 @@ export default function AnalyzePage() {
                 </Button>
               </div>
               {url && !isValidUrl && (
-                <p className="text-red-500 text-xs md:text-sm mt-2 ml-10 md:ml-12">Please enter a valid URL</p>
+                <p className="text-red-500 text-xs md:text-sm mt-2 ml-10 md:ml-12">
+                  Please enter a valid URL
+                </p>
               )}
             </CardContent>
           </Card>
@@ -204,8 +221,8 @@ export default function AnalyzePage() {
                   <button
                     key={index}
                     onClick={() => {
-                      setUrl(exampleUrl)
-                      setIsValidUrl(true)
+                      setUrl(exampleUrl);
+                      setIsValidUrl(true);
                     }}
                     className="block w-full text-left p-2 md:p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-600/50 transition-colors text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm md:text-base break-all"
                   >
@@ -218,5 +235,5 @@ export default function AnalyzePage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
