@@ -2,12 +2,12 @@ import re
 import nltk
 
 try:
-    nltk.data.find('corpora/stopwords')
-    nltk.data.find('corpora/punkt_tab')
+    nltk.data.find("corpora/stopwords")
+    nltk.data.find("corpora/punkt_tab")
 
 except LookupError:
-    nltk.download('stopwords')
-    nltk.download('punkt_tab')
+    nltk.download("stopwords")
+    nltk.download("punkt_tab")
 
 
 def clean_extracted_text(text: str):
@@ -19,7 +19,7 @@ def clean_extracted_text(text: str):
         return ""
 
     # 1. Removing multiple line breaks to single line break
-    text = re.sub(r'\n{2,}', '\n\n', text)
+    text = re.sub(r"\n{2,}", "\n\n", text)
 
     # 2. Removing common boilerplate patterns
     # (example: "Read more at...", "Subscribe", etc.)
@@ -32,7 +32,7 @@ def clean_extracted_text(text: str):
         r"sponsored content",
         r"promoted by.*",
         r"recommended for you",
-        r"© \d{4}.*",               # copyright lines
+        r"© \d{4}.*",  # copyright lines
         r"all rights reserved",
         r"terms of service",
         r"privacy policy",
@@ -71,16 +71,16 @@ def clean_extracted_text(text: str):
         r"powered by .*",
     ]
     for pattern in boilerplate_phrases:
-        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
 
     # 3. Remove lines with too few characters (likely junk)
-    lines = text.split('\n')
+    lines = text.split("\n")
     cleaned_lines = [line.strip() for line in lines if len(line.strip()) > 30]
 
     # 4. Join lines back with a double newline for paragraphs
-    cleaned_text = '\n\n'.join(cleaned_lines)
+    cleaned_text = "\n\n".join(cleaned_lines)
 
     # 5. Optional: Fix multiple spaces and trim
-    cleaned_text = re.sub(r'[ \t]{2,}', ' ', cleaned_text).strip()
+    cleaned_text = re.sub(r"[ \t]{2,}", " ", cleaned_text).strip()
 
     return cleaned_text

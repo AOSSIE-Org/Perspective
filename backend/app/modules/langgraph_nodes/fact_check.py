@@ -1,4 +1,3 @@
-
 from app.utils.fact_check_utils import run_fact_check_pipeline
 
 
@@ -25,9 +24,5 @@ def run_fact_check(state):
             "status": "error",
             "error_from": "fact_checking",
             "message": f"{e}",
-            }
-    return {
-        **state,
-        "facts": verifications,
-        "status": "success"
         }
+    return {**state, "facts": verifications, "status": "success"}

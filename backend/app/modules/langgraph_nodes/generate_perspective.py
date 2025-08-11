@@ -13,10 +13,7 @@ class PerspectiveOutput(BaseModel):
 
 my_llm = "llama-3.3-70b-versatile"
 
-llm = ChatGroq(
-    model=my_llm,
-    temperature=0.7
-)
+llm = ChatGroq(model=my_llm, temperature=0.7)
 
 structured_llm = llm.with_structured_output(PerspectiveOutput)
 
@@ -37,15 +34,22 @@ def generate_perspective(state):
         elif not facts:
             raise ValueError("Missing or empty 'facts' in state")
 
-        facts_str = "\n".join([f"Claim: {f['original_claim']}\n"
-                               "Verdict: {f['verdict']}\nExplanation: "
-                               "{f['explanation']}" for f in state["facts"]])
+        facts_str = "\n".join(
+            [
+                f"Claim: {f['original_claim']}\n"
+                "Verdict: {f['verdict']}\nExplanation: "
+                "{f['explanation']}"
+                for f in state["facts"]
+            ]
+        )
 
-        result = chain.invoke({
-            "cleaned_article": text,
-            "facts": facts_str,
-            "sentiment": state.get("sentiment", "neutral")
-        })
+        result = chain.invoke(
+            {
+                "cleaned_article": text,
+                "facts": facts_str,
+                "sentiment": state.get("sentiment", "neutral"),
+            }
+        )
     except Exception as e:
         print(f"some error occured in generate_perspective:{e}")
         return {
@@ -53,8 +57,4 @@ def generate_perspective(state):
             "error_from": "generate_perspective",
             "message": f"{e}",
         }
-    return {
-        **state,
-        "perspective": result,
-        "status": "success"
-        }
+    return {**state, "perspective": result, "status": "success"}

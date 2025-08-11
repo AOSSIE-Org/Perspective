@@ -5,8 +5,8 @@ from app.modules.langgraph_nodes import (
     generate_perspective,
     judge,
     store_and_send,
-    error_handler
-    )
+    error_handler,
+)
 
 from typing_extensions import TypedDict
 
@@ -24,58 +24,34 @@ class MyState(TypedDict):
 def build_langgraph():
     graph = StateGraph(MyState)
 
-    graph.add_node(
-                    "sentiment_analysis",
-                    sentiment.run_sentiment_sdk
-                    )
-    graph.add_node(
-                    "fact_checking",
-                    fact_check.run_fact_check
-                    )
-    graph.add_node(
-                    "generate_perspective",
-                    generate_perspective.generate_perspective
-                    )
-    graph.add_node(
-                    "judge_perspective",
-                    judge.judge_perspective
-                    )
-    graph.add_node(
-                    "store_and_send",
-                    store_and_send.store_and_send
-                    )
-    graph.add_node(
-                    "error_handler",
-                    error_handler.error_handler
-                    )
+    graph.add_node("sentiment_analysis", sentiment.run_sentiment_sdk)
+    graph.add_node("fact_checking", fact_check.run_fact_check)
+    graph.add_node("generate_perspective", generate_perspective.generate_perspective)
+    graph.add_node("judge_perspective", judge.judge_perspective)
+    graph.add_node("store_and_send", store_and_send.store_and_send)
+    graph.add_node("error_handler", error_handler.error_handler)
 
     graph.set_entry_point(
-                    "sentiment_analysis",
-                    )
+        "sentiment_analysis",
+    )
 
     graph.add_conditional_edges(
         "sentiment_analysis",
-        lambda x: (
-            "error_handler" if x.get("status") == "error" else "fact_checking"
-            )
+        lambda x: ("error_handler" if x.get("status") == "error" else "fact_checking"),
     )
 
     graph.add_conditional_edges(
         "fact_checking",
         lambda x: (
-            "error_handler"
-            if x.get("status") == "error"
-            else "generate_perspective"
-            )
+            "error_handler" if x.get("status") == "error" else "generate_perspective"
+        ),
     )
 
     graph.add_conditional_edges(
         "generate_perspective",
         lambda x: (
-            "error_handler"
-            if x.get("status") == "error"
-            else "judge_perspective"
-            )
+            "error_handler" if x.get("status") == "error" else "judge_perspective"
+        ),
     )
 
     graph.add_conditional_edges(
@@ -90,15 +66,11 @@ def build_langgraph():
             )
             if state.get("score", 0) < 70
             else "store_and_send"
-            )
+        ),
     )
     graph.add_conditional_edges(
         "store_and_send",
-        lambda x: (
-            "error_handler"
-            if x.get("status") == "error"
-            else "__end__"
-            )
+        lambda x: ("error_handler" if x.get("status") == "error" else "__end__"),
     )
 
     graph.set_finish_point("store_and_send")

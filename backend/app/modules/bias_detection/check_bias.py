@@ -12,7 +12,7 @@ def check_bias(text):
     try:
         print(text)
         print(json.dumps(text))
-        
+
         if not text:
             raise ValueError("Missing or empty 'cleaned_text'")
 
@@ -30,10 +30,7 @@ def check_bias(text):
                 },
                 {
                     "role": "user",
-                    "content": (
-                        "Give bias score to the following article "
-                        f"\n\n{text}"
-                    ),
+                    "content": (f"Give bias score to the following article \n\n{text}"),
                 },
             ],
             model="gemma2-9b-it",

@@ -6,7 +6,6 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 if not PINECONE_API_KEY:
     raise ValueError("PINECONE_API_KEY environment variable is required")
 try:
-
     # Initialize Pinecone client
     pc = Pinecone(api_key=PINECONE_API_KEY)
 
@@ -25,10 +24,7 @@ if not pc.has_index(INDEX_NAME):
         name=INDEX_NAME,
         dimension=DIMENSIONS,
         metric=METRIC,
-        spec=ServerlessSpec(
-            cloud=CloudProvider.AWS,
-            region=AwsRegion.US_EAST_1
-        )
+        spec=ServerlessSpec(cloud=CloudProvider.AWS, region=AwsRegion.US_EAST_1),
     )
 else:
     print(f"Index '{INDEX_NAME}' already exists")
@@ -37,5 +33,4 @@ try:
     # Connect to the index
     index = pc.Index(INDEX_NAME)
 except Exception as e:
-    raise RuntimeError("Error occured while "
-                       f"connecting to the index {INDEX_NAME}:{e}")
+    raise RuntimeError(f"Error occured while connecting to the index {INDEX_NAME}:{e}")

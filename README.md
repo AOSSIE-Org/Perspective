@@ -134,6 +134,15 @@ sequenceDiagram
 ## Setup & Deployment
 
 ### Frontend Setup
+
+Setup environment variables:*
+  - add .env file in `/frontend`directory.
+  - add following environment variable in your .env file.
+```
+NEXT_PUBLIC_API_URL = http://localhost:8000
+
+```
+
 ```bash
 cd frontend
 npm install
@@ -151,10 +160,10 @@ npm run dev
 
 
 *Setup environment variables:*
-  - add .env file in `/new-backend`directory.
+  - add .env file in `/backend`directory.
   - add following environment variable in your .env file.
   ```
-  GROQ_API_KEY= <groq_api_key>
+GROQ_API_KEY= <groq_api_key>
 PINECONE_API_KEY = <your_pinecone_API_KEY>
 PORT = 8000
 SEARCH_KEY = <your_Google_custom_search_engine_API_key>

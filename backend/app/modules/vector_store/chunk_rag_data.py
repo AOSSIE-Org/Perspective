@@ -31,40 +31,40 @@ def chunk_rag_data(data):
         ):
             raise ValueError("Perspective object missing required fields")
 
-        chunks.append({
-            "id": f"{article_id}-perspective",
-            "text": perspective_obj.perspective,
-            "metadata": {
-                "type": "counter-perspective",
-                "reasoning": perspective_obj.reasoning,
-                "article_id": article_id
+        chunks.append(
+            {
+                "id": f"{article_id}-perspective",
+                "text": perspective_obj.perspective,
+                "metadata": {
+                    "type": "counter-perspective",
+                    "reasoning": perspective_obj.reasoning,
+                    "article_id": article_id,
+                },
             }
-        })
+        )
 
         # Add each fact as a separate chunk
         for i, fact in enumerate(data["facts"]):
-            fact_fields = [
-                        "original_claim",
-                        "verdict",
-                        "explanation",
-                        "source_link"
-                        ]
+            fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
             for field in fact_fields:
                 if field not in fact:
-                    raise ValueError("Missing required fact field:"
-                                     f" {field} in fact index {i}")
+                    raise ValueError(
+                        f"Missing required fact field: {field} in fact index {i}"
+                    )
 
-            chunks.append({
-                "id": f"{article_id}-fact-{i}",
-                "text": fact["original_claim"],
-                "metadata": {
-                    "type": "fact",
-                    "verdict": fact["verdict"],
-                    "explanation": fact["explanation"],
-                    "source_link": fact["source_link"],
-                    "article_id": article_id
+            chunks.append(
+                {
+                    "id": f"{article_id}-fact-{i}",
+                    "text": fact["original_claim"],
+                    "metadata": {
+                        "type": "fact",
+                        "verdict": fact["verdict"],
+                        "explanation": fact["explanation"],
+                        "source_link": fact["source_link"],
+                        "article_id": article_id,
+                    },
                 }
-            })
+            )
 
         return chunks
 

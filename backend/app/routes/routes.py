@@ -42,7 +42,6 @@ async def run_pipelines(request: URlRequest):
 
 @router.post("/chat")
 async def answer_query(request: ChatQuery):
-
     query = request.message
     results = search_pinecone(query)
     answer = ask_llm(query, results)
