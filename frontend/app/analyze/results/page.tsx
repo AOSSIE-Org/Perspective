@@ -4,10 +4,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Send,
-  Link as LinkIcon,
-} from "lucide-react";
+import { Send, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -22,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import BiasMeter from "@/components/bias-meter";
 import axios from "axios";
 
+const backend_url = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Renders the article analysis page with summary, perspectives, fact checks, bias meter, AI chat, and sources.
@@ -47,16 +45,15 @@ export default function AnalyzePage() {
   useEffect(() => {
     const storedBiasScore = sessionStorage.getItem("BiasScore");
     const storedData = sessionStorage.getItem("analysisResult");
-    if (storedBiasScore && storedData){
+    if (storedBiasScore && storedData) {
       setIsLoading(false);
-      }
+    }
 
     if (storedBiasScore) setBiasScore(JSON.parse(storedBiasScore).bias_score);
     else console.warn("No bias score found.");
 
     if (storedData) setAnalysisData(JSON.parse(storedData));
     else console.warn("No analysis result found");
-  
   }, []);
 
   useEffect(() => {
@@ -64,40 +61,37 @@ export default function AnalyzePage() {
       return;
     }
 
-    
     const storedData = sessionStorage.getItem("analysisResult");
     const storedBiasScore = sessionStorage.getItem("BiasScore");
 
     if (storedBiasScore && storedData) {
-    // inside here TS knows storedBiasScore and storedData are strings
-    setBiasScore(JSON.parse(storedBiasScore).bias_score);
-    setAnalysisData(JSON.parse(storedData));
-    setIsLoading(false);
-  } else {
-    console.warn("No bias or data found. Redirecting...");
-    router.push("/analyze");
+      // inside here TS knows storedBiasScore and storedData are strings
+      setBiasScore(JSON.parse(storedBiasScore).bias_score);
+      setAnalysisData(JSON.parse(storedData));
+      setIsLoading(false);
+    } else {
+      console.warn("No bias or data found. Redirecting...");
+      router.push("/analyze");
     }
-
   }, [router]);
 
-  async function handleSendMessage(e: React.FormEvent){
+  async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!message.trim()) return;
     const newMessages = [...messages, { role: "user", content: message }];
     setMessages(newMessages);
     setMessage("");
 
-  const res = await axios.post("http://Thunder1245-perspective-backend.hf.space/api/chat", {
-    message: message
+    const res = await axios.post(`${backend_url}/api/chat`, {
+      message: message,
     });
-  const data = res.data;
+    const data = res.data;
 
-  console.log(data)
+    console.log(data);
 
-  // 🔹 Step 2: Append LLM’s response
-  setMessages([...newMessages, { role: "assistant", content: data.answer }]);
-};
-
+    // 🔹 Step 2: Append LLM’s response
+    setMessages([...newMessages, { role: "assistant", content: data.answer }]);
+  }
 
   if (isLoading || !analysisData || !biasScore) {
     return (
@@ -115,7 +109,7 @@ export default function AnalyzePage() {
     score,
   } = analysisData;
 
-  return(
+  return (
     <div className="flex flex-col min-h-screen">
       {/* Header omitted for brevity */}
       <main className="flex-1 pt-16 container mx-auto px-4">

@@ -16,6 +16,8 @@ import {
 import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
 
+const backend_url = process.env.NEXT_PUBLIC_API_URL;
+
 /**
  * Displays a multi-step animated loading and progress interface for the article analysis workflow.
  *
@@ -70,20 +72,13 @@ export default function LoadingPage() {
 
         try {
           const [processRes, biasRes] = await Promise.all([
-            axios.post(
-              "https://Thunder1245-perspective-backend.hf.space/api/process",
-              {
-                url: storedUrl,
-              }
-            ),
-            axios.post(
-              "http://Thunder1245-perspective-backend.hf.space/api/bias",
-              {
-                url: storedUrl,
-              }
-            ),
+            axios.post(`${backend_url}/api/process`, {
+              url: storedUrl,
+            }),
+            axios.post(`${backend_url}/api/bias`, {
+              url: storedUrl,
+            }),
           ]);
-
 
           sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
 
@@ -99,7 +94,6 @@ export default function LoadingPage() {
           console.log("Analysis result saved");
           console.log(processRes);
 
-          
           // optional logging
         } catch (err) {
           console.error("Failed to process article:", err);
