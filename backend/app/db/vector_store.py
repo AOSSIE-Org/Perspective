@@ -22,6 +22,10 @@ Raises:
 
 import os
 from pinecone import Pinecone, ServerlessSpec, CloudProvider, AwsRegion
+from app.logging.logging_config import setup_logger
+
+
+logger = setup_logger(__name__)
 
 # Load Pinecone credentials from environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -41,7 +45,7 @@ METRIC = "cosine"
 
 # Create index if it doesn't exist
 if not pc.has_index(INDEX_NAME):
-    print(f"Creating index: {INDEX_NAME}")
+    logger.info(f"Creating index: {INDEX_NAME}")
     pc.create_index(
         name=INDEX_NAME,
         dimension=DIMENSIONS,
@@ -49,7 +53,7 @@ if not pc.has_index(INDEX_NAME):
         spec=ServerlessSpec(cloud=CloudProvider.AWS, region=AwsRegion.US_EAST_1),
     )
 else:
-    print(f"Index '{INDEX_NAME}' already exists")
+    logger.info(f"Index '{INDEX_NAME}' already exists")
 
 try:
     # Connect to the index

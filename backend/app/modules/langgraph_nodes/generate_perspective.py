@@ -23,6 +23,9 @@ Functions:
 from app.utils.prompt_templates import generation_prompt
 from langchain_groq import ChatGroq
 from pydantic import BaseModel, Field
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 
 prompt = generation_prompt
@@ -73,7 +76,7 @@ def generate_perspective(state):
             }
         )
     except Exception as e:
-        print(f"some error occured in generate_perspective:{e}")
+        logger.exception(f"Error in generate_perspective: {e}")
         return {
             "status": "error",
             "error_from": "generate_perspective",

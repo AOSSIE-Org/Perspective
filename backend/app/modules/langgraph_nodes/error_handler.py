@@ -13,10 +13,15 @@ Functions:
 """
 
 
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
+
+
 def error_handler(input):
-    print("Error detected!")
-    print(f"From: {input.get('error_from')}")
-    print(f"Message: {input.get('message')}")
+    error_from = input.get("error_from", "Unknown source")
+    message = input.get("message", "No message provided")
+    logger.error(f"Error detected from '{error_from}': {message}")
 
     return {
         "status": "stopped_due_to_error",

@@ -28,6 +28,9 @@ from groq import Groq
 from dotenv import load_dotenv
 import json
 import re
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 load_dotenv()
 
@@ -66,6 +69,8 @@ def run_claim_extractor_sdk(state):
         )
 
         extracted_claims = chat_completion.choices[0].message.content.strip()
+        logger.debug(f"Extracted claims:\n{extracted_claims}")
+
 
         return {
             **state,
@@ -74,7 +79,7 @@ def run_claim_extractor_sdk(state):
         }
 
     except Exception as e:
-        print(f"Error in claim_extraction: {e}")
+        logger.exception("Error in claim_extraction")
         return {
             "status": "error",
             "error_from": "claim_extraction",
@@ -132,13 +137,13 @@ def run_fact_verifier_sdk(search_results):
 
             # Strip markdown code blocks if present
             content = re.sub(r"^```json|```$", "", content).strip()
-            print(content)
+            logger.debug(f"Raw LLM fact verification output:\n{content}")
 
             # Try parsing the JSON response
             try:
                 parsed = json.loads(content)
             except Exception as parse_err:
-                print(f"❌ LLM JSON parse error: {parse_err}")
+                logger.error(f"LLM JSON parse error: {parse_err}")
 
             results_list.append(parsed)
 
@@ -149,7 +154,7 @@ def run_fact_verifier_sdk(search_results):
         }
 
     except Exception as e:
-        print(f"🔥 Error in fact_verification: {e}")
+        logger.exception("Error in fact_verification")
         return {
             "status": "error",
             "error_from": "fact_verification",

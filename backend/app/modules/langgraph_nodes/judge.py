@@ -18,6 +18,9 @@ Functions:
 import re
 from langchain_groq import ChatGroq
 from langchain.schema import HumanMessage
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 # Init once
 groq_llm = ChatGroq(
@@ -62,7 +65,7 @@ a single integer score from 0 (very poor) to 100 (excellent).
         return {**state, "score": score, "status": "success"}
 
     except Exception as e:
-        print(f"Error in judge_perspective: {e}")
+        logger.exception(f"Error in judge_perspective: {e}")
         return {
             "status": "error",
             "error_from": "judge_perspective",

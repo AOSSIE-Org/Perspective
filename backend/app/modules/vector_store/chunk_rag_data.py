@@ -25,6 +25,9 @@ Functions:
 
 
 from app.utils.generate_chunk_id import generate_id
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def chunk_rag_data(data):
@@ -95,5 +98,5 @@ def chunk_rag_data(data):
         return chunks
 
     except Exception as e:
-        print(f"[Error] Failed to chunk the data: {e}")
+        logger.exception(f"Failed to chunk the data: {e}")
         raise

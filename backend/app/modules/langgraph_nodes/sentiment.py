@@ -17,6 +17,9 @@ Functions:
 import os
 from groq import Groq
 from dotenv import load_dotenv
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 load_dotenv()
 
@@ -61,7 +64,7 @@ def run_sentiment_sdk(state):
         }
 
     except Exception as e:
-        print(f"Error in sentiment_analysis: {e}")
+        logger.exception(f"Error in sentiment_analysis: {e}")
         return {
             "status": "error",
             "error_from": "sentiment_analysis",

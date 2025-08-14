@@ -37,8 +37,11 @@ from app.modules.pipeline import run_langgraph_workflow
 from app.modules.bias_detection.check_bias import check_bias
 from app.modules.chat.get_rag_data import search_pinecone
 from app.modules.chat.llm_processing import ask_llm
+from app.logging.logging_config import setup_logger
 import asyncio
 import json
+
+logger = setup_logger(__name__)
 
 router = APIRouter()
 
@@ -60,14 +63,14 @@ async def home():
 async def bias_detection(request: URlRequest):
     content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     bias_score = await asyncio.to_thread(check_bias, (content))
-    print(bias_score)
+    logger.info(f"Bias detection result: {bias_score}")
     return bias_score
 
 
 @router.post("/process")
 async def run_pipelines(request: URlRequest):
     article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    print(json.dumps(article_text, indent=2))
+    logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
     data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
     return data
 
@@ -77,6 +80,6 @@ async def answer_query(request: ChatQuery):
     query = request.message
     results = search_pinecone(query)
     answer = ask_llm(query, results)
-    print(answer)
+    logger.info(f"Chat answer generated: {answer}")
 
     return {"answer": answer}

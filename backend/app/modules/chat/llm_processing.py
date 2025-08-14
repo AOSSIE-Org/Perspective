@@ -26,6 +26,9 @@ Environment Variables:
 import os
 from groq import Groq
 from dotenv import load_dotenv
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 load_dotenv()
 
@@ -41,7 +44,7 @@ def build_context(docs):
 
 def ask_llm(question, docs):
     context = build_context(docs)
-    print(context)
+    logger.debug(f"Generated context for LLM:\n{context}")
     prompt = f"""You are an assistant that answers based on context.
 
 Context:
@@ -58,5 +61,5 @@ Question:
             {"role": "user", "content": prompt},
         ],
     )
-
+    logger.info("LLM response retrieved successfully.")
     return response.choices[0].message.content

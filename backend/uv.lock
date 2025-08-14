@@ -98,6 +98,57 @@ wheels = [
 ]
 
 [[package]]
+name = "backend"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "bs4" },
+    { name = "dotenv" },
+    { name = "duckduckgo-search" },
+    { name = "fastapi" },
+    { name = "google-search-results" },
+    { name = "groq" },
+    { name = "langchain" },
+    { name = "langchain-community" },
+    { name = "langchain-groq" },
+    { name = "langgraph" },
+    { name = "logging" },
+    { name = "newspaper3k" },
+    { name = "nltk" },
+    { name = "pinecone" },
+    { name = "rake-nltk" },
+    { name = "readability-lxml" },
+    { name = "requests" },
+    { name = "sentence-transformers" },
+    { name = "trafilatura" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bs4", specifier = ">=0.0.2" },
+    { name = "dotenv", specifier = ">=0.9.9" },
+    { name = "duckduckgo-search", specifier = ">=8.0.4" },
+    { name = "fastapi", specifier = ">=0.115.12" },
+    { name = "google-search-results", specifier = ">=2.4.2" },
+    { name = "groq", specifier = ">=0.28.0" },
+    { name = "langchain", specifier = ">=0.3.25" },
+    { name = "langchain-community", specifier = ">=0.3.25" },
+    { name = "langchain-groq", specifier = ">=0.3.2" },
+    { name = "langgraph", specifier = ">=0.4.8" },
+    { name = "logging", specifier = ">=0.4.9.6" },
+    { name = "newspaper3k", specifier = ">=0.2.8" },
+    { name = "nltk", specifier = ">=3.9.1" },
+    { name = "pinecone", specifier = ">=7.3.0" },
+    { name = "rake-nltk", specifier = ">=1.0.6" },
+    { name = "readability-lxml", specifier = ">=0.8.4.1" },
+    { name = "requests", specifier = ">=2.32.3" },
+    { name = "sentence-transformers", specifier = ">=5.0.0" },
+    { name = "trafilatura", specifier = ">=2.0.0" },
+    { name = "uvicorn", specifier = ">=0.34.3" },
+]
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.13.4"
 source = { registry = "https://pypi.org/simple" }
@@ -919,57 +970,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/8d/776adee7bbf76365fdd7f2552710282c79a4ead5d2a46408c9043a2b70ba/networkx-3.5-py3-none-any.whl", hash = "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec", size = 2034406, upload-time = "2025-05-29T11:35:04.961Z" },
-]
-
-[[package]]
-name = "new-backend"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "bs4" },
-    { name = "dotenv" },
-    { name = "duckduckgo-search" },
-    { name = "fastapi" },
-    { name = "google-search-results" },
-    { name = "groq" },
-    { name = "langchain" },
-    { name = "langchain-community" },
-    { name = "langchain-groq" },
-    { name = "langgraph" },
-    { name = "logging" },
-    { name = "newspaper3k" },
-    { name = "nltk" },
-    { name = "pinecone" },
-    { name = "rake-nltk" },
-    { name = "readability-lxml" },
-    { name = "requests" },
-    { name = "sentence-transformers" },
-    { name = "trafilatura" },
-    { name = "uvicorn" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bs4", specifier = ">=0.0.2" },
-    { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "duckduckgo-search", specifier = ">=8.0.4" },
-    { name = "fastapi", specifier = ">=0.115.12" },
-    { name = "google-search-results", specifier = ">=2.4.2" },
-    { name = "groq", specifier = ">=0.28.0" },
-    { name = "langchain", specifier = ">=0.3.25" },
-    { name = "langchain-community", specifier = ">=0.3.25" },
-    { name = "langchain-groq", specifier = ">=0.3.2" },
-    { name = "langgraph", specifier = ">=0.4.8" },
-    { name = "logging", specifier = ">=0.4.9.6" },
-    { name = "newspaper3k", specifier = ">=0.2.8" },
-    { name = "nltk", specifier = ">=3.9.1" },
-    { name = "pinecone", specifier = ">=7.3.0" },
-    { name = "rake-nltk", specifier = ">=1.0.6" },
-    { name = "readability-lxml", specifier = ">=0.8.4.1" },
-    { name = "requests", specifier = ">=2.32.3" },
-    { name = "sentence-transformers", specifier = ">=5.0.0" },
-    { name = "trafilatura", specifier = ">=2.0.0" },
-    { name = "uvicorn", specifier = ">=0.34.3" },
 ]
 
 [[package]]

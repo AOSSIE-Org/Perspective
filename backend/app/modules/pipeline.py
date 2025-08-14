@@ -36,8 +36,10 @@ from app.modules.scraper.extractor import Article_extractor
 from app.modules.scraper.cleaner import clean_extracted_text
 from app.modules.scraper.keywords import extract_keywords
 from app.modules.langgraph_builder import build_langgraph
-
+from app.logging.logging_config import setup_logger
 import json
+
+logger = setup_logger(__name__)
 
 # Compile once when module loads
 _LANGGRAPH_WORKFLOW = build_langgraph()
@@ -56,8 +58,8 @@ def run_scraper_pipeline(url: str) -> dict:
     keywords = extract_keywords(cleaned_text)
     result["keywords"] = keywords
 
-    # Optional: pretty print raw_text for debugging
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    logger.info(f"Scraper pipeline completed for URL: {url}")
+    logger.debug(f"Scraper output: {json.dumps(result, ensure_ascii=False, indent=2)}")
 
     return result
 
@@ -65,4 +67,5 @@ def run_scraper_pipeline(url: str) -> dict:
 def run_langgraph_workflow(state: dict):
     """Execute the pre-compiled LangGraph workflow."""
     result = _LANGGRAPH_WORKFLOW.invoke(state)
+    logger.info("LangGraph workflow executed successfully.")
     return result
