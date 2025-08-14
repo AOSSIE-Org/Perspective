@@ -1,3 +1,37 @@
+"""
+pipeline.py
+-----------
+Module that orchestrates the scraping, text cleaning, keyword extraction, 
+and LangGraph workflow execution for article analysis.
+
+Workflow:
+    1. Scraping:
+        - Fetches article content from a given URL using 
+          `Article_extractor`, which attempts multiple extraction 
+          strategies with fallbacks.
+    2. Cleaning:
+        - Processes extracted text to remove noise and formatting 
+          artifacts via `clean_extracted_text`.
+    3. Keyword Extraction:
+        - Identifies important keywords from the cleaned article 
+          using RAKE-based `extract_keywords`.
+    4. LangGraph Processing:
+        - Passes structured state into a pre-compiled LangGraph 
+          workflow (`_LANGGRAPH_WORKFLOW`) for sentiment analysis, 
+          fact-checking, perspective generation, judging, and 
+          storage.
+
+Core Functions:
+    run_scraper_pipeline(url: str) -> dict
+        Executes the scraping, cleaning, and keyword extraction stages, 
+        returning a dictionary containing the cleaned text and keywords.
+    
+    run_langgraph_workflow(state: dict) -> dict
+        Invokes the pre-compiled LangGraph workflow with the provided 
+        state dictionary and returns the result.
+"""
+
+
 from app.modules.scraper.extractor import Article_extractor
 from app.modules.scraper.cleaner import clean_extracted_text
 from app.modules.scraper.keywords import extract_keywords

@@ -1,3 +1,20 @@
+"""
+judge.py
+--------
+Evaluates a generated counter-perspective using an LLM-based scoring system.
+
+This module:
+    - Uses Groq's LLM to rate the originality, reasoning quality,
+      and factual grounding of a generated perspective.
+    - Returns a score from 0 (very poor) to 100 (excellent).
+    - Handles parsing errors and unexpected responses gracefully.
+
+Functions:
+    judge_perspective(state: dict) -> dict:
+        Evaluates the given perspective and returns an integer score with status metadata.
+"""
+
+
 import re
 from langchain_groq import ChatGroq
 from langchain.schema import HumanMessage

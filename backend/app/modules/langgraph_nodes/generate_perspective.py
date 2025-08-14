@@ -1,3 +1,25 @@
+"""
+generate_perspective.py
+-----------------------
+Generates an alternative perspective for a given article based on verified claims.
+
+This module:
+    - Uses a LangChain pipeline with Groq's LLM to produce a reasoning chain
+      and an opposite perspective.
+    - Validates required inputs before generation.
+    - Handles errors gracefully and returns structured responses.
+
+Classes:
+    PerspectiveOutput (pydantic.BaseModel):
+        Data model for structured LLM output containing reasoning and perspective.
+
+Functions:
+    generate_perspective(state: dict) -> dict:
+        Generates an alternative perspective using the provided article text
+        and verified facts.
+"""
+
+
 from app.utils.prompt_templates import generation_prompt
 from langchain_groq import ChatGroq
 from pydantic import BaseModel, Field

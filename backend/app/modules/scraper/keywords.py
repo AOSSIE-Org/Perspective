@@ -1,3 +1,24 @@
+"""
+keywords.py
+-----------
+Module for extracting key phrases from text using the RAKE
+(Rapid Automatic Keyword Extraction) algorithm. This utility
+helps identify the most relevant and representative words or
+phrases in a body of text, often useful for summarization,
+tagging, search indexing, and content analysis.
+
+Functions:
+    extract_keywords(text: str, max_keywords: int = 15)
+        Runs the RAKE algorithm on the provided text and returns
+        the top-ranked keywords or phrases up to the specified limit.
+
+    extract_keyword_data(text: str) -> Dict
+        Higher-level helper function that packages extracted
+        keywords along with the top phrase and the total count
+        into a single dictionary for convenient downstream use.
+"""
+
+
 from rake_nltk import Rake
 from typing import Dict
 

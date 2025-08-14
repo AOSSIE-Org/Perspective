@@ -1,3 +1,28 @@
+"""
+llm_processing.py
+-----------------
+Handles Large Language Model (LLM) interactions for context-based question answering.
+
+This module:
+    - Connects to the Groq API using credentials from environment variables.
+    - Builds a context string from retrieved documents.
+    - Sends user questions along with context to the LLM.
+    - Returns generated answers.
+
+Functions:
+    build_context(docs: list[dict]) -> str:
+        Extracts relevant fields (explanation or reasoning) from document
+        metadata and combines them into a single context string.
+
+    ask_llm(question: str, docs: list[dict]) -> str:
+        Builds context from the provided documents, sends it along with the
+        question to the LLM, and returns the model's answer.
+
+Environment Variables:
+    GROQ_API_KEY (str): API key for authenticating with Groq.
+"""
+
+
 import os
 from groq import Groq
 from dotenv import load_dotenv

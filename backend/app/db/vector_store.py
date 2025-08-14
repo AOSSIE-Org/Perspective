@@ -1,3 +1,25 @@
+"""
+vector_store.py
+------------------
+Initializes and manages the Pinecone vector database connection for the Perspective API.
+
+This module:
+    - Loads Pinecone credentials from environment variables.
+    - Creates the Pinecone index if it does not exist.
+    - Connects to the specified index for vector operations.
+
+Attributes:
+    PINECONE_API_KEY (str): API key for authenticating with Pinecone.
+    INDEX_NAME (str): Name of the Pinecone index used for storing vectors.
+    DIMENSIONS (int): Dimensionality of vector embeddings.
+    METRIC (str): Similarity metric used for vector comparison.
+    index (pinecone.Index): Connected Pinecone index instance.
+
+Raises:
+    ValueError: If `PINECONE_API_KEY` is not set in environment variables.
+    RuntimeError: If Pinecone initialization or index connection fails.
+"""
+
 import os
 from pinecone import Pinecone, ServerlessSpec, CloudProvider, AwsRegion
 

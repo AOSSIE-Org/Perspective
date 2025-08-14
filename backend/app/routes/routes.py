@@ -1,3 +1,35 @@
+"""
+routes.py
+---------
+Defines the FastAPI API routes for the Perspective application, exposing endpoints
+for bias detection, article processing, and chat-based querying over stored RAG data.
+
+Endpoints:
+    GET /
+        Health check endpoint confirming the API is live.
+
+    POST /bias
+        Accepts a URL, scrapes and processes the article content, and runs bias detection
+        to return a bias score and related insights.
+
+    POST /process
+        Accepts a URL, scrapes and processes the article content, then executes the
+        LangGraph workflow for sentiment analysis, fact-checking, perspective generation,
+        and final result assembly.
+
+    POST /chat
+        Accepts a user query, searches stored vector data in Pinecone, and queries an LLM
+        to produce a contextual answer.
+
+Core Components:
+    - run_scraper_pipeline: Extracts and cleans article text, then identifies keywords.
+    - run_langgraph_workflow: Executes the LangGraph pipeline for deep content analysis.
+    - check_bias: Scores and analyzes potential bias in article content.
+    - search_pinecone: Retrieves relevant RAG data for a given query.
+    - ask_llm: Generates a natural language answer using retrieved context.
+"""
+
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline

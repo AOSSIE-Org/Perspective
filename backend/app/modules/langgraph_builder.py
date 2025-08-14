@@ -1,3 +1,36 @@
+"""
+langgraph_builder.py
+--------------------
+Module for constructing and compiling a LangGraph pipeline to process
+cleaned article text through multiple NLP tasks, with error handling
+and retry logic.
+
+Workflow:
+    1. Sentiment analysis on the cleaned text.
+    2. Fact-checking detected claims.
+    3. Generating a counter-perspective.
+    4. Judging the quality of the generated perspective.
+    5. Storing results and sending them downstream.
+    6. Error handling at any step if failures occur.
+
+Core Features:
+    - Uses a TypedDict (`MyState`) to define the shape of the pipeline's
+      state, ensuring structured data flow between nodes.
+    - Employs conditional edges to handle branching:
+        * Routes to error handler if a node signals `"status": "error"`.
+        * Retries perspective generation up to 3 times if judged score
+          is below 70.
+        * Moves to storage once retries are exhausted or score passes
+          the threshold.
+    - Ensures the graph terminates only after successful storage.
+
+Functions:
+    build_langgraph() -> CompiledGraph
+        Creates the StateGraph, adds processing nodes, defines
+        transitions, and compiles the graph for execution.
+"""
+
+
 from langgraph.graph import StateGraph
 from app.modules.langgraph_nodes import (
     sentiment,

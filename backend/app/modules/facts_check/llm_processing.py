@@ -1,3 +1,28 @@
+"""
+llm_processing.py
+-----------------
+Handles claim extraction and fact verification tasks using the Groq LLM API.
+
+This module:
+    - Connects to the Groq API with credentials from environment variables.
+    - Extracts verifiable factual claims from text.
+    - Verifies claims using provided search results and evidence.
+    - Returns structured responses with verdicts and explanations.
+
+Functions:
+    run_claim_extractor_sdk(state: dict) -> dict:
+        Extracts up to three concise, verifiable claims from the input text
+        stored in the `state` dictionary.
+
+    run_fact_verifier_sdk(search_results: list[dict]) -> dict:
+        Evaluates provided claims against web search evidence and returns
+        structured JSON verdicts for each claim.
+
+Environment Variables:
+    GROQ_API_KEY (str): API key for authenticating with Groq.
+"""
+
+
 import os
 from groq import Groq
 from dotenv import load_dotenv

@@ -1,3 +1,20 @@
+"""
+fact_check.py
+-------------
+Provides functionality to run a fact-checking process on given article text.
+
+This module:
+    - Validates the presence of `cleaned_text` in the provided state.
+    - Runs the fact-checking pipeline using `run_fact_check_pipeline`.
+    - Handles errors gracefully and returns structured error responses.
+
+Functions:
+    run_fact_check(state: dict) -> dict:
+        Executes the fact-checking process and returns either the verification results
+        or an error message.
+"""
+
+
 from app.utils.fact_check_utils import run_fact_check_pipeline
 
 

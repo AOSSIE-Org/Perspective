@@ -1,3 +1,27 @@
+"""
+check_bias.py
+-------------
+Provides functionality to evaluate the bias score of an article using the Groq API.
+
+This module:
+    - Loads environment variables for Groq API credentials.
+    - Connects to the Groq client.
+    - Defines `check_bias()` to analyze a given article's bias and return a score.
+
+Functions:
+    check_bias(text: str) -> dict:
+        Analyzes the input article text and returns a bias score between 0 and 100,
+        where 0 indicates the least bias and 100 indicates the highest bias.
+
+Environment Variables:
+    GROQ_API_KEY (str): API key for authenticating with Groq.
+
+Raises:
+    ValueError: If `text` is missing or empty.
+    Exception: For errors during API interaction or response parsing.
+"""
+
+
 import os
 from groq import Groq
 from dotenv import load_dotenv

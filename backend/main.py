@@ -13,7 +13,7 @@ Key Features:
     - Can be run directly using uvicorn.
 
 Usage:
-    $ uvicorn app.main:app --reload
+    $ uv run main.py
 
 Attributes:
     app (FastAPI): The FastAPI application instance.
@@ -23,14 +23,12 @@ from fastapi import FastAPI
 from app.routes.routes import router as article_router
 from fastapi.middleware.cors import CORSMiddleware
 
-# Create FastAPI app instance with metadata
 app = FastAPI(
     title="Perspective API",
     version="1.0.0",
     description=("An API to generate alternative perspectives on biased articles"),
 )
 
-# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,14 +37,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register article routes
 app.include_router(article_router, prefix="/api", tags=["Articles"])
 
 if __name__ == "__main__":
     import uvicorn
     import os
 
-    # Run development server
     port = int(os.environ.get("PORT", 7860))
     print(f"Server is running on http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

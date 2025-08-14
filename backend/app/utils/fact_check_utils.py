@@ -1,3 +1,35 @@
+"""
+fact_check_utils.py
+-------------------
+Provides a pipeline for automated fact-checking of extracted claims from article content.
+The process integrates claim extraction, web search, and large language model (LLM) 
+verification to produce a structured set of fact verification results.
+
+Pipeline Steps:
+    1. Claim Extraction:
+        - Uses the `run_claim_extractor_sdk` to identify verifiable claims from the
+          provided article state.
+        - Claims are parsed from markdown-like bullet point output.
+
+    2. Web Search:
+        - For each extracted claim, executes a Google search via `search_google` to find
+          relevant supporting or refuting sources.
+        - Stores the top search result along with the associated claim.
+        - Implements basic error handling and skips claims with no search results.
+
+    3. Fact Verification:
+        - Passes search results to `run_fact_verifier_sdk` for LLM-based evaluation.
+        - Produces verdicts and explanations for each claim.
+
+Returns:
+    - A list of verification objects containing verdicts, reasoning, and source metadata.
+    - An error message if the process fails at any stage.
+
+Usage:
+    final_results, error = run_fact_check_pipeline(state)
+"""
+
+
 from app.modules.facts_check.web_search import search_google
 from app.modules.facts_check.llm_processing import (
     run_claim_extractor_sdk,

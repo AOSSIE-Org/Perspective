@@ -1,3 +1,19 @@
+"""
+sentiment.py
+------------
+Performs sentiment analysis on cleaned article text using Groq's LLM.
+
+This module:
+    - Accepts pre-processed article text from the pipeline state.
+    - Uses an LLM to classify sentiment as Positive, Negative, or Neutral.
+    - Returns the sentiment label along with updated pipeline state.
+
+Functions:
+    run_sentiment_sdk(state: dict) -> dict:
+        Analyzes sentiment and updates the state with the result.
+"""
+
+
 import os
 from groq import Groq
 from dotenv import load_dotenv

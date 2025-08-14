@@ -1,3 +1,21 @@
+"""
+extractor.py
+------------
+Module for extracting article content from a given URL using multiple
+progressively robust methods. Attempts extraction with the following
+approaches in order:
+    1. Trafilatura
+    2. Newspaper3k
+    3. BeautifulSoup + Readability
+
+If one method fails, it falls back to the next until a valid article
+body is found.
+
+Classes:
+    ArticleExtractor
+        Encapsulates all extraction methods and fallback logic.
+"""
+
 import trafilatura
 from newspaper import Article
 from bs4 import BeautifulSoup
