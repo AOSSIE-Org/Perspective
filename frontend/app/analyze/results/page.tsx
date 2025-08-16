@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import BiasMeter from "@/components/bias-meter";
 import axios from "axios";
 
-const backend_url = process.env.NEXT_PUBLIC_API_URL;
+// const backend_url = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Renders the article analysis page with summary, perspectives, fact checks, bias meter, AI chat, and sources.
@@ -82,7 +82,7 @@ export default function AnalyzePage() {
     setMessages(newMessages);
     setMessage("");
 
-    const res = await axios.post(`${backend_url}/api/chat`, {
+    const res = await axios.post("https://thunder1245-perspective-backend.hf.space/api/chat", {
       message: message,
     });
     const data = res.data;
