@@ -1,4 +1,33 @@
+"""
+chunk_rag_data.py
+-----------------
+Module for converting processed article data into smaller, structured
+chunks suitable for storage and retrieval in a vector database.
+
+The chunking process:
+    1. Validates the presence of required top-level fields such as
+       cleaned_text, perspective, and facts.
+    2. Assigns a unique article ID to all chunks using a hash-based
+       generator.
+    3. Creates a "counter-perspective" chunk containing the alternative
+       viewpoint and its reasoning.
+    4. Splits each fact into its own chunk, including metadata like
+       verdict, explanation, and source link.
+
+This structure enables more efficient semantic search, targeted
+retrieval, and fine-grained analysis.
+
+Functions:
+    chunk_rag_data(data: dict) -> list[dict]
+        Validates and transforms the input data into a list of
+        chunk dictionaries containing text and metadata.
+"""
+
+
 from app.utils.generate_chunk_id import generate_id
+from app.logging.logging_config import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def chunk_rag_data(data):
@@ -69,5 +98,5 @@ def chunk_rag_data(data):
         return chunks
 
     except Exception as e:
-        print(f"[Error] Failed to chunk the data: {e}")
+        logger.exception(f"Failed to chunk the data: {e}")
         raise

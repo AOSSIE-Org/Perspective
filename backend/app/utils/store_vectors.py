@@ -1,3 +1,26 @@
+"""
+store_vectors.py
+----------------
+Provides a utility for persisting vector embeddings into a Pinecone index.
+
+Functions:
+    store(vectors: List[Dict[str, Any]], namespace: str = "default") -> None
+        - Validates and upserts a batch of vector embeddings into the 
+          configured Pinecone namespace.
+        - Parameters:
+            vectors: List of dictionaries containing 'id', 'values', and 'metadata'.
+            namespace: Target namespace in Pinecone (default is "default").
+        - Raises:
+            ValueError: If the vectors list is empty or malformed.
+            RuntimeError: If the upsert operation to Pinecone fails.
+
+Notes:
+    - Logs success and failure events for monitoring.
+    - Intended to be used after generating embeddings via 
+      the embed.py module before retrieval/semantic search.
+"""
+
+
 from app.db.vector_store import index
 
 

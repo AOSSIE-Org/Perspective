@@ -1,3 +1,22 @@
+"""
+cleaner.py
+----------
+Utility for cleaning raw extracted article text by removing boilerplate,
+junk lines, and excessive whitespace. Helps prepare text for downstream
+processing like NLP, fact-checking, and embedding.
+
+Main Features:
+    - Normalizes line breaks.
+    - Removes common boilerplate phrases and copyright notices.
+    - Filters out lines that are too short to be meaningful.
+    - Tidies spacing and formatting for readability.
+
+Functions:
+    clean_extracted_text(text: str) -> str
+        Cleans up extracted text by removing repetitive, promotional, or
+        irrelevant content while preserving main article body.
+"""
+
 import re
 import nltk
 

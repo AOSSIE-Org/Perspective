@@ -1,6 +1,31 @@
+"""
+main.py
+-------
+Entry point for the Perspective API backend.
+
+This module initializes the FastAPI application, configures middleware, 
+and includes API routes for handling article-related operations.
+
+Key Features:
+    - Serves as the main entry point for the Perspective backend.
+    - Configures CORS middleware to allow cross-origin requests.
+    - Includes article processing routes via FastAPI's router.
+    - Can be run directly using uvicorn.
+
+Usage:
+    $ uv run main.py
+
+Attributes:
+    app (FastAPI): The FastAPI application instance.
+"""
+
 from fastapi import FastAPI
 from app.routes.routes import router as article_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.logging.logging_config import setup_logger
+    
+# Setup logger for this module
+logger = setup_logger(__name__)
 
 app = FastAPI(
     title="Perspective API",
@@ -23,5 +48,5 @@ if __name__ == "__main__":
     import os
 
     port = int(os.environ.get("PORT", 7860))
-    print(f"Server is running on http://0.0.0.0:{port}")
+    logger.info(f" Server is running on http://localhost:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
