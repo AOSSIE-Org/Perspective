@@ -25,9 +25,9 @@ def run_sentiment_sdk(state):
                 },
                 {
                     "role": "user",
-                    "content": ("Analyze the sentiment of the following text:"
-                                f"\n\n{text}"
-                                ),
+                    "content": (
+                        f"Analyze the sentiment of the following text:\n\n{text}"
+                    ),
                 },
             ],
             model="gemma2-9b-it",

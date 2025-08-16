@@ -11,16 +11,15 @@ import json
 
 
 class Article_extractor:
-
     def __init__(self, url):
         self.url = url
         self.headers = {
-            'User-Agent': (
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-                        ' AppleWebKit/537.36 '
-                        '(KHTML, like Gecko) Chrome/113.0 Safari/537.36'
-                        )
-            }
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                " AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/113.0 Safari/537.36"
+            )
+        }
 
     def _fetch_html(self):
         try:
@@ -41,8 +40,8 @@ class Article_extractor:
             include_comments=False,
             include_tables=False,
             favor_recall=True,
-            output_format='json'
-            )
+            output_format="json",
+        )
         if result:
             return json.loads(result)
         return {}
@@ -56,8 +55,9 @@ class Article_extractor:
                 "title": article.title,
                 "text": article.text,
                 "authors": article.authors,
-                "publish_date": (article.publish_date.isoformat()
-                                 if article.publish_date else None)
+                "publish_date": (
+                    article.publish_date.isoformat() if article.publish_date else None
+                ),
             }
         except Exception as e:
             logging.error(f"Newspaper3k failed: {e}")
@@ -70,9 +70,9 @@ class Article_extractor:
 
         try:
             doc = Document(html)
-            soup = BeautifulSoup(doc.summary(), 'html.parser')
+            soup = BeautifulSoup(doc.summary(), "html.parser")
             title = doc.title()
-            text = soup.get_text(separator='\n')
+            text = soup.get_text(separator="\n")
             return {"title": title, "text": text}
         except Exception as e:
             logging.error(f"BS4 + Readability fallback failed: {e}")
@@ -82,15 +82,11 @@ class Article_extractor:
         methods = [
             self.extract_with_trafilatura,
             self.extract_with_newspaper,
-            self.extract_with_bs4
-            ]
+            self.extract_with_bs4,
+        ]
         for method in methods:
             result = method()
             if result and result.get("text"):
                 result["url"] = self.url
                 return result
-        return {
-            "url": self.url,
-            "text": "",
-            "error": "Failed to extract article."
-        }
+        return {"url": self.url, "text": "", "error": "Failed to extract article."}

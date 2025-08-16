@@ -5,10 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="Perspective API",
     version="1.0.0",
-    description=(
-        'An API to generate alternative'
-        ' perspectives on biased articles'
-    )
+    description=("An API to generate alternative perspectives on biased articles"),
 )
 
 app.add_middleware(
@@ -25,6 +22,6 @@ if __name__ == "__main__":
     import uvicorn
     import os
 
-    port = int(os.environ.get("PORT",  7860))
+    port = int(os.environ.get("PORT", 7860))
     print(f"Server is running on http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

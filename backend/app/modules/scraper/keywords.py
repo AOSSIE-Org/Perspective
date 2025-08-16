@@ -18,10 +18,7 @@ def extract_keywords(text: str, max_keywords: int = 15):
     keywords_with_scores = rake.get_ranked_phrases_with_scores()
 
     # Sort and limit
-    keywords = [phrase for score, phrase in sorted(
-        keywords_with_scores,
-        reverse=True
-        )]
+    keywords = [phrase for score, phrase in sorted(keywords_with_scores, reverse=True)]
     return keywords[:max_keywords]
 
 
@@ -40,5 +37,5 @@ def extract_keyword_data(text: str) -> Dict:
     return {
         "keywords": keywords,
         "top_phrase": keywords[0] if keywords else None,
-        "count": len(keywords)
+        "count": len(keywords),
     }

@@ -1,11 +1,25 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Shield, Brain, Database, CheckCircle, Globe, ArrowRight, Sparkles } from "lucide-react"
-import ThemeToggle from "@/components/theme-toggle"
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Shield,
+  Brain,
+  Database,
+  CheckCircle,
+  Globe,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
+import ThemeToggle from "@/components/theme-toggle";
 
 /**
  * Renders the main landing page for the Perspective application, showcasing its features, technology stack, and calls to action.
@@ -15,7 +29,7 @@ import ThemeToggle from "@/components/theme-toggle"
  * @returns The complete landing page React element for the Perspective app.
  */
 export default function Home() {
-  const router = useRouter()
+  const router = useRouter();
   const features = [
     {
       icon: Brain,
@@ -27,41 +41,56 @@ export default function Home() {
     {
       icon: Shield,
       title: "Bias Detection",
-      description: "Sophisticated algorithms identify and highlight potential biases in article content.",
+      description:
+        "Sophisticated algorithms identify and highlight potential biases in article content.",
       color: "from-emerald-500 to-teal-600",
     },
     {
       icon: CheckCircle,
       title: "Fact Checking",
-      description: "Cross-references claims with reliable sources to ensure accuracy and credibility.",
+      description:
+        "Cross-references claims with reliable sources to ensure accuracy and credibility.",
       color: "from-blue-500 to-cyan-600",
     },
     {
       icon: Database,
       title: "Vector Database",
-      description: "Efficient storage and retrieval system enables chat-based exploration of perspectives.",
+      description:
+        "Efficient storage and retrieval system enables chat-based exploration of perspectives.",
       color: "from-orange-500 to-red-600",
     },
-  ]
+  ];
 
   const technologies = [
     { name: "Python", color: "bg-gradient-to-r from-blue-500 to-blue-600" },
-    { name: "TypeScript", color: "bg-gradient-to-r from-blue-600 to-indigo-600" },
-    { name: "FastAPI", color: "bg-gradient-to-r from-green-500 to-emerald-600" },
+    {
+      name: "TypeScript",
+      color: "bg-gradient-to-r from-blue-600 to-indigo-600",
+    },
+    {
+      name: "FastAPI",
+      color: "bg-gradient-to-r from-green-500 to-emerald-600",
+    },
     { name: "Next.js", color: "bg-gradient-to-r from-gray-700 to-gray-900" },
-    { name: "Tailwind CSS", color: "bg-gradient-to-r from-cyan-500 to-blue-500" },
-    { name: "LangChain", color: "bg-gradient-to-r from-purple-500 to-indigo-600" },
+    {
+      name: "Tailwind CSS",
+      color: "bg-gradient-to-r from-cyan-500 to-blue-500",
+    },
+    {
+      name: "LangChain",
+      color: "bg-gradient-to-r from-purple-500 to-indigo-600",
+    },
     { name: "LangGraph", color: "bg-gradient-to-r from-pink-500 to-rose-600" },
     { name: "NLP", color: "bg-gradient-to-r from-amber-500 to-orange-600" },
     { name: "Vector DB", color: "bg-gradient-to-r from-teal-500 to-cyan-600" },
-  ]
+  ];
 
   const stats = [
     { label: "Articles Analyzed", value: "10,000+", color: "text-blue-600" },
     { label: "Biases Detected", value: "95%", color: "text-emerald-600" },
     { label: "Fact Accuracy", value: "98%", color: "text-purple-600" },
     { label: "User Satisfaction", value: "4.9/5", color: "text-orange-600" },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 overflow-hidden transition-colors duration-300">
@@ -104,8 +133,10 @@ export default function Home() {
           </h1>
 
           <p className="text-lg md:text-xl lg:text-2xl text-slate-600 dark:text-slate-300 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in delay-300 px-4">
-            Combat bias and one-sided narratives with AI-generated alternative perspectives. Get fact-based, balanced
-            viewpoints on any online article through our advanced NLP pipeline powered by LangGraph and LangChain.
+            Combat bias and one-sided narratives with AI-generated alternative
+            perspectives. Get fact-based, balanced viewpoints on any online
+            article through our advanced NLP pipeline powered by LangGraph and
+            LangChain.
           </p>
 
           <Button
@@ -116,9 +147,9 @@ export default function Home() {
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2 md:ml-3 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 animate-fade-in delay-600">
-             No sign in required. It’s completely free.
+            No sign in required. It’s completely free.
           </p>
-          
+
           {/* Floating stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-12 md:mt-20 animate-fade-in delay-700">
             {stats.map((stat, index) => (
@@ -128,7 +159,9 @@ export default function Home() {
                 >
                   {stat.value}
                 </div>
-                <div className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
+                <div className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
@@ -142,10 +175,12 @@ export default function Home() {
             What is Perspective?
           </h2>
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed animate-fade-in delay-200 px-4">
-            Perspective addresses the critical problem of biased and one-sided narratives in online articles. Our
-            AI-powered solution provides readers with fact-based, well-structured alternative perspectives by analyzing
-            article content, extracting key points, and generating logical counter-perspectives using cutting-edge
-            natural language processing technology.
+            Perspective addresses the critical problem of biased and one-sided
+            narratives in online articles. Our AI-powered solution provides
+            readers with fact-based, well-structured alternative perspectives by
+            analyzing article content, extracting key points, and generating
+            logical counter-perspectives using cutting-edge natural language
+            processing technology.
           </p>
         </div>
       </section>
@@ -157,8 +192,8 @@ export default function Home() {
             How Perspective Works
           </h2>
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto animate-fade-in delay-200 px-4">
-            Our advanced AI pipeline processes articles through multiple stages to deliver balanced, fact-checked
-            perspectives.
+            Our advanced AI pipeline processes articles through multiple stages
+            to deliver balanced, fact-checked perspectives.
           </p>
         </div>
 
@@ -199,8 +234,8 @@ export default function Home() {
                 Built with Cutting-Edge Technology
               </h3>
               <p className="text-slate-300 dark:text-slate-400 max-w-3xl mx-auto text-base md:text-lg leading-relaxed px-4">
-                Powered by the latest in AI, NLP, and web technologies to deliver accurate, fast, and reliable
-                perspective analysis.
+                Powered by the latest in AI, NLP, and web technologies to
+                deliver accurate, fast, and reliable perspective analysis.
               </p>
             </div>
 
@@ -226,8 +261,8 @@ export default function Home() {
             Ready to See Every Side of the Story?
           </h3>
           <p className="text-lg md:text-xl lg:text-2xl text-slate-600 dark:text-slate-300 mb-8 md:mb-12 leading-relaxed animate-fade-in delay-200 px-4">
-            Join thousands of readers who are already discovering balanced perspectives and combating bias in online
-            content.
+            Join thousands of readers who are already discovering balanced
+            perspectives and combating bias in online content.
           </p>
           <Button
             onClick={() => router.push("/analyze")}
@@ -247,15 +282,20 @@ export default function Home() {
               <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-lg flex items-center justify-center transform transition-all duration-300 group-hover:rotate-6">
                 <Globe className="w-3 h-3 md:w-4 md:h-4 text-white" />
               </div>
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base">Perspective</span>
-              <span className="text-slate-500 dark:text-slate-400 text-sm md:text-base">by AOSSIE</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base">
+                Perspective
+              </span>
+              <span className="text-slate-500 dark:text-slate-400 text-sm md:text-base">
+                by AOSSIE
+              </span>
             </div>
             <div className="text-xs md:text-sm text-slate-500 dark:text-slate-400 text-center">
-              © 2024 AOSSIE. Combating bias through AI-powered perspective analysis.
+              © 2024 AOSSIE. Combating bias through AI-powered perspective
+              analysis.
             </div>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

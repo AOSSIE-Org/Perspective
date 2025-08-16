@@ -31,7 +31,4 @@ def store_and_send(state):
             "message": f"{e}",
         }
     #  sending to frontend
-    return {
-        **state,
-        "status": "success"
-        }
+    return {**state, "status": "success"}

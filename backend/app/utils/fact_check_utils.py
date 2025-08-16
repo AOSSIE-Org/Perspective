@@ -1,8 +1,8 @@
 from app.modules.facts_check.web_search import search_google
 from app.modules.facts_check.llm_processing import (
     run_claim_extractor_sdk,
-    run_fact_verifier_sdk
-    )
+    run_fact_verifier_sdk,
+)
 import re
 import time
 

@@ -24,9 +24,9 @@ def store(vectors: List[Dict[str, Any]], namespace: str = "default") -> None:
 
     try:
         index.upsert(vectors, namespace=namespace)
-        logger.info(f"Successfully stored {len(vectors)} "
-                    f"vectors in namespace '{namespace}'")
+        logger.info(
+            f"Successfully stored {len(vectors)} vectors in namespace '{namespace}'"
+        )
     except Exception as e:
-        logger.error("Failed to store "
-                     f"vectors in namespace '{namespace}': {e}")
+        logger.error(f"Failed to store vectors in namespace '{namespace}': {e}")
         raise RuntimeError(f"Vector storage failed: {e}")
