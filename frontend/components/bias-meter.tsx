@@ -12,6 +12,11 @@ interface BiasMeterProps {
  * @param score - The bias score to display, expected to be between 0 and 100.
  */
 export default function BiasMeter({ score }: BiasMeterProps) {
+
+if(!score){
+  score = 0
+}
+
   const getScoreColor = (score: number) => {
     if (score <= 30) return "text-green-500";
     if (score <= 60) return "text-yellow-500";

@@ -71,7 +71,10 @@ export default function AnalyzePage() {
       setIsLoading(false);
     } else {
       console.warn("No bias or data found. Redirecting...");
-      router.push("/analyze");
+      if (!isRedirecting.current) {
+        isRedirecting.current = true;
+        router.push("/analyze"); // 🔹 You can also add a toast here
+      }
     }
   }, [router]);
 
@@ -92,14 +95,14 @@ export default function AnalyzePage() {
     // 🔹 Step 2: Append LLM’s response
     setMessages([...newMessages, { role: "assistant", content: data.answer }]);
   }
-
-  if (isLoading || !analysisData || !biasScore) {
+   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-muted-foreground">Analyzing content...</div>
       </div>
     );
   }
+
 
   const {
     cleaned_text,
@@ -108,6 +111,10 @@ export default function AnalyzePage() {
     perspective,
     score,
   } = analysisData;
+
+  
+
+  
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -137,7 +144,7 @@ export default function AnalyzePage() {
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="summary">Article</TabsTrigger>
                 <TabsTrigger value="perspectives">Perspective</TabsTrigger>
                 <TabsTrigger value="facts">Fact Check</TabsTrigger>
               </TabsList>
