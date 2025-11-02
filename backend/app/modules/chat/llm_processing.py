@@ -53,13 +53,16 @@ Context:
 Question:
 {question}
 """
-
-    response = client.chat.completions.create(
+    try:
+        response = client.chat.completions.create(
         model="gemma2-9b-it",
         messages=[
             {"role": "system", "content": "Use only the context to answer."},
             {"role": "user", "content": prompt},
-        ],
-    )
-    logger.info("LLM response retrieved successfully.")
-    return response.choices[0].message.content
+        ],  
+        )
+        logger.info("LLM response retrieved successfully.")
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"Error during LLM interaction: {e}")
+        raise
