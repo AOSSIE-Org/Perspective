@@ -22,10 +22,59 @@ Functions:
 """
 
 
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Any
+import os
+import logging
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+
+_embedder = None
+_model_name = os.getenv("EMBED_MODEL_NAME", "all-MiniLM-L6-v2")
+
+
+def _get_embedder():
+    """Lazily load the SentenceTransformer embedder. If loading fails (network/DNS),
+    return a deterministic fallback embedder that produces fixed-size vectors.
+    """
+    global _embedder
+    if _embedder is not None:
+        return _embedder
+
+    try:
+        from sentence_transformers import SentenceTransformer
+
+        _embedder = SentenceTransformer(_model_name)
+        return _embedder
+    except Exception as exc:  # pragma: no cover - defensive fallback
+        logging.warning(
+            "Failed to load SentenceTransformer '%s' (%s). Falling back to deterministic embedder.",
+            _model_name,
+            exc,
+        )
+
+        class _FallbackEmbedder:
+            def __init__(self, dim: int = 384):
+                self.dim = dim
+
+            def encode(self, texts: List[str]):
+                # deterministic hash-based vectors (not semantically meaningful)
+                import hashlib
+
+                out = []
+                for t in texts:
+                    h = hashlib.sha256(t.encode("utf-8")).digest()
+                    # expand/repeat to required dim and convert to floats in [-1,1]
+                    vals = []
+                    i = 0
+                    while len(vals) < self.dim:
+                        b = h[i % len(h)]
+                        # map byte to [-1,1]
+                        vals.append((b / 127.5) - 1.0)
+                        i += 1
+                    out.append(vals[: self.dim])
+                return out
+
+        _embedder = _FallbackEmbedder()
+        return _embedder
 
 
 def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -40,7 +89,14 @@ def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             )
 
     texts = [chunk["text"] for chunk in chunks]
-    embeddings = embedder.encode(texts).tolist()
+    embedder = _get_embedder()
+    embeddings = embedder.encode(texts)
+    # some embedders return numpy arrays
+    try:
+        embeddings = embeddings.tolist()
+    except Exception:
+        # assume it's already a list of lists
+        pass
 
     vectors = []
     for chunk, embedding in zip(chunks, embeddings):

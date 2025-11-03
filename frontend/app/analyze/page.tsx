@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import ProfileMenu from "@/components/profile-menu";
 
 /**
  * Renders the main page for submitting an article URL to initiate AI-powered analysis.
@@ -102,8 +103,9 @@ export default function AnalyzePage() {
               Perspective
             </span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-3">
             <ThemeToggle />
+            <ProfileMenu />
           </div>
         </div>
       </header>

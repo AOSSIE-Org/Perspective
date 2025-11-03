@@ -23,6 +23,8 @@ from fastapi import FastAPI
 from app.routes.routes import router as article_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.logging.logging_config import setup_logger
+from app.routes.auth import router as auth_router
+from app.db.mongo import init_mongo, close_mongo
     
 # Setup logger for this module
 logger = setup_logger(__name__)
@@ -42,6 +44,18 @@ app.add_middleware(
 )
 
 app.include_router(article_router, prefix="/api", tags=["Articles"])
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
+
+
+@app.on_event("startup")
+async def on_startup():
+    # initialize MongoDB client
+    init_mongo(app)
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    close_mongo()
 
 if __name__ == "__main__":
     import uvicorn

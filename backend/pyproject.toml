@@ -25,4 +25,9 @@ dependencies = [
     "sentence-transformers>=5.0.0",
     "trafilatura>=2.0.0",
     "uvicorn>=0.34.3",
+    "pyjwt>=2.9.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt<4.0.0",
+    "pydantic[email]>=2.11.5",
+    "motor>=3.5.1",
 ]
