@@ -29,10 +29,24 @@ export default function ProfileMenu() {
 
       if (token) {
         setIsAuthenticated(true);
-        // Decode JWT to get user email (basic decoding, no verification needed client-side)
+        // Robust base64url decoding for JWT payload
         try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUserEmail(payload.sub || "");
+          const part = token.split(".")[1];
+          if (part) {
+            // base64url -> base64 (replace - and _ then pad)
+            let b64 = part.replace(/-/g, "+").replace(/_/g, "/");
+            while (b64.length % 4 !== 0) b64 += "=";
+            const json = decodeURIComponent(
+              atob(b64)
+                .split("")
+                .map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
+                .join("")
+            );
+            const payload = JSON.parse(json);
+            setUserEmail(payload.sub || "");
+          } else {
+            setUserEmail("");
+          }
         } catch (e) {
           setUserEmail("");
         }

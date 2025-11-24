@@ -11,8 +11,6 @@ JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
 
-from passlib.context import CryptContext
-
 pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 bearer_scheme = HTTPBearer(auto_error=True)
 
@@ -45,7 +43,14 @@ def decode_token(token: str) -> dict:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> dict:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> dict:
     token = credentials.credentials
     payload = decode_token(token)
-    return {"email": payload.get("sub")}
+    from app.db.user_store import get_user_by_email  # local import to avoid circulars
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+    user = await get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer exists")
+    return {"email": email}

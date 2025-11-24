@@ -24,9 +24,12 @@ def init_mongo(app=None) -> None:
 
 
 def close_mongo() -> None:
-    global _client
+    global _client, _db
     if _client is not None:
         _client.close()
+    # Reset globals so future calls re-init a fresh client instead of returning closed handle
+    _client = None
+    _db = None
 
 
 def get_db() -> AsyncIOMotorDatabase:

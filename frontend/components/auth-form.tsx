@@ -68,7 +68,10 @@ export default function AuthForm() {
       if (!token) throw new Error("No token returned");
       // Store token in a cookie for middleware to read
       const maxAge = 60 * 60 * 2; // 2 hours
-      document.cookie = `token=${token}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+      // httpOnly cannot be set from client-side JS; Secure only when served over HTTPS / production
+      const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+      const secureFlag = isSecure ? '; Secure' : '';
+      document.cookie = `token=${token}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secureFlag}`;
 
       // Show success toast
       toast({

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 
@@ -15,7 +15,7 @@ class User(BaseModel):
     name: str
     email: EmailStr
     hashed_password: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class UserPublic(BaseModel):
