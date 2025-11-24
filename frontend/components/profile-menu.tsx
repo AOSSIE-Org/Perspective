@@ -61,7 +61,9 @@ export default function ProfileMenu() {
 
   const handleLogout = () => {
     // Remove token cookie
-    document.cookie = "token=; Path=/; Max-Age=0; SameSite=Lax";
+    const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const secureFlag = isSecure ? '; Secure' : '';
+    document.cookie = `token=; Path=/; Max-Age=0; SameSite=Lax${secureFlag}`;
     setIsAuthenticated(false);
     setUserEmail("");
 
