@@ -94,8 +94,17 @@ export default function ResultsPage() {
 
   const validateUrl = (inputUrl: string) => {
     try {
-      new URL(inputUrl);
-      setIsValidUrl(true);
+      const parsedUrl = new URL(inputUrl);
+      
+      // Whitelist only safe protocols to prevent XSS attacks
+      // Reject javascript:, data:, file:, and other dangerous protocols
+      const safeProtocols = ['http:', 'https:'];
+      
+      if (safeProtocols.includes(parsedUrl.protocol)) {
+        setIsValidUrl(true);
+      } else {
+        setIsValidUrl(false);
+      }
     } catch {
       setIsValidUrl(false);
     }
