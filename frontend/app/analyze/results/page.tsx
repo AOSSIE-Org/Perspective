@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,30 +31,66 @@ export default function ResultsPage() {
   const [hasError, setHasError] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const router = useRouter();
+  
+  // Track if component is mounted to prevent state updates after unmount
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const storedAnalysis = sessionStorage.getItem("analysisResult");
     const storedBias = sessionStorage.getItem("BiasScore");
 
+    let parsedAnalysis = null;
+    let parsedBias = null;
+
+    // Try to parse analysis data
     if (storedAnalysis) {
-      const parsed = JSON.parse(storedAnalysis);
-      setAnalysisData(parsed);
-      
-      if ((parsed.status === "stopped_due_to_error" || parsed.status === "error") && !parsed.cleaned_text) {
+      try {
+        parsedAnalysis = JSON.parse(storedAnalysis);
+        setAnalysisData(parsedAnalysis);
+        
+        // Check if analysis failed
+        if ((parsedAnalysis.status === "stopped_due_to_error" || parsedAnalysis.status === "error") && !parsedAnalysis.cleaned_text) {
+          setHasError(true);
+        }
+      } catch (error) {
+        console.error("Failed to parse analysis data:", error);
+        sessionStorage.removeItem("analysisResult");
         setHasError(true);
       }
     }
+
+    // Try to parse bias score data
     if (storedBias) {
-      setBiasScore(JSON.parse(storedBias));
+      try {
+        parsedBias = JSON.parse(storedBias);
+        setBiasScore(parsedBias);
+      } catch (error) {
+        console.error("Failed to parse bias score:", error);
+        sessionStorage.removeItem("BiasScore");
+        // Bias is optional, don't set error flag
+      }
     }
 
+    // Redirect if no valid analysis data
+    if (!storedAnalysis || !parsedAnalysis) {
+      console.warn("No valid analysis data found, redirecting to analyze page");
+      router.push("/analyze");
+      return;
+    }
+
+    // Initialize chat messages
     setChatMessages([
       {
         role: "assistant",
         content: "Welcome to the Perspective chat. You can ask me questions about this article or request more information about specific claims.",
       },
     ]);
-  }, []);
+
+    // Cleanup function to mark component as unmounted
+    return () => {
+      isMounted.current = false;
+    };
+  }, [router]);
 
   const validateUrl = (inputUrl: string) => {
     try {
@@ -85,16 +121,25 @@ export default function ResultsPage() {
   const handleSendMessage = () => {
     if (chatInput.trim()) {
       setChatMessages([...chatMessages, { role: "user", content: chatInput }]);
-      setTimeout(() => {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "This is a simulated response. In production, this would connect to your AI backend.",
-          },
-        ]);
+      
+      // Store timeout ID for potential cleanup
+      const timeoutId = setTimeout(() => {
+        // Check if component is still mounted before updating state
+        if (isMounted.current) {
+          setChatMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: "This is a simulated response. In production, this would connect to your AI backend.",
+            },
+          ]);
+        }
       }, 1000);
+      
       setChatInput("");
+      
+      // Note: If you need to clear this specific timeout on unmount,
+      // you'd need to store it in a ref and clear it in useEffect cleanup
     }
   };
 
@@ -161,6 +206,7 @@ export default function ResultsPage() {
                           <li>The content couldn't be extracted properly</li>
                           <li>The article format isn't supported</li>
                           <li>Backend service timeout or error</li>
+                          <li>Corrupted or invalid session data</li>
                         </ul>
                         <Button
                           onClick={() => router.push("/analyze")}

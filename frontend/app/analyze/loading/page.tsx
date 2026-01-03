@@ -15,6 +15,24 @@ import {
 import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
 
+// Backend URL from environment variable with fallback
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://thunder1245-perspective-backend.hf.space";
+
+// API timeout in milliseconds (60 seconds)
+const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "60000", 10);
+
+// Simple logger utility that respects NODE_ENV
+const logger = {
+  debug: (...args: any[]) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[DEBUG]', ...args);
+    }
+  },
+  error: (...args: any[]) => {
+    console.error('[ERROR]', ...args);
+  }
+};
+
 export default function LoadingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -50,6 +68,10 @@ export default function LoadingPage() {
   ];
 
   useEffect(() => {
+    let stepInterval: NodeJS.Timeout | null = null;
+    let progressInterval: NodeJS.Timeout | null = null;
+    let isMounted = true;
+
     const runAnalysis = async () => {
       const storedUrl = sessionStorage.getItem("articleUrl");
       if (storedUrl) {
@@ -57,46 +79,69 @@ export default function LoadingPage() {
 
         try {
           const [processRes, biasRes] = await Promise.all([
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/process", {
-              url: storedUrl,
-            }),
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/bias", {
-              url: storedUrl,
-            }),
+            axios.post(
+              `${BACKEND_URL}/api/process`,
+              { url: storedUrl },
+              { timeout: API_TIMEOUT }
+            ),
+            axios.post(
+              `${BACKEND_URL}/api/bias`,
+              { url: storedUrl },
+              { timeout: API_TIMEOUT }
+            ),
           ]);
 
           sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
-          console.log("Bias score saved");
-          console.log(biasRes);
+          logger.debug("Bias score saved", biasRes.data);
 
           sessionStorage.setItem(
             "analysisResult",
             JSON.stringify(processRes.data)
           );
 
-          console.log("Analysis result saved");
-          console.log(processRes);
+          logger.debug("Analysis result saved", processRes.data);
         } catch (err) {
-          console.error("Failed to process article:", err);
-          router.push("/analyze");
+          // Enhanced error logging with timeout detection
+          if (axios.isAxiosError(err)) {
+            if (err.code === 'ECONNABORTED') {
+              logger.error("Request timeout - backend took too long to respond:", err);
+            } else if (err.response) {
+              logger.error("Backend error response:", err.response.status, err.response.data);
+            } else if (err.request) {
+              logger.error("No response received from backend:", err.message);
+            } else {
+              logger.error("Request setup error:", err.message);
+            }
+          } else {
+            logger.error("Failed to process article:", err);
+          }
+          
+          if (isMounted) {
+            router.push("/analyze");
+          }
           return;
         }
 
-        const stepInterval = setInterval(() => {
+        // Don't start intervals if component already unmounted
+        if (!isMounted) return;
+
+        stepInterval = setInterval(() => {
           setCurrentStep((prev) => {
             if (prev < steps.length - 1) {
               return prev + 1;
             } else {
-              clearInterval(stepInterval);
+              if (stepInterval) clearInterval(stepInterval);
               setTimeout(() => {
-                router.push("/analyze/results");
+                if (isMounted) {
+                  router.push("/analyze/results");
+                }
               }, 2000);
               return prev;
             }
           });
         }, 2000);
 
-        const progressInterval = setInterval(() => {
+        progressInterval = setInterval(() => {
           setProgress((prev) => {
             if (prev < 100) {
               return prev + 1;
@@ -104,18 +149,20 @@ export default function LoadingPage() {
             return prev;
           });
         }, 100);
-
-        return () => {
-          clearInterval(stepInterval);
-          clearInterval(progressInterval);
-        };
       } else {
         router.push("/analyze");
       }
     };
 
     runAnalysis();
-  }, [router]);
+
+    // Cleanup function returned directly from useEffect
+    return () => {
+      isMounted = false;
+      if (stepInterval) clearInterval(stepInterval);
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [router, steps.length]);
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 transition-colors duration-300 overflow-hidden">

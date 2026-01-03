@@ -31,8 +31,17 @@ export default function AnalyzePage() {
 
   const validateUrl = (inputUrl: string) => {
     try {
-      new URL(inputUrl);
-      setIsValidUrl(true);
+      const parsedUrl = new URL(inputUrl);
+      
+      // Whitelist only safe protocols to prevent XSS attacks
+      // Reject javascript:, data:, file:, and other dangerous protocols
+      const safeProtocols = ['http:', 'https:'];
+      
+      if (safeProtocols.includes(parsedUrl.protocol)) {
+        setIsValidUrl(true);
+      } else {
+        setIsValidUrl(false);
+      }
     } catch {
       setIsValidUrl(false);
     }
@@ -168,7 +177,7 @@ export default function AnalyzePage() {
                 {url && !isValidUrl && (
                   <p className="text-red-500 text-sm mt-3 ml-12 animate-fade-in flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                    Please enter a valid URL
+                    Please enter a valid HTTP or HTTPS URL
                   </p>
                 )}
               </div>
