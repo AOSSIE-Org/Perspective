@@ -35,7 +35,7 @@ Core Components:
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
@@ -54,6 +54,9 @@ logger = setup_logger(__name__)
 
 router = APIRouter()
 
+# Admin API key for destructive cache operations (set via environment variable)
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
+
 
 class URlRequest(BaseModel):
     url: str
@@ -71,6 +74,23 @@ async def home():
 # Directory for saving cache hit responses
 CACHE_RESPONSES_DIR = Path(__file__).parent.parent.parent / "cache_responses"
 CACHE_RESPONSES_DIR.mkdir(exist_ok=True)
+CACHE_RESPONSES_MAX_FILES = 100  # Max files to keep
+
+
+async def _cleanup_old_cache_files() -> None:
+    """Remove oldest cache files if exceeding max limit."""
+    try:
+        files = list(CACHE_RESPONSES_DIR.glob("*.json"))
+        if len(files) > CACHE_RESPONSES_MAX_FILES:
+            # Sort by modification time (oldest first)
+            files.sort(key=lambda f: f.stat().st_mtime)
+            # Remove oldest files to stay under limit
+            files_to_remove = files[:len(files) - CACHE_RESPONSES_MAX_FILES]
+            for f in files_to_remove:
+                f.unlink()
+                logger.debug(f"Evicted old cache file: {f.name}")
+    except Exception as e:
+        logger.error(f"Failed to cleanup cache files: {e}")
 
 
 async def _save_cache_response(url: str, response: dict) -> None:
@@ -95,6 +115,9 @@ async def _save_cache_response(url: str, response: dict) -> None:
             lambda: filepath.write_text(json_content, encoding="utf-8")
         )
         logger.info(f"Saved cache response to: {filepath}")
+        
+        # Cleanup old files if over limit
+        await _cleanup_old_cache_files()
     except Exception as e:
         logger.error(f"Failed to save cache response: {e}")
 
@@ -163,22 +186,31 @@ async def cache_stats():
 
 
 @router.delete("/cache/clear")
-async def cache_clear():
-    """Clear all cache entries."""
+async def cache_clear(x_admin_key: str = Header(None, alias="X-Admin-Key")):
+    """Clear all cache entries. Requires X-Admin-Key header."""
+    if not ADMIN_API_KEY or x_admin_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid or missing admin key")
     count = cache.clear()
     logger.info(f"Cache cleared: {count} entries removed")
     return {"message": f"Cleared {count} cache entries", "cleared": count}
 
 
 @router.delete("/cache/{endpoint}")
-async def cache_delete(endpoint: str, request: URlRequest):
+async def cache_delete(
+    endpoint: str, 
+    request: URlRequest,
+    x_admin_key: str = Header(None, alias="X-Admin-Key")
+):
     """
-    Delete a specific cache entry.
+    Delete a specific cache entry. Requires X-Admin-Key header.
     
     Args:
         endpoint: The endpoint type ("process" or "bias")
         request: The URL request containing the article URL
     """
+    if not ADMIN_API_KEY or x_admin_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid or missing admin key")
+    
     if endpoint not in ["process", "bias"]:
         return {"error": "Invalid endpoint. Use 'process' or 'bias'", "deleted": False}
     

@@ -140,8 +140,11 @@ async def verify_facts_node(state):
 
     context = "Verify claims:\n"
     for item in results:
-        c_id = item["claim_id"]
-        if c_id < len(claims):
+        try:
+            c_id = int(item["claim_id"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= c_id < len(claims):
             # Limit evidence to first 300 chars
             evidence = item['result'][:300] if item.get('result') else 'No evidence'
             context += f"Claim: {claims[c_id]}\nEvidence: {evidence}\n"

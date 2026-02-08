@@ -33,6 +33,7 @@ Usage:
 import hashlib
 import os
 import threading
+import copy
 from datetime import datetime, timedelta
 from typing import Any, Optional
 from collections import OrderedDict
@@ -129,8 +130,8 @@ class URLCache:
             
             logger.info(f"Cache hit for {endpoint}: {url}")
             
-            # Return value with cache metadata
-            result = entry.value.copy() if isinstance(entry.value, dict) else entry.value
+            # Return deep copy with cache metadata to prevent mutation
+            result = copy.deepcopy(entry.value) if isinstance(entry.value, (dict, list)) else entry.value
             if isinstance(result, dict):
                 result["_cache"] = entry.to_metadata()
             
@@ -156,7 +157,8 @@ class URLCache:
                 evicted_key, _ = self._cache.popitem(last=False)
                 logger.debug(f"Evicted cache entry: {evicted_key}")
             
-            self._cache[key] = CacheEntry(value, self._ttl_seconds)
+            safe_value = copy.deepcopy(value) if isinstance(value, (dict, list)) else value
+            self._cache[key] = CacheEntry(safe_value, self._ttl_seconds)
             logger.info(f"Cached response for {endpoint}: {url}")
     
     def delete(self, endpoint: str, url: str) -> bool:
