@@ -73,23 +73,24 @@ def chunk_rag_data(data):
         )
 
         # Add each fact as a separate chunk
+        # Handle both old format (original_claim/verdict/explanation/source_link) and
+        # new DuckDuckGo format (claim/status/reason)
         for i, fact in enumerate(data["facts"]):
-            fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
-            for field in fact_fields:
-                if field not in fact:
-                    raise ValueError(
-                        f"Missing required fact field: {field} in fact index {i}"
-                    )
+            # Get claim text with flexible key lookup
+            claim_text = fact.get("claim") or fact.get("original_claim") or "Unknown claim"
+            verdict = fact.get("status") or fact.get("verdict") or "Unknown"
+            explanation = fact.get("reason") or fact.get("explanation") or "N/A"
+            source_link = fact.get("source_link", "")
 
             chunks.append(
                 {
                     "id": f"{article_id}-fact-{i}",
-                    "text": fact["original_claim"],
+                    "text": claim_text,
                     "metadata": {
                         "type": "fact",
-                        "verdict": fact["verdict"],
-                        "explanation": fact["explanation"],
-                        "source_link": fact["source_link"],
+                        "verdict": str(verdict),
+                        "explanation": explanation,
+                        "source_link": source_link,
                         "article_id": article_id,
                     },
                 }

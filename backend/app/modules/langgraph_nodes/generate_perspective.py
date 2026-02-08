@@ -56,17 +56,19 @@ def generate_perspective(state):
 
         if not text:
             raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not facts:
-            raise ValueError("Missing or empty 'facts' in state")
-
-        facts_str = "\n".join(
-            [
-                f"Claim: {f['original_claim']}\n"
-                "Verdict: {f['verdict']}\nExplanation: "
-                "{f['explanation']}"
-                for f in state["facts"]
-            ]
-        )
+        # Handle both old format (original_claim/verdict/explanation) and 
+        # new format (claim/status/reason)
+        if not facts:
+            facts_str = "No facts available."
+        else:
+            facts_str = "\n".join(
+                [
+                    f"Claim: {f.get('claim', f.get('original_claim', 'Unknown'))}\n"
+                    f"Verdict: {f.get('status', f.get('verdict', 'Unknown'))}\n"
+                    f"Explanation: {f.get('reason', f.get('explanation', 'N/A'))}"
+                    for f in facts
+                ]
+            )
 
         result = chain.invoke(
             {

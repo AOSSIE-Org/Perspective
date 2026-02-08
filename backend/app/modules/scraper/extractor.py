@@ -41,7 +41,7 @@ class Article_extractor:
 
     def _fetch_html(self):
         try:
-            res = requests.get(self.url, self.headers, timeout=10)
+            res = requests.get(self.url, headers=self.headers, timeout=10)
             res.raise_for_status()
             return res.text
         except requests.RequestException as e:

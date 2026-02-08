@@ -27,8 +27,8 @@ Core Functions:
         returning a dictionary containing the cleaned text and keywords.
     
     run_langgraph_workflow(state: dict) -> dict
-        Invokes the pre-compiled LangGraph workflow with the provided 
-        state dictionary and returns the result.
+        Invokes the pre-compiled LangGraph workflow asynchronously with 
+        the provided state dictionary and returns the result.
 """
 
 
@@ -38,6 +38,7 @@ from app.modules.scraper.keywords import extract_keywords
 from app.modules.langgraph_builder import build_langgraph
 from app.logging.logging_config import setup_logger
 import json
+import asyncio
 
 logger = setup_logger(__name__)
 
@@ -64,8 +65,9 @@ def run_scraper_pipeline(url: str) -> dict:
     return result
 
 
-def run_langgraph_workflow(state: dict):
-    """Execute the pre-compiled LangGraph workflow."""
-    result = _LANGGRAPH_WORKFLOW.invoke(state)
+async def run_langgraph_workflow(state: dict):
+    """Execute the pre-compiled LangGraph workflow asynchronously."""
+    result = await _LANGGRAPH_WORKFLOW.ainvoke(state)
     logger.info("LangGraph workflow executed successfully.")
     return result
+
