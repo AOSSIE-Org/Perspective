@@ -29,6 +29,11 @@ search_tool = DuckDuckGoSearchRun()
 # Use the same model as other modules
 LLM_MODEL = "llama-3.3-70b-versatile"
 
+# Timeout for DuckDuckGo searches (seconds)
+# The underlying duckduckgo_search library has a default timeout (~10s),
+# but we add an asyncio-level timeout as a safety net for hung searches.
+SEARCH_TIMEOUT_SECONDS = 15
+
 logger = setup_logger(__name__)
 
 
@@ -112,16 +117,30 @@ async def execute_searches_node(state):
         return {"search_results": []}
 
     async def run_one_search(q):
+        query_str = q.get("query")
+        c_id = q.get("claim_id")
+        
+        # Guard against malformed LLM responses missing the query key
+        if not query_str or not isinstance(query_str, str):
+            logger.warning(f"Skipping invalid search query for claim {c_id}: {query_str}")
+            return {"claim_id": c_id, "result": "Invalid query"}
+        
         try:
-            query_str = q.get("query")
-            c_id = q.get("claim_id")
-            
-            res = await asyncio.to_thread(search_tool.invoke, query_str)
+            # Wrap the search in asyncio.wait_for to prevent indefinite hangs
+            res = await asyncio.wait_for(
+                asyncio.to_thread(search_tool.invoke, query_str),
+                timeout=SEARCH_TIMEOUT_SECONDS
+            )
             logger.info(f"Search Result for Claim {c_id}: {res[:200]}...")
             return {"claim_id": c_id, "result": res}
+        except asyncio.TimeoutError:
+            logger.warning(
+                f"Search timed out after {SEARCH_TIMEOUT_SECONDS}s for query: {query_str}"
+            )
+            return {"claim_id": c_id, "result": "Search timed out"}
         except Exception as e:
-            logger.error(f"Search failed for query: {q.get('query')}: {e}")
-            return {"claim_id": q.get("claim_id"), "result": "Search failed"}
+            logger.error(f"Search failed for query: {query_str}: {e}")
+            return {"claim_id": c_id, "result": "Search failed"}
 
     results = await asyncio.gather(*[run_one_search(q) for q in queries])
     

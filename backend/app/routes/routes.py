@@ -212,7 +212,10 @@ async def cache_delete(
         raise HTTPException(status_code=403, detail="Forbidden: Invalid or missing admin key")
     
     if endpoint not in ["process", "bias"]:
-        return {"error": "Invalid endpoint. Use 'process' or 'bias'", "deleted": False}
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid endpoint. Use 'process' or 'bias'"
+        )
     
     deleted = cache.delete(endpoint, request.url)
     if deleted:
