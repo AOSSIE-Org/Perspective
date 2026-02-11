@@ -71,7 +71,7 @@ async def bias_detection(request: URlRequest):
 async def run_pipelines(request: URlRequest):
     article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
-    data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
+    data = await run_langgraph_workflow(article_text)
     return data
 
 

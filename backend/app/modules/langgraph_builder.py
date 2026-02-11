@@ -6,12 +6,12 @@ cleaned article text through multiple NLP tasks, with error handling
 and retry logic.
 
 Workflow:
-    1. Sentiment analysis on the cleaned text.
-    2. Fact-checking detected claims.
-    3. Generating a counter-perspective.
-    4. Judging the quality of the generated perspective.
-    5. Storing results and sending them downstream.
-    6. Error handling at any step if failures occur.
+    1. Parallel analysis: sentiment analysis and fact checking tool pipeline
+       (extract_claims -> plan_searches -> execute_searches -> verify_facts)
+    2. Generating a counter-perspective.
+    3. Judging the quality of the generated perspective.
+    4. Storing results and sending.
+    5. Error handling at any step if failures occur.
 
 Core Features:
     - Uses a TypedDict (`MyState`) to define the shape of the pipeline's
@@ -31,17 +31,17 @@ Functions:
 """
 
 
+from typing import List, Any
 from langgraph.graph import StateGraph
+from typing_extensions import TypedDict
+
 from app.modules.langgraph_nodes import (
     sentiment,
-    fact_check,
     generate_perspective,
     judge,
     store_and_send,
     error_handler,
 )
-
-from typing_extensions import TypedDict
 
 
 class MyState(TypedDict):
@@ -52,29 +52,26 @@ class MyState(TypedDict):
     score: int
     retries: int
     status: str
+    claims: List[str]
+    search_queries: List[Any]
+    search_results: List[Any]
 
 
 def build_langgraph():
     graph = StateGraph(MyState)
 
-    graph.add_node("sentiment_analysis", sentiment.run_sentiment_sdk)
-    graph.add_node("fact_checking", fact_check.run_fact_check)
+    # parallel analysis runs sentiment and fact_check tool pipeline in parallel
+    graph.add_node("parallel_analysis", sentiment.run_parallel_analysis)
+
     graph.add_node("generate_perspective", generate_perspective.generate_perspective)
     graph.add_node("judge_perspective", judge.judge_perspective)
     graph.add_node("store_and_send", store_and_send.store_and_send)
     graph.add_node("error_handler", error_handler.error_handler)
 
-    graph.set_entry_point(
-        "sentiment_analysis",
-    )
+    graph.set_entry_point("parallel_analysis")
 
     graph.add_conditional_edges(
-        "sentiment_analysis",
-        lambda x: ("error_handler" if x.get("status") == "error" else "fact_checking"),
-    )
-
-    graph.add_conditional_edges(
-        "fact_checking",
+        "parallel_analysis",
         lambda x: (
             "error_handler" if x.get("status") == "error" else "generate_perspective"
         ),
@@ -101,6 +98,7 @@ def build_langgraph():
             else "store_and_send"
         ),
     )
+
     graph.add_conditional_edges(
         "store_and_send",
         lambda x: ("error_handler" if x.get("status") == "error" else "__end__"),

@@ -31,7 +31,7 @@ import os
 
 load_dotenv()
 
-pc = Pinecone(os.getenv("PINECONE_API_KEY"))
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index = pc.Index("perspective")
 
 
