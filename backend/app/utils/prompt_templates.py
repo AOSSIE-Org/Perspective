@@ -47,6 +47,7 @@ Use *step-by-step reasoning* and return your output in this JSON format:
 
 ```json
 {{
+  "short_title": "<a catchy, concise title for this analysis, max 10 words>",
   "counter_perspective": "<your opposite point of view>",
   "reasoning_steps": [
     "<step 1>",

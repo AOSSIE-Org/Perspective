@@ -27,6 +27,7 @@ from groq import Groq
 from dotenv import load_dotenv
 import json
 from app.logging.logging_config import setup_logger
+from app.llm_config import LLM_MODEL
 
 logger = setup_logger(__name__)
 
@@ -61,7 +62,7 @@ def check_bias(text):
                     "content": (f"Give bias score to the following article \n\n{text}"),
                 },
             ],
-            model="gemma2-9b-it",
+            model=LLM_MODEL,
             temperature=0.3,
             max_tokens=512,
         )

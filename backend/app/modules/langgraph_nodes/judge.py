@@ -19,12 +19,13 @@ import re
 from langchain_groq import ChatGroq
 from langchain.schema import HumanMessage
 from app.logging.logging_config import setup_logger
+from app.llm_config import LLM_MODEL
 
 logger = setup_logger(__name__)
 
 # Init once
 groq_llm = ChatGroq(
-    model="gemma2-9b-it",
+    model=LLM_MODEL,
     temperature=0.0,
     max_tokens=10,
 )

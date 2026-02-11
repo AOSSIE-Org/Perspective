@@ -29,6 +29,7 @@ from dotenv import load_dotenv
 import json
 import re
 from app.logging.logging_config import setup_logger
+from app.llm_config import LLM_MODEL
 
 logger = setup_logger(__name__)
 
@@ -63,7 +64,7 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model=LLM_MODEL,
             temperature=0.3,
             max_tokens=512,
         )
@@ -128,7 +129,7 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="gemma2-9b-it",
+                model=LLM_MODEL,
                 temperature=0.3,
                 max_tokens=256,
             )

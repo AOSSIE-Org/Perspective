@@ -32,71 +32,79 @@ logger = setup_logger(__name__)
 
 def chunk_rag_data(data):
     try:
-        # Validate required top-level fields
         required_fields = ["cleaned_text", "perspective", "facts"]
         for field in required_fields:
             if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+                if field == "facts":
+                    data["facts"] = []
+                else:
+                    raise ValueError(f"Missing required field: {field}")
 
         if not isinstance(data["facts"], list):
-            raise ValueError("Facts must be a list")
-
-        # Validate perspective structure
-        perspective_data = data["perspective"]
-        if hasattr(perspective_data, "dict"):
-            perspective_data = perspective_data.dict()
+            logger.warning("Facts is not a list. Treating as empty.")
+            data["facts"] = []
 
         article_id = generate_id(data["cleaned_text"])
         chunks = []
 
-        # Add counter-perspective chunk
-        perspective_obj = data["perspective"]
+        perspective_data = data["perspective"]
+        
+        if hasattr(perspective_data, "dict"):
+            p_data = perspective_data.dict()
+        elif hasattr(perspective_data, "model_dump"):
+            p_data = perspective_data.model_dump()
+        elif isinstance(perspective_data, dict):
+            p_data = perspective_data
+        else:
+            p_data = {
+                "perspective": getattr(perspective_data, "perspective", ""),
+                "reasoning": getattr(perspective_data, "reasoning", "")
+            }
 
-        # Optional safety check
+        p_text = p_data.get("perspective", "")
+        raw_reasoning = p_data.get("reasoning", "")
+        if isinstance(raw_reasoning, list):
+            p_reason = "\n".join(raw_reasoning)
+        else:
+            p_reason = str(raw_reasoning)
 
-        if not (
-            hasattr(perspective_obj, "perspective")
-            and hasattr(perspective_obj, "reasoning")
-        ):
-            raise ValueError("Perspective object missing required fields")
-
-        chunks.append(
-            {
+        if p_text:
+            chunks.append({
                 "id": f"{article_id}-perspective",
-                "text": perspective_obj.perspective,
+                "text": p_text,
                 "metadata": {
                     "type": "counter-perspective",
-                    "reasoning": perspective_obj.reasoning,
+                    "reasoning": p_reason,
                     "article_id": article_id,
                 },
-            }
-        )
+            })
 
-        # Add each fact as a separate chunk
         for i, fact in enumerate(data["facts"]):
-            fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
-            for field in fact_fields:
-                if field not in fact:
-                    raise ValueError(
-                        f"Missing required fact field: {field} in fact index {i}"
-                    )
+            claim_text = fact.get("claim", fact.get("original_claim", ""))
+            verdict = fact.get("status", fact.get("verdict", "Unverified"))
+            explanation = fact.get("reason", fact.get("explanation", "No explanation provided"))
+            source = fact.get("source_link", "N/A")
 
-            chunks.append(
-                {
-                    "id": f"{article_id}-fact-{i}",
-                    "text": fact["original_claim"],
-                    "metadata": {
-                        "type": "fact",
-                        "verdict": fact["verdict"],
-                        "explanation": fact["explanation"],
-                        "source_link": fact["source_link"],
-                        "article_id": article_id,
-                    },
-                }
-            )
+            # SKIP invalid facts instead of Crashing
+            if not claim_text:
+                logger.warning(f"Skipping fact index {i}: Missing claim text.")
+                continue
 
+            chunks.append({
+                "id": f"{article_id}-fact-{i}",
+                "text": claim_text,
+                "metadata": {
+                    "type": "fact",
+                    "verdict": verdict,
+                    "explanation": explanation,
+                    "source_link": source,
+                    "article_id": article_id,
+                },
+            })
+
+        logger.info(f"Generated {len(chunks)} chunks for storage.")
         return chunks
 
     except Exception as e:
         logger.exception(f"Failed to chunk the data: {e}")
-        raise
+        return []

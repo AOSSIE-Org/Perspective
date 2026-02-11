@@ -21,10 +21,11 @@ Functions:
 
 
 from app.utils.prompt_templates import generation_prompt
+from app.llm_config import LLM_MODEL
 from langchain_groq import ChatGroq
 from pydantic import BaseModel, Field
 from app.logging.logging_config import setup_logger
-
+from typing import List
 logger = setup_logger(__name__)
 
 
@@ -32,11 +33,12 @@ prompt = generation_prompt
 
 
 class PerspectiveOutput(BaseModel):
-    reasoning: str = Field(..., description="Chain-of-thought reasoning steps")
+    short_title: str = Field(..., description="A catchy, concise title for this analysis (max 10 words)")
+    reasoning: List[str] = Field(description="Chain-of-thought reasoning steps", alias="reasoning_steps")
     perspective: str = Field(..., description="Generated opposite perspective")
 
 
-my_llm = "llama-3.3-70b-versatile"
+my_llm = LLM_MODEL
 
 llm = ChatGroq(model=my_llm, temperature=0.7)
 
@@ -56,17 +58,18 @@ def generate_perspective(state):
 
         if not text:
             raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not facts:
-            raise ValueError("Missing or empty 'facts' in state")
-
-        facts_str = "\n".join(
-            [
-                f"Claim: {f['original_claim']}\n"
-                "Verdict: {f['verdict']}\nExplanation: "
-                "{f['explanation']}"
-                for f in state["facts"]
-            ]
-        )
+        if not facts:
+            logger.warning("No facts found in state. Generating perspective based on text only.")
+            facts_str = "No specific claims verified."
+        else:
+            facts_str = "\n".join(
+                [
+                    f"Claim: {f.get('claim', f.get('original_claim', 'Unknown Claim'))}\n"
+                    f"Verdict: {f.get('status', f.get('verdict', 'Unknown Verdict'))}\n"
+                    f"Explanation: {f.get('reason', f.get('explanation', 'No explanation'))}"
+                    for f in facts
+                ]
+            )
 
         result = chain.invoke(
             {

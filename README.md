@@ -167,6 +167,7 @@ GROQ_API_KEY= <groq_api_key>
 PINECONE_API_KEY = <your_pinecone_API_KEY>
 PORT = 8000
 SEARCH_KEY = <your_Google_custom_search_engine_API_key>
+HF_TOKEN = <your_huggingface_access_token>
   ```
 
 *Run backend:*
