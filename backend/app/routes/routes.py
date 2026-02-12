@@ -30,7 +30,7 @@ Core Components:
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
@@ -38,6 +38,7 @@ from app.modules.bias_detection.check_bias import check_bias
 from app.modules.chat.get_rag_data import search_pinecone
 from app.modules.chat.llm_processing import ask_llm
 from app.logging.logging_config import setup_logger
+from app.utils.auth import get_current_user
 import asyncio
 import json
 
@@ -60,7 +61,7 @@ async def home():
 
 
 @router.post("/bias")
-async def bias_detection(request: URlRequest):
+async def bias_detection(request: URlRequest, user=Depends(get_current_user)):
     content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     bias_score = await asyncio.to_thread(check_bias, (content))
     logger.info(f"Bias detection result: {bias_score}")
@@ -68,7 +69,7 @@ async def bias_detection(request: URlRequest):
 
 
 @router.post("/process")
-async def run_pipelines(request: URlRequest):
+async def run_pipelines(request: URlRequest, user=Depends(get_current_user)):
     article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
     data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
@@ -76,7 +77,7 @@ async def run_pipelines(request: URlRequest):
 
 
 @router.post("/chat")
-async def answer_query(request: ChatQuery):
+async def answer_query(request: ChatQuery, user=Depends(get_current_user)):
     query = request.message
     results = search_pinecone(query)
     answer = ask_llm(query, results)

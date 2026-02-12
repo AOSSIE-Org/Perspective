@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
+import ProfileMenu from "@/components/profile-menu";
 
 /**
  * Renders the main landing page for the Perspective application, showcasing its features, technology stack, and calls to action.
@@ -111,8 +112,9 @@ export default function Home() {
               Perspective
             </span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-3">
             <ThemeToggle />
+            <ProfileMenu />
           </div>
         </div>
       </header>
