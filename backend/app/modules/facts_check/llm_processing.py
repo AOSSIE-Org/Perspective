@@ -63,7 +63,7 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model="llama-3.3-70b-versatile",
             temperature=0.3,
             max_tokens=512,
         )
@@ -128,7 +128,7 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="gemma2-9b-it",
+                model="llama-3.3-70b-versatile",
                 temperature=0.3,
                 max_tokens=256,
             )
@@ -144,7 +144,13 @@ def run_fact_verifier_sdk(search_results):
                 parsed = json.loads(content)
             except Exception as parse_err:
                 logger.error(f"LLM JSON parse error: {parse_err}")
-
+             parsed = {
+                    "verdict": "Unknown",
+                    "explanation": f"Parse error: {parse_err}",
+                    "original_claim": claim,
+                    "source_link": source,
+                }
+            
             results_list.append(parsed)
 
         return {
