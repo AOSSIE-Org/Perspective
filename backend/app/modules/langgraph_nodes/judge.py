@@ -16,18 +16,18 @@ Functions:
 
 
 import re
-from langchain_groq import ChatGroq
+
 from langchain.schema import HumanMessage
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
 # Init once
-groq_llm = ChatGroq(
-    model="gemma2-9b-it",
-    temperature=0.0,
-    max_tokens=10,
-)
+from app.llm.manager import LLMManager
+
+# Init once
+llm_manager = LLMManager()
+groq_llm = llm_manager.get_llm(temperature=0.0, max_tokens=10)
 
 
 def judge_perspective(state):

@@ -21,7 +21,7 @@ Functions:
 
 
 from app.utils.prompt_templates import generation_prompt
-from langchain_groq import ChatGroq
+
 from pydantic import BaseModel, Field
 from app.logging.logging_config import setup_logger
 
@@ -36,9 +36,10 @@ class PerspectiveOutput(BaseModel):
     perspective: str = Field(..., description="Generated opposite perspective")
 
 
-my_llm = "llama-3.3-70b-versatile"
+from app.llm.manager import LLMManager
 
-llm = ChatGroq(model=my_llm, temperature=0.7)
+llm_manager = LLMManager()
+llm = llm_manager.get_llm(temperature=0.7)
 
 structured_llm = llm.with_structured_output(PerspectiveOutput)
 

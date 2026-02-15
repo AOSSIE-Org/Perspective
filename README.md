@@ -1,33 +1,18 @@
 # Perspective-AI
 ![Perspective banner](frontend/public/perspective_banner.jpg)
 
-### Table of Contents
+## Table of Contents
 - [Perspective-AI](#perspective-ai)
-    - [Table of Contents](#table-of-contents)
-  - [System Overview](#system-overview)
-    - [High-Level Concept](#high-level-concept)
-  - [Architecture Components](#architecture-components)
-    - [1. Frontend Layer](#1-frontend-layer)
-    - [3. Core Backend](#3-core-backend)
-    - [4. AI \& NLP Integration](#4-ai--nlp-integration)
-    - [5. Data Storage](#5-data-storage)
-  - [Technical Stack](#technical-stack)
-    - [Frontend Technologies](#frontend-technologies)
-    - [Backend Technologies](#backend-technologies)
-    - [I Integration](#i-integration)
-  - [Core Features](#core-features)
-    - [1. Counter-Perspective Generation](#1-counter-perspective-generation)
-    - [2. Reasoned Thinking](#2-reasoned-thinking)
-    - [3. Updated Facts](#3-updated-facts)
-    - [4. Seamless Integration](#4-seamless-integration)
-    - [5. Real-Time Analysis](#5-real-time-analysis)
-  - [Data Flow \& Security](#data-flow--security)
-  - [Setup \& Deployment](#setup--deployment)
-    - [Frontend Setup](#frontend-setup)
-    - [Backend Setup](#backend-setup)
-  - [Architecture Diagram](#architecture-diagram)
-  - [Expected Outcomes](#expected-outcomes)
-  - [Required Skills](#required-skills)
+- [System Overview](#system-overview)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Architecture & Responsibilities](#architecture--responsibilities)
+- [Core Features](#core-features)
+- [Data Flow & Security](#data-flow--security)
+- [Setup & Deployment](#setup--deployment)
+- [Architecture Diagram](#architecture-diagram)
+- [Expected Outcomes](#expected-outcomes)
+- [Required Skills](#required-skills)
 
 ---
 
@@ -40,68 +25,99 @@ Imagine having a smart, opinionated friend who isn’t afraid to challenge your 
 
 ---
 
+## Quick Start
+
+Experience Perspective-AI locally in three major steps:
+1. **Clone the repository**: `git clone https://github.com/AOSSIE-Org/Perspective.git`
+2. **Setup the Backend**: Install dependencies with `uv` and configure your API keys.
+3. **Setup the Frontend**: Install dependencies with `npm` and point it to the backend API.
+
+See [Setup & Deployment](#setup--deployment) for detailed steps.
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- **Node.js** (v18 or higher) & **npm**
+- **Python** (v3.13 or higher)
+- **uv** (Modern Python package manager): [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)
+- **Git**
+
+---
+
+## Architecture & Responsibilities
+
+The project is split into two primary components to ensure modularity and scalability:
+
+### Frontend (Next.js)
+The [frontend](frontend/) serves as the user interface layer. It is responsible for:
+- User interactions and URL submissions.
+- Rendering biased article analysis and counter-perspectives.
+- Managing real-time UI updates and smooth transitions.
+- *For more details, see the [Frontend README](frontend/README.md).*
+
+### Backend (FastAPI)
+The [backend](backend/) serves as the intelligence layer. It is responsible for:
+- **Article Scraping**: Extracting text and metadata from provided URLs.
+- **Narrative Analysis**: Quantifying bias and identifying core narratives.
+- **AI Processing**: Orchestrating LangGraph workflows to generate counter-perspectives.
+- **Vector Search**: Managing semantic retrieval and RAG (Retrieval-Augmented Generation).
+- *For more details, see the [Backend README](backend/README.md).*
+
+---
+
 ## Architecture Components
 
 ### 1. Frontend Layer
 - **Next.js UI**: A sleek, responsive interface that displays content alongside counter perspectives.
 
-### 3. Core Backend
+### 2. Core Backend
 - **FastAPI Server**: A high-performance API server handling requests, content analysis, and response delivery.
 - **Content Analyzer**: Processes incoming articles or posts to identify the dominant narrative.
 - **Counter-Narrative Engine**: Uses advanced AI and NLP techniques to generate alternative perspectives and reasoned analyses.
 
-### 4. AI & NLP Integration
-- **LLM Service**: Leverages large language models (e.g., OpenAI, custom models) to generate detailed counterarguments.
-- **LangChain & Langgraph**: Frameworks to manage chains of reasoning and workflow orchestration for coherent narrative generation.
+### 3. AI & NLP Integration
+- **LLM Service**: Leverages large language models (via Groq, OpenAI, etc.) to generate detailed counterarguments.
+- **LangChain & Langgraph**: Frameworks to manage chains of reasoning and workflow orchestration.
 
-### 5. Data Storage
-- **VectorDB**: A vector database for storing semantic embeddings to efficiently retrieve and compare content.
+### 4. Data Storage
+- **VectorDB (Pinecone)**: A vector database for storing and retrieving semantic embeddings efficiently.
 
 ---
 
 ## Technical Stack
 
-### Frontend Technologies
- - **framework**: Next.js
-- **styling**: TailwindCSS
+### Frontend
+- **Framework**: Next.js (App Router)
+- **Styling**: TailwindCSS / Lucide React
 
-### Backend Technologies
-  - **framework**: FastAPI
-  - **language**: Python
-  - **AI & NLP**: LangChain, Langgraph, Prompt Engineering
-  - **database**: Any VectorDB
+### Backend
+- **Framework**: FastAPI
+- **Language**: Python 3.13+
+- **Orchestration**: LangGraph, LangChain
+- **Environment**: Managed by **uv**
 
-
-### I Integration
-
-  - **LLM**: OpenAI, Other NLP Models
-  - **processing**:Context-Aware
-
+### AI Integration
+- **LLMs**: Groq (Llama/Gemma models)
+- **Embeddings**: Sentence-Transformers
+- **Search**: Google Custom Search
 
 ---
 
 ## Core Features
 
 ### 1. Counter-Perspective Generation
-- **What It Does**: Instantly displays counterarguments to the main narrative.
-- **How It Works**: Analyzes content to identify biases and generates alternative viewpoints.
-
+Instantly identifies the main narrative of a URL and generates a balanced alternative viewpoint backed by reasoned analysis.
 
 ### 2. Reasoned Thinking
-- **What It Does**: Breaks down narratives into logical, connected arguments.
-- **How It Works**: Uses chain-of-thought prompting and connected fact analysis.
+Uses logic-driven AI workflows to break down narratives into connected arguments, providing transparency in how perspectives are formed.
 
-### 3. Updated Facts
-- **What It Does**: Provides real-time updates and the latest facts along with counter-narratives.
-- **How It Works**: Continuously pulls data from trusted sources and updates the insights.
+### 3. Real-Time Fact Check
+Integrates live search and news data to ensure that counter-narratives are grounded in the latest available information.
 
-### 4. Seamless Integration
-- **What It Does**: Integrates effortlessly with existing news, blogs, and social media platforms.
-- **How It Works**: Uses custom integration modules and API endpoints.
-
-### 5. Real-Time Analysis
-- **What It Does**: Generates insights instantly as you browse.
-- **How It Works**: Employs real-time processing powered by advanced AI.
+### 4. Semantic Discovery
+Leverages vector databases to find related perspectives and historical context for any given topic.
 
 ---
 
@@ -109,144 +125,120 @@ Imagine having a smart, opinionated friend who isn’t afraid to challenge your 
 
 ```mermaid
 sequenceDiagram
-    %% Define Participants
     participant U as User
     participant F as Frontend
     participant B as Backend
     participant AI as AI Service
     participant D as Data Storage
 
-    %% Interaction Flow
-    U->>F: Request/View Content
-    F->>B: Forward Request
-    B->>AI: Analyze Content & Generate Counter Perspective
-    AI->>B: Return Counter Analysis   
+    U->>F: Submit Article URL
+    F->>B: POST /api/process
+    B->>AI: Scrape & Analyze Narrative
+    AI->>B: Return Analysis & Perspective
+    B->>D: Store/Retrieve Context
     B->>F: Deliver Results
     F->>U: Display Balanced Insights
-
-    %% Notes for Clarity
-    Note over AI: AI generates counter analysis
-    Note over B: Backend processes logic
-    Note over F: Frontend updates UI
 ```
+
 ---
 
 ## Setup & Deployment
 
-### Frontend Setup
+> [!IMPORTANT]
+> This project requires external API keys (Groq, Pinecone, and Google Custom Search) to function. Please ensure you have these ready.
 
-Setup environment variables:*
-  - add .env file in `/frontend`directory.
-  - add following environment variable in your .env file.
+### 1. Environment Configuration
+Both the frontend and backend require environment files. You will find `.env.example` templates in each directory.
+- **Frontend**: Create `frontend/.env` and set `NEXT_PUBLIC_API_URL`.
+- **Backend**: Create `backend/.env` and provide your `GROQ_API_KEY`, `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `GOOGLE_SEARCH_API_KEY`, and `GOOGLE_SEARCH_ENGINE_ID`.
+
+#### How to Obtain API Keys
+- **Groq API Key**: Sign up at [Groq Console](https://console.groq.com) and create an API key.
+- **Pinecone**: Create an index at [Pinecone Console](https://app.pinecone.io) to get your API Key and Index Name.
+- **Google Custom Search**:
+  1. **API Key**: Go to [Google Cloud Console](https://console.cloud.google.com), create a project, enable the "Custom Search API", and create credentials (API Key).
+  2. **Search Engine ID**: Go to [Programmable Search Engine](https://programmablesearchengine.google.com), create a search engine (select "Search the entire web"), and copy the "Search engine ID" (cx).
+
+### Example .env Files
+**Backend** (`backend/.env`)
+```env
+GROQ_API_KEY=your_groq_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=your_index_name
+GOOGLE_SEARCH_API_KEY=your_google_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id
 ```
-NEXT_PUBLIC_API_URL = http://localhost:8000
 
+**Frontend** (`frontend/.env`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
+### 2. Backend Setup
+```bash
+cd backend
+uv sync
+uv run main.py
+```
+*The backend will be available at `http://localhost:8000`.*
+
+### 3. Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-### Backend Setup
-
-*Get HuggingFace Access Token:*
-- Go to HuggingFace website and create new access token.
-- copy that token
-
-*Install uv:*
-- install **uv** from [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
-
-
-*Setup environment variables:*
-  - add .env file in `/backend`directory.
-  - add following environment variable in your .env file.
-  ```
-GROQ_API_KEY= <groq_api_key>
-PINECONE_API_KEY = <your_pinecone_API_KEY>
-PORT = 8000
-SEARCH_KEY = <your_Google_custom_search_engine_API_key>
-  ```
-
-*Run backend:*
-```bash
-cd backend
-uv sync # Creating virtual environment at: .venv
-uv run main.py #Runs the backend server
-```
+*The UI will be available at `http://localhost:3000`.*
 
 ---
 
-
 ## Architecture Diagram
-
 
 ```mermaid
 graph TB
-    %% Define Subgraphs with Colors and Text Styles
     subgraph Client Side
-        style UI fill:#FFDDC1,stroke:#FF6600,stroke-width:2px,color:#000,font-weight:bold
         UI[Next.js UI]
     end
 
     subgraph Server Side
-        style API fill:#D1E8FF,stroke:#005BBB,stroke-width:2px,color:#000,font-weight:bold
-        style Analyzer fill:#D1E8FF,stroke:#005BBB,stroke-width:2px,color:#000,font-weight:bold
-        style CNEngine fill:#D1E8FF,stroke:#005BBB,stroke-width:2px,color:#000,font-weight:bold
-        style Context fill:#D1E8FF,stroke:#005BBB,stroke-width:2px,color:#000,font-weight:bold
         API[FastAPI Server]
         Analyzer[Content Analyzer]
         CNEngine[Counter-Narrative Engine]
-        Context[Context Manager]
-
     end
 
     subgraph AI & NLP Layer
-        style LLM fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
-        style LangChain fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
-        style Langgraph fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
         LLM[LLM Service]
         LangChain[LangChain]
         Langgraph[Langgraph]
+        GCS[Google Custom Search API]
     end
 
     subgraph Data Storage
-        style VectorDB fill:#FFDDEE,stroke:#CC3366,stroke-width:2px,color:#000,font-weight:bold
         VectorDB[(Vector Database)]
     end
 
-    %% Define Connections with Labels
-    style Browser fill:#FFFF99,stroke:#FFAA00,stroke-width:2px,color:#000,font-weight:bold
-    Browser -->|User Interaction| UI
-    UI -->|Requests| API
+    UI -->|URL Request| API
     API -->|Process| Analyzer
     Analyzer -->|Analysis| CNEngine
-    CNEngine -->|Generates| LLM
-    LLM -->|Uses| LangChain
-    LLM -->|Uses| Langgraph
-    API -->|Manages| Context
-    CNEngine -->|Stores| VectorDB
-    API -->|Responses| UI
-
+    CNEngine -->|Workflow| Langgraph
+    Langgraph -->|Query| LLM
+    Langgraph -->|Query| GCS
+    GCS -->|Results| Langgraph
+    CNEngine -->|Store/Search| VectorDB
+    API -->|Results| UI
 ```
 
 ---
 
 ## Expected Outcomes
-
-- **Less Bias in Narratives**: Break out of echo chambers and question prevailing narratives.
-- **Wider Perspectives**: Broaden your understanding of complex issues.
-- **Better Discourse**: Enable balanced, informed discussions.
-- **Sharper Analysis**: Improve critical thinking by comparing connected facts and counter-facts.
+- **Reduced Narrative Bias**: Breaking out of echo chambers through automated alternative viewpoints.
+- **Enhanced Critical Thinking**: Providing users with the tools to see multiple sides of a single story.
+- **Informed Discourse**: Facilitating better discussions based on a holistic understanding of complex issues.
 
 ---
 
 ## Required Skills
-
-- **Frontend Development**:  Experience with Next.js and modern UI frameworks.
-- **Backend Development**: Proficiency in Python and FastAPI.
-- **AI & NLP**: Familiarity with LangChain, Langgraph, and prompt engineering techniques.
-- **Database Management**: Knowledge of vector databases system.
-
----
+- **Frontend**: Next.js, TypeScript, TailwindCSS.
+- **Backend**: Python, FastAPI, Pydantic.
+- **AI**: LangChain, LangGraph, Vector Databases (Pinecone).
+- **Tooling**: uv, Git, npm.

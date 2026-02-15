@@ -25,4 +25,7 @@ dependencies = [
     "sentence-transformers>=5.0.0",
     "trafilatura>=2.0.0",
     "uvicorn>=0.34.3",
+    "langchain-openai>=0.3.0",
+    "langchain-google-genai>=2.0.0",
+    "pydantic-settings>=2.0.0",
 ]
