@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Script from "next/script";
 import {
   Card,
   CardContent,
@@ -91,6 +92,29 @@ export default function Home() {
     { label: "Fact Accuracy", value: "98%", color: "text-purple-600" },
     { label: "User Satisfaction", value: "4.9/5", color: "text-orange-600" },
   ];
+  const faqData = [
+    {
+      question: "What is Perspective?",
+      answer:
+        "Perspective is an AI-powered research tool that analyzes online articles to uncover bias and generate balanced counter-perspectives using advanced NLP models.",
+    },
+    {
+      question: "How does Perspective detect bias?",
+      answer:
+        "Perspective uses natural language processing techniques and structured evaluation pipelines to detect narrative patterns and highlight potential bias in content.",
+    },
+    {
+      question: "Is Perspective free to use?",
+      answer:
+        "Yes, Perspective is completely free to use and does not require sign-in.",
+    },
+    {
+      question: "What technology powers Perspective?",
+      answer:
+        "Perspective is built using Next.js, FastAPI, LangChain, LangGraph, and advanced NLP models for research-focused analysis.",
+    },
+  ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 overflow-hidden transition-colors duration-300">
@@ -274,6 +298,36 @@ export default function Home() {
         </div>
       </section>
 
+            {/* FAQ Section */}
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-slate-900 dark:text-slate-100">
+            Frequently Asked Questions
+          </h2>
+
+          <div className="space-y-6">
+            {faqData.map((faq, index) => (
+              <Card
+                key={index}
+                className="p-6 border-0 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm"
+              >
+                <CardHeader>
+                  <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+                    {faq.question}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-slate-600 dark:text-slate-300">
+                    {faq.answer}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+        
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-white/20 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-6 md:py-8">
@@ -296,6 +350,43 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+            {/* FAQ Structured Data */}
+      <Script
+        id="faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqData.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          }),
+        }}
+      />
+
+      <Script
+        id="software-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Perspective",
+            applicationCategory: "ResearchApplication",
+            operatingSystem: "Web",
+            description:
+              "Perspective is an AI-powered research tool that analyzes online articles to detect bias and generate structured counter-perspectives.",
+            url: "https://perspective-aossie.vercel.app/",
+          }),
+        }}
+      />
     </div>
   );
 }
