@@ -32,6 +32,8 @@ def search_google(query):
         f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_SEARCH}&cx=f637ab77b5d8b4a3c&q={query}"
     )
     res = results.json()
+    if "items" not in res:
+        return []
     first = {}
     first["title"] = res["items"][0]["title"]
     first["link"] = res["items"][0]["link"]

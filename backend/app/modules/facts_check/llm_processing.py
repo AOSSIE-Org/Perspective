@@ -34,10 +34,9 @@ logger = setup_logger(__name__)
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 
 def run_claim_extractor_sdk(state):
+    client = Groq(api_key=state["groq_api_key"])
     try:
         text = state.get("cleaned_text")
         if not text:
@@ -63,7 +62,7 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model=state.get("groq_model", "llama-3.3-70b-versatile"),
             temperature=0.3,
             max_tokens=512,
         )
@@ -87,7 +86,8 @@ def run_claim_extractor_sdk(state):
         }
 
 
-def run_fact_verifier_sdk(search_results):
+def run_fact_verifier_sdk(search_results, api_key: str, groq_model: str = "llama-3.3-70b-versatile"):
+    client = Groq(api_key=api_key)
     try:
         results_list = []
 
@@ -128,7 +128,7 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="gemma2-9b-it",
+                model=groq_model,
                 temperature=0.3,
                 max_tokens=256,
             )

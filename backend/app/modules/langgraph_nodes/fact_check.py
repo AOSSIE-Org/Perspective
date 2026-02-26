@@ -32,12 +32,10 @@ def run_fact_check(state):
         verifications, error_message = run_fact_check_pipeline(state)
 
         if error_message:
-            logger.error(f"Error in fact-checking: {error_message}")
-            return {
-                "status": "error",
-                "error_from": "fact_checking",
-                "message": f"{error_message}",
-            }
+            # Soft failure — web search quota/key issue. Continue with empty facts
+            # so the rest of the pipeline (generate_perspective, store_and_send) still runs.
+            logger.warning(f"Fact-checking skipped (non-fatal): {error_message}")
+            verifications = []
 
     except Exception as e:
         logger.exception(f"Unexpected error in fact-checking: {e}")

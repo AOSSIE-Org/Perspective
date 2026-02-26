@@ -23,14 +23,13 @@ from app.logging.logging_config import setup_logger
 logger = setup_logger(__name__)
 
 # Init once
-groq_llm = ChatGroq(
-    model="gemma2-9b-it",
-    temperature=0.0,
-    max_tokens=10,
-)
-
-
 def judge_perspective(state):
+    groq_llm = ChatGroq(
+        model=state.get("groq_model", "llama-3.3-70b-versatile"),
+        temperature=0.0,
+        max_tokens=10,
+        api_key=state["groq_api_key"],
+    )
     try:
         perspective_obj = state.get("perspective")
         text = getattr(perspective_obj, "perspective", "").strip()

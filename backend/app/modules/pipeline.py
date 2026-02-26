@@ -64,8 +64,8 @@ def run_scraper_pipeline(url: str) -> dict:
     return result
 
 
-def run_langgraph_workflow(state: dict):
+def run_langgraph_workflow(state: dict, api_key: str, groq_model: str = "llama-3.3-70b-versatile"):
     """Execute the pre-compiled LangGraph workflow."""
-    result = _LANGGRAPH_WORKFLOW.invoke(state)
+    result = _LANGGRAPH_WORKFLOW.invoke({**state, "groq_api_key": api_key, "groq_model": groq_model})
     logger.info("LangGraph workflow executed successfully.")
     return result

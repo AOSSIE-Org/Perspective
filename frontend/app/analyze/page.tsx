@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import { SettingsModal } from "@/components/settings-modal";
 
 /**
  * Renders the main page for submitting an article URL to initiate AI-powered analysis.
@@ -103,6 +104,7 @@ export default function AnalyzePage() {
             </span>
           </div>
           <div className="flex items-center space-x-4">
+            <SettingsModal />
             <ThemeToggle />
           </div>
         </div>

@@ -32,10 +32,9 @@ logger = setup_logger(__name__)
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-
-def check_bias(text):
+def check_bias(text, api_key: str, groq_model: str = "llama-3.3-70b-versatile"):
+    client = Groq(api_key=api_key)
     try:
         logger.debug(f"Raw article text: {text}")
         logger.debug(f"JSON dump of text: {json.dumps(text)}")
@@ -61,7 +60,7 @@ def check_bias(text):
                     "content": (f"Give bias score to the following article \n\n{text}"),
                 },
             ],
-            model="gemma2-9b-it",
+            model=groq_model,
             temperature=0.3,
             max_tokens=512,
         )

@@ -30,7 +30,7 @@ Core Components:
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
@@ -52,6 +52,7 @@ class URlRequest(BaseModel):
 
 class ChatQuery(BaseModel):
     message: str
+    article_text: str = ""
 
 
 @router.get("/")
@@ -60,26 +61,37 @@ async def home():
 
 
 @router.post("/bias")
-async def bias_detection(request: URlRequest):
-    content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    bias_score = await asyncio.to_thread(check_bias, (content))
+async def bias_detection(url_request: URlRequest, request: Request):
+    api_key = request.headers.get("x-byok-api-key")
+    if not api_key:
+        raise HTTPException(status_code=401, detail="Missing X-BYOK-Api-Key header")
+    groq_model = request.headers.get("x-byok-model", "llama-3.3-70b-versatile")
+    content = await asyncio.to_thread(run_scraper_pipeline, url_request.url)
+    bias_score = await asyncio.to_thread(check_bias, content, api_key, groq_model)
     logger.info(f"Bias detection result: {bias_score}")
     return bias_score
 
 
 @router.post("/process")
-async def run_pipelines(request: URlRequest):
-    article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
+async def run_pipelines(url_request: URlRequest, request: Request):
+    api_key = request.headers.get("x-byok-api-key")
+    if not api_key:
+        raise HTTPException(status_code=401, detail="Missing X-BYOK-Api-Key header")
+    groq_model = request.headers.get("x-byok-model", "llama-3.3-70b-versatile")
+    article_text = await asyncio.to_thread(run_scraper_pipeline, url_request.url)
     logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
-    data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
+    data = await asyncio.to_thread(run_langgraph_workflow, article_text, api_key, groq_model)
     return data
 
 
 @router.post("/chat")
-async def answer_query(request: ChatQuery):
-    query = request.message
+async def answer_query(chat_request: ChatQuery, request: Request):
+    api_key = request.headers.get("x-byok-api-key")
+    if not api_key:
+        raise HTTPException(status_code=401, detail="Missing X-BYOK-Api-Key header")
+    groq_model = request.headers.get("x-byok-model", "llama-3.3-70b-versatile")
+    query = chat_request.message
     results = search_pinecone(query)
-    answer = ask_llm(query, results)
+    answer = ask_llm(query, results, api_key, groq_model, chat_request.article_text)
     logger.info(f"Chat answer generated: {answer}")
-
     return {"answer": answer}

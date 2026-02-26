@@ -23,10 +23,9 @@ logger = setup_logger(__name__)
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 
 def run_sentiment_sdk(state):
+    client = Groq(api_key=state["groq_api_key"])
     try:
         text = state.get("cleaned_text")
         if not text:
@@ -49,7 +48,7 @@ def run_sentiment_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model=state.get("groq_model", "llama-3.3-70b-versatile"),
             temperature=0.2,
             max_tokens=3,
         )
