@@ -17,7 +17,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import BiasMeter from "@/components/bias-meter";
+import { SettingsModal } from "@/components/settings-modal";
+import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
+import { getActiveApiKey, getActiveModel } from "@/components/settings-modal";
+
+const BACKEND = "http://localhost:7860";
 
 // const backend_url = process.env.NEXT_PUBLIC_API_URL;
 
@@ -85,9 +90,10 @@ export default function AnalyzePage() {
     setMessages(newMessages);
     setMessage("");
 
-    const res = await axios.post("https://thunder1245-perspective-backend.hf.space/api/chat", {
+    const res = await axios.post(`${BACKEND}/api/chat`, {
       message: message,
-    });
+      article_text: analysisData?.cleaned_text ?? "",
+    }, { headers: { "X-BYOK-Api-Key": getActiveApiKey() ?? "", "X-BYOK-Model": getActiveModel() ?? "" } });
     const data = res.data;
 
     console.log(data);
@@ -118,8 +124,16 @@ export default function AnalyzePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header omitted for brevity */}
-      <main className="flex-1 pt-16 container mx-auto px-4">
+      <header className="border-b bg-background/90 backdrop-blur sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/analyze" className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Perspective</Link>
+          <div className="flex items-center gap-3">
+            <SettingsModal />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+      <main className="flex-1 pt-6 container mx-auto px-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Analysis Results</h1>
           <Badge

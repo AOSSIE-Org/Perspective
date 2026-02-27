@@ -76,5 +76,5 @@ def run_fact_check_pipeline(state):
         return [], "All claim searches failed or returned no results."
 
     # Step 3: Verify facts using LLM
-    final = run_fact_verifier_sdk(search_results)
+    final = run_fact_verifier_sdk(search_results, state["groq_api_key"], state.get("groq_model", "llama-3.3-70b-versatile"))
     return final.get("verifications", []), None

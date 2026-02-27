@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
+import { SettingsModal } from "@/components/settings-modal";
 
 /**
  * Renders the main landing page for the Perspective application, showcasing its features, technology stack, and calls to action.
@@ -112,6 +113,7 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center space-x-4">
+            <SettingsModal />
             <ThemeToggle />
           </div>
         </div>

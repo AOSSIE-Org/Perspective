@@ -32,8 +32,6 @@ logger = setup_logger(__name__)
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
 
 def build_context(docs):
     return "\n".join(
@@ -42,10 +40,19 @@ def build_context(docs):
     )
 
 
-def ask_llm(question, docs):
-    context = build_context(docs)
-    logger.debug(f"Generated context for LLM:\n{context}")
-    prompt = f"""You are an assistant that answers based on context.
+def ask_llm(question, docs, api_key: str, groq_model: str = "llama-3.3-70b-versatile", article_text: str = ""):
+    client = Groq(api_key=api_key)
+    pinecone_context = build_context(docs)
+    logger.debug(f"Generated context for LLM:\n{pinecone_context}")
+
+    context_parts = []
+    if article_text:
+        context_parts.append(f"=== Full Article ===\n{article_text}")
+    if pinecone_context:
+        context_parts.append(f"=== Fact-Check Notes ===\n{pinecone_context}")
+    context = "\n\n".join(context_parts) or "No context available."
+
+    prompt = f"""You are an assistant that answers questions about a news article.
 
 Context:
 {context}
@@ -55,7 +62,7 @@ Question:
 """
 
     response = client.chat.completions.create(
-        model="gemma2-9b-it",
+        model=groq_model,
         messages=[
             {"role": "system", "content": "Use only the context to answer."},
             {"role": "user", "content": prompt},

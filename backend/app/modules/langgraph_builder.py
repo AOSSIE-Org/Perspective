@@ -52,6 +52,8 @@ class MyState(TypedDict):
     score: int
     retries: int
     status: str
+    groq_api_key: str
+    groq_model: str
 
 
 def build_langgraph():

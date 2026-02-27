@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
+import { getActiveApiKey, getActiveModel } from "@/components/settings-modal";
 
-// const backend_url = process.env.NEXT_PUBLIC_API_URL;
+const BACKEND = "http://localhost:7860";
 
 
 
@@ -73,13 +74,15 @@ export default function LoadingPage() {
         setArticleUrl(storedUrl);
 
         try {
+          const apiKey = getActiveApiKey();
+          const model = getActiveModel();
+          const headers: Record<string, string> = {};
+          if (apiKey) headers["X-BYOK-Api-Key"] = apiKey;
+          if (model) headers["X-BYOK-Model"] = model;
+
           const [processRes, biasRes] = await Promise.all([
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/process", {
-              url: storedUrl,
-            }),
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/bias", {
-              url: storedUrl,
-            }),
+            axios.post(`${BACKEND}/api/process`, { url: storedUrl }, { headers }),
+            axios.post(`${BACKEND}/api/bias`, { url: storedUrl }, { headers }),
           ]);
 
           sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));

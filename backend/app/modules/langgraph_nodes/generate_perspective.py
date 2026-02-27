@@ -36,15 +36,6 @@ class PerspectiveOutput(BaseModel):
     perspective: str = Field(..., description="Generated opposite perspective")
 
 
-my_llm = "llama-3.3-70b-versatile"
-
-llm = ChatGroq(model=my_llm, temperature=0.7)
-
-structured_llm = llm.with_structured_output(PerspectiveOutput)
-
-
-chain = prompt | structured_llm
-
 
 def generate_perspective(state):
     try:
@@ -56,17 +47,19 @@ def generate_perspective(state):
 
         if not text:
             raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not facts:
-            raise ValueError("Missing or empty 'facts' in state")
 
+        llm = ChatGroq(model=state["groq_model"], temperature=0.7, api_key=state["groq_api_key"])
+        chain = prompt | llm.with_structured_output(PerspectiveOutput)
+
+        # facts may be empty if web search failed — generate perspective without them
         facts_str = "\n".join(
             [
                 f"Claim: {f['original_claim']}\n"
                 "Verdict: {f['verdict']}\nExplanation: "
                 "{f['explanation']}"
-                for f in state["facts"]
+                for f in (facts or [])
             ]
-        )
+        ) or "No verified facts available."
 
         result = chain.invoke(
             {
