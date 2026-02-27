@@ -24,8 +24,12 @@ def setup_logger(name: str) -> logging.Logger:
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    # Console Handler
-    console_handler = logging.StreamHandler(sys.stdout)
+    # Console Handler (force UTF-8 to prevent UnicodeEncodeError on Windows with emoji)
+    try:
+        utf8_stream = open(sys.stdout.fileno(), mode="w", encoding="utf-8", closefd=False)
+        console_handler = logging.StreamHandler(utf8_stream)
+    except Exception:
+        console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
