@@ -1,0 +1,20 @@
+
+> perspective@0.1.0 build
+> next build
+
+   ▲ Next.js 15.2.4
+   - Environments: .env
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, open 'D:\gsoc\Perspective\frontend\.next\cache\webpack\server-production\0.pack_'
+socket hang up
+
+Retrying 1/3...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+unhandledRejection [Error [PageNotFoundError]: Cannot find module for page: /_document] {
+  type: 'PageNotFoundError',
+  code: 'ENOENT'
+}

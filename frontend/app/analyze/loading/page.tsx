@@ -2,71 +2,61 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Globe,
-  Brain,
-  Shield,
-  CheckCircle,
-  Database,
-  Sparkles,
-  Zap,
-} from "lucide-react";
-import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
 
-// const backend_url = process.env.NEXT_PUBLIC_API_URL;
-
-
-
-/**
- * Displays a multi-step animated loading and progress interface for the article analysis workflow.
- *
- * Guides the user through sequential analysis steps—fetching the article, AI analysis, bias detection, fact checking, and generating perspectives—while visually indicating progress and status. Retrieves the article URL from session storage, automatically advances through each step, and redirects to the results page upon completion. If no article URL is found, redirects to the analysis input page.
- *
- * @remark This component manages its own navigation and redirects based on session state.
- */
 export default function LoadingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [articleUrl, setArticleUrl] = useState("");
   const router = useRouter();
 
+  // Custom Cursor state
+  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
+  const [ringPos, setRingPos] = useState({ x: -100, y: -100 });
+
+  useEffect(() => {
+    const updateMouse = (e: MouseEvent) => {
+      setCursorPos({ x: e.clientX, y: e.clientY });
+      setTimeout(() => {
+        setRingPos({ x: e.clientX - 11, y: e.clientY - 11 });
+      }, 50);
+    };
+    window.addEventListener("mousemove", updateMouse);
+    return () => window.removeEventListener("mousemove", updateMouse);
+  }, []);
+
   const steps = [
     {
-      icon: Globe,
       title: "Fetching Article",
-      description: "Retrieving content from the provided URL",
-      color: "from-blue-500 to-cyan-500",
+      subtitleVerified: "Node Verified",
+      subtitlePending: "Awaiting Source",
     },
     {
-      icon: Brain,
       title: "AI Analysis",
-      description: "Processing content with advanced NLP algorithms",
-      color: "from-purple-500 to-indigo-500",
+      subtitleVerified: "Entropy Mapped",
+      subtitlePending: "Parsing Logic",
     },
     {
-      icon: Shield,
       title: "Bias Detection",
-      description: "Identifying potential biases and one-sided perspectives",
-      color: "from-emerald-500 to-teal-500",
+      subtitleVerified: "Cognitive Filter Applied",
+      subtitlePending: "Scanning Narratives",
     },
     {
-      icon: CheckCircle,
       title: "Fact Checking",
-      description: "Cross-referencing claims with reliable sources",
-      color: "from-orange-500 to-red-500",
+      subtitleVerified: "Cross-Reference Complete",
+      subtitlePending: "Querying Database",
     },
     {
-      icon: Database,
       title: "Generating Perspectives",
-      description: "Creating balanced alternative viewpoints",
-      color: "from-pink-500 to-rose-500",
+      subtitleVerified: "Analysis Result",
+      subtitlePending: "Synthesizing"
     },
   ];
 
   useEffect(() => {
+    let stepInterval: ReturnType<typeof setInterval>;
+    let progressInterval: ReturnType<typeof setInterval>;
+
     const runAnalysis = async () => {
       const storedUrl = sessionStorage.getItem("articleUrl");
       if (storedUrl) {
@@ -83,20 +73,8 @@ export default function LoadingPage() {
           ]);
 
           sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
+          sessionStorage.setItem("analysisResult", JSON.stringify(processRes.data));
 
-          console.log("Bias score saved");
-          console.log(biasRes);
-
-          // Save response to sessionStorage
-          sessionStorage.setItem(
-            "analysisResult",
-            JSON.stringify(processRes.data)
-          );
-
-          console.log("Analysis result saved");
-          console.log(processRes);
-
-          // optional logging
         } catch (err) {
           console.error("Failed to process article:", err);
           router.push("/analyze"); // fallback in case of error
@@ -104,9 +82,9 @@ export default function LoadingPage() {
         }
 
         // Progress and step simulation
-        const stepInterval = setInterval(() => {
+        stepInterval = setInterval(() => {
           setCurrentStep((prev) => {
-            if (prev < steps.length - 1) {
+            if (prev < 4) { // hardcode 4 since steps.length removed from dep array
               return prev + 1;
             } else {
               clearInterval(stepInterval);
@@ -118,7 +96,7 @@ export default function LoadingPage() {
           });
         }, 2000);
 
-        const progressInterval = setInterval(() => {
+        progressInterval = setInterval(() => {
           setProgress((prev) => {
             if (prev < 100) {
               return prev + 1;
@@ -127,173 +105,128 @@ export default function LoadingPage() {
           });
         }, 100);
 
-        return () => {
-          clearInterval(stepInterval);
-          clearInterval(progressInterval);
-        };
       } else {
         router.push("/analyze");
       }
     };
 
     runAnalysis();
+
+    return () => {
+      clearInterval(stepInterval);
+      clearInterval(progressInterval);
+    };
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-900/80 dark:to-indigo-950/50 transition-colors duration-300 overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-gradient-to-r from-blue-400/20 to-purple-400/20 dark:from-blue-400/10 dark:to-purple-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 bg-gradient-to-r from-emerald-400/20 to-cyan-400/20 dark:from-emerald-400/10 dark:to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 md:w-[600px] md:h-[600px] bg-gradient-to-r from-indigo-400/10 to-pink-400/10 dark:from-indigo-400/5 dark:to-pink-400/5 rounded-full blur-3xl animate-spin"
-          style={{ animationDuration: "20s" }}
-        ></div>
-      </div>
+    <div className="bg-background-dark font-display text-slate-100 min-h-screen selection:bg-primary/30 flex flex-col grid-pattern">
+      {/* Custom Cursor */}
+      <div className="custom-cursor hidden md:block" style={{ left: cursorPos.x, top: cursorPos.y }}></div>
+      <div className="custom-cursor-ring hidden md:block" style={{ left: ringPos.x, top: ringPos.y }}></div>
 
-      {/* Header */}
-      <header className="border-b border-white/20 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300">
-        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
-          <div
-            className="flex items-center space-x-2 md:space-x-3 group cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-xl flex items-center justify-center transform transition-all duration-300 group-hover:rotate-6 group-hover:scale-110 shadow-lg">
-              <Globe className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Perspective
-            </span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <ThemeToggle />
-          </div>
+      {/* Top Navigation Bar */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="flex items-center gap-2 cursor-none" onClick={() => router.push("/")}>
+          <span className="material-symbols-outlined text-primary text-2xl">lens_blur</span>
+          <span className="font-bold tracking-tight text-lg uppercase">Perspective-AI</span>
         </div>
-      </header>
+      </nav>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 md:py-16 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Status Badge */}
-          <Badge className="mb-6 md:mb-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white border-0 px-4 md:px-6 py-1.5 md:py-2 text-xs md:text-sm font-medium animate-pulse">
-            <Sparkles className="w-3 h-3 md:w-4 md:h-4 mr-2" />
-            AI Processing in Progress
-          </Badge>
+      <main className="flex-1 flex flex-col p-6 max-w-xl mx-auto w-full gap-8 z-10 relative">
+        {/* Header */}
+        <header className="text-center space-y-2 mt-4">
+          <h1 className="font-serif text-3xl md:text-4xl italic text-slate-100">Initiating Narrative Synthesis...</h1>
+          <p className="text-primary/60 text-xs font-mono tracking-widest uppercase">System Core v4.0.2</p>
+        </header>
 
-          {/* Main Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 dark:from-slate-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent leading-tight">
-            Analyzing Your Article
-          </h1>
-
-          {/* Article URL Display */}
-          <div className="mb-8 md:mb-12 p-3 md:p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg backdrop-blur-sm">
-            <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm mb-2">
-              Processing:
-            </p>
-            <p className="text-blue-600 dark:text-blue-400 font-medium truncate text-sm md:text-base">
-              {articleUrl}
-            </p>
+        {/* Terminal Box */}
+        <div className="glass-card rounded-xl p-4 font-mono text-xs overflow-hidden relative border border-white/5 bg-white/5 backdrop-blur-[12px]">
+          <div className="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
+            <div className="w-2 h-2 rounded-full bg-red-500/50"></div>
+            <div className="w-2 h-2 rounded-full bg-yellow-500/50"></div>
+            <div className="w-2 h-2 rounded-full bg-green-500/50"></div>
+            <span className="ml-2 text-primary/40 uppercase tracking-widest">TARGET_INPUT</span>
           </div>
+          <div className="flex flex-col gap-1 pr-10">
+            <span className="text-primary/70">Source:</span>
+            <span className="text-slate-300 break-all">{articleUrl || "Awaiting URL..."}</span>
+          </div>
+          <div className="absolute right-2 bottom-2 opacity-10">
+            <span className="material-symbols-outlined text-4xl">terminal</span>
+          </div>
+        </div>
 
-          {/* Progress Bar */}
-          <div className="mb-12 md:mb-16">
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 md:h-3 mb-3 md:mb-4 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-full transition-all duration-300 ease-out relative"
-                style={{
-                  width: `${Math.min(progress, (currentStep + 1) * 20)}%`,
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse"></div>
-              </div>
+        {/* Central Circular Loader */}
+        <div className="relative flex justify-center items-center py-6">
+          <div className="relative w-48 h-48 flex items-center justify-center">
+            {/* Outer Ring */}
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-[spin_3s_linear_infinite]"></div>
+
+            {/* Inner Ring */}
+            <div className="absolute inset-4 rounded-full border border-primary/10 border-b-primary/60 animate-[spin_2s_linear_infinite_reverse]"></div>
+
+            {/* Technical Motif Center */}
+            <div className="glass-card w-32 h-32 rounded-full flex flex-col items-center justify-center border border-primary/30 bg-primary/5 shadow-[0_0_15px_rgba(6,224,249,0.2)]">
+              <span className="material-symbols-outlined text-primary text-4xl animate-pulse">psychology</span>
+              <span className="text-[10px] font-mono text-primary mt-2 uppercase tracking-tighter">{Math.min(progress, 100)}%</span>
             </div>
-            <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm">
-              {Math.min(progress, (currentStep + 1) * 20)}% Complete
-            </p>
           </div>
+        </div>
 
-          {/* Processing Steps */}
-          <div className="grid gap-4 md:gap-6 max-w-2xl mx-auto">
-            {steps.map((step, index) => (
-              <Card
-                key={index}
-                className={`p-4 md:p-6 border-0 transition-all duration-500 ${
-                  index === currentStep
-                    ? "bg-white dark:bg-slate-800 shadow-2xl scale-105 ring-2 ring-blue-500/50"
-                    : index < currentStep
-                    ? "bg-white/80 dark:bg-slate-800/80 shadow-lg opacity-75"
-                    : "bg-white/40 dark:bg-slate-800/40 shadow-md opacity-50"
-                }`}
-              >
-                <div className="flex items-center space-x-3 md:space-x-4">
-                  <div
-                    className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${
-                      index === currentStep
-                        ? `bg-gradient-to-br ${step.color} animate-pulse shadow-lg`
-                        : index < currentStep
-                        ? "bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md"
-                        : "bg-slate-200 dark:bg-slate-700"
-                    }`}
-                  >
-                    {index < currentStep ? (
-                      <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                    ) : index === currentStep ? (
-                      <step.icon
-                        className="w-5 h-5 md:w-6 md:h-6 text-white animate-spin"
-                        style={{ animationDuration: "2s" }}
-                      />
-                    ) : (
-                      <step.icon className="w-5 h-5 md:w-6 md:h-6 text-slate-400" />
-                    )}
-                  </div>
-                  <div className="flex-1 text-left">
-                    <h3
-                      className={`font-semibold mb-1 transition-colors duration-300 text-sm md:text-base ${
-                        index === currentStep
-                          ? "text-blue-600 dark:text-blue-400"
-                          : index < currentStep
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-slate-500 dark:text-slate-400"
-                      }`}
-                    >
-                      {step.title}
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-300 text-xs md:text-sm">
-                      {step.description}
-                    </p>
-                  </div>
-                  {index === currentStep && (
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-indigo-500 rounded-full animate-bounce delay-100"></div>
-                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-500 rounded-full animate-bounce delay-200"></div>
+        {/* Processing Nodes */}
+        <div className="space-y-4">
+          {steps.map((step, index) => {
+            const isCompleted = index < currentStep;
+            const isActive = index === currentStep;
+            const isPending = index > currentStep;
+
+            return (
+              <div key={index} className="flex items-center gap-4 group">
+                <div className="flex flex-col items-center">
+                  {isCompleted ? (
+                    <div className="w-8 h-8 rounded-full border border-yellow-500/50 flex items-center justify-center bg-yellow-500/10">
+                      <span className="material-symbols-outlined text-yellow-500 text-lg">check</span>
+                    </div>
+                  ) : isActive ? (
+                    <div className="w-8 h-8 rounded-full border border-primary flex items-center justify-center bg-primary/20 shadow-[0_0_15px_rgba(6,224,249,0.4)] animate-pulse">
+                      <span className="material-symbols-outlined text-primary text-lg">settings_suggest</span>
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center bg-white/5">
+                      <div className="w-2 h-2 rounded-full bg-white/20"></div>
                     </div>
                   )}
+                  {index < steps.length - 1 && (
+                    <div className={`w-px h-6 my-1 ${isCompleted ? 'bg-yellow-500/30' : isActive ? 'bg-primary/30' : 'bg-white/10'}`}></div>
+                  )}
                 </div>
-              </Card>
-            ))}
-          </div>
 
-          {/* AI Processing Animation */}
-          <div className="mt-12 md:mt-16 flex justify-center">
-            <div className="relative">
-              <div className="w-24 h-24 md:w-32 md:h-32 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin">
-                <div
-                  className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-blue-600 rounded-full animate-spin"
-                  style={{ animationDuration: "1s" }}
-                ></div>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Zap className="w-6 h-6 md:w-8 md:h-8 text-blue-600 animate-pulse" />
-              </div>
-            </div>
-          </div>
+                <div className={`flex-1 ${index < steps.length - 1 ? 'pb-4' : ''}`}>
+                  <h3 className={`text-sm font-bold tracking-wide ${isActive || isCompleted ? 'text-white' : 'text-slate-500'}`}>{step.title}</h3>
 
-          <p className="mt-6 md:mt-8 text-slate-600 dark:text-slate-300 text-base md:text-lg px-4">
-            Our AI is working hard to provide you with comprehensive analysis...
-          </p>
+                  {isActive ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary shadow-[0_0_8px_#06e0f9] transition-all duration-300" style={{ width: `${(progress % 20) * 5}%` }}></div>
+                      </div>
+                      <span className="text-[10px] font-mono text-primary animate-pulse uppercase">Active</span>
+                    </div>
+                  ) : (
+                    <p className={`text-[10px] font-mono uppercase ${isCompleted ? 'text-yellow-500/60' : 'text-slate-600'}`}>
+                      {isCompleted ? step.subtitleVerified : step.subtitlePending}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </main>
+
+      {/* Basic Particle Mesh Layer */}
+      <div className="fixed inset-0 pointer-events-none particle-mesh opacity-30 dark:opacity-40 z-0 mix-blend-screen"></div>
+
     </div>
   );
 }

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Perspective-AI | Challenge Your Beliefs</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Space+Mono&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        @import url("./frontend/app/globals.css");
+
+        .feature-card:hover {
+            box-shadow: 0 -4px 15px -3px rgba(6, 224, 249, 0.3);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display overflow-x-hidden">
+    <!-- Custom Cursor -->
+    <div class="custom-cursor"></div>
+    <div class="custom-cursor-ring"></div>
+    <!-- Nav Bar -->
+    <nav
+        class="fixed top-0 left-0 right-0 h-[68px] bg-background-dark/80 backdrop-blur-md border-b border-white/10 z-50 px-10">
+        <div class="max-w-[1320px] mx-auto h-full flex items-center justify-between">
+            <!-- Left: Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_#06e0f9]"></div>
+                <h1 class="text-xl font-bold tracking-tight">
+                    <span class="text-primary">Perspective</span><span class="text-accent">-AI</span>
+                </h1>
+            </div>
+            <!-- Center: Links -->
+            <div class="hidden lg:flex gap-10 font-mono text-[11px] tracking-[0.2em] uppercase text-slate-400">
+                <a class="hover:text-primary transition-colors" href="#">Features</a>
+                <a class="hover:text-primary transition-colors" href="#">How It Works</a>
+                <a class="hover:text-primary transition-colors" href="#">Pipeline</a>
+                <a class="hover:text-primary transition-colors" href="#">Stack</a>
+                <a class="hover:text-primary transition-colors" href="#">About</a>
+            </div>
+            <!-- Right: Action -->
+            <button
+                class="border border-primary text-primary px-6 py-2 rounded font-bold text-xs uppercase tracking-widest hover:bg-primary/10 transition-all">
+                Get Started
+            </button>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen pt-[68px] flex items-center particle-mesh">
+        <div class="max-w-[1320px] mx-auto grid grid-cols-12 gap-8 px-10 w-full">
+            <div class="col-span-12 md:col-span-6 flex flex-col justify-center gap-8">
+                <h1 class="font-serif text-5xl lg:text-7xl leading-[1.1] dark:text-white">
+                    Imagine having a <span class="italic text-primary">smart, opinionated</span> friend who isn't afraid
+                    to <span class="text-accent underline decoration-1 underline-offset-8">challenge</span> your
+                    beliefs.
+                </h1>
+                <p class="text-xl text-slate-400 max-w-xl font-light">
+                    That's Perspective-AI. We break your echo chambers by injecting reasoned, factual, and challenging
+                    narratives into your digital intake.
+                </p>
+                <div class="flex gap-4 mt-4">
+                    <button
+                        class="bg-primary text-background-dark px-10 py-4 rounded-lg font-bold text-lg hover:scale-105 transition-transform">
+                        Launch Dashboard
+                    </button>
+                </div>
+            </div>
+            <div class="col-span-12 md:col-span-6 flex justify-end items-center mt-12 md:mt-0">
+                <!-- 3D Tilting Glass Widget -->
+                <div
+                    class="glass-card w-full min-h-[480px] rounded-xl p-8 tilt-effect shadow-2xl relative overflow-hidden">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-primary/60 font-mono">Input
+                                Content</label>
+                            <div class="bg-white/5 border border-white/10 p-4 rounded text-sm text-slate-300 italic">
+                                "The recent policy shifts in decentralized finance are purely motivated by short-term
+                                greed..."
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-end">
+                                <label class="text-[10px] uppercase tracking-widest text-primary font-mono">Analyzing
+                                    Perspective</label>
+                                <span class="text-[10px] font-mono text-primary">84%</span>
+                            </div>
+                            <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary w-[84%] shadow-[0_0_10px_#06e0f9]"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-accent font-mono">Counter-Narrative
+                                Output</label>
+                            <div
+                                class="bg-black/20 p-4 rounded font-mono text-xs leading-relaxed text-accent/90 border-l-2 border-accent">
+                                <span class="block mb-2 text-white opacity-50"># Initializing Reasoned
+                                    Thinking...</span>
+                                &gt; While the pursuit of profit is a factor, consider the structural necessity for
+                                liquidity providers in volatile markets. Without these incentives, the very
+                                infrastructure of...
+                                <span class="animate-pulse">|</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 right-0 p-4 opacity-20">
+                        <span class="material-symbols-outlined text-8xl">troubleshoot</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Problem Band -->
+    <section class="bg-slate-900/50 border-y border-white/5 py-20">
+        <div class="max-w-[1320px] mx-auto grid grid-cols-3 gap-12 px-10">
+            <div class="text-center group">
+                <p class="text-primary font-mono text-sm uppercase tracking-[0.3em] mb-2">Average User</p>
+                <h3 class="text-5xl font-bold dark:text-white mb-2">3.2 <span
+                        class="text-2xl font-light opacity-50">hrs</span></h3>
+                <p class="text-slate-500">Daily Bubble Time</p>
+            </div>
+            <div class="text-center group border-x border-white/10">
+                <p class="text-accent font-mono text-sm uppercase tracking-[0.3em] mb-2">Algorithm Goal</p>
+                <h3 class="text-5xl font-bold dark:text-white mb-2">78%</h3>
+                <p class="text-slate-500">Bias Reinforcement</p>
+            </div>
+            <div class="text-center group">
+                <p class="text-primary font-mono text-sm uppercase tracking-[0.3em] mb-2">Discovery Cost</p>
+                <h3 class="text-5xl font-bold dark:text-white mb-2">$0</h3>
+                <p class="text-slate-500">True Incentive</p>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section class="py-32 bg-background-dark">
+        <div class="max-w-[1320px] mx-auto px-10">
+            <div class="mb-20">
+                <h2 class="text-4xl font-bold mb-4">Core Capabilities</h2>
+                <div class="w-20 h-1 bg-primary"></div>
+            </div>
+            <div class="grid grid-cols-5 gap-6">
+                <!-- Feature 1 -->
+                <div class="feature-card glass-card p-8 rounded-xl tilt-effect transition-all flex flex-col gap-6">
+                    <span class="material-symbols-outlined text-primary text-4xl">swap_horiz</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Counter-Perspective</h4>
+                        <p class="text-sm text-slate-400">Challenge your existing views with dialectic logic.</p>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="feature-card glass-card p-8 rounded-xl tilt-effect transition-all flex flex-col gap-6">
+                    <span class="material-symbols-outlined text-primary text-4xl">psychology</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Reasoned Thinking</h4>
+                        <p class="text-sm text-slate-400">Step-by-step logic-driven insights based on first principles.
+                        </p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
+                <div class="feature-card glass-card p-8 rounded-xl tilt-effect transition-all flex flex-col gap-6">
+                    <span class="material-symbols-outlined text-primary text-4xl">history_edu</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Updated Facts</h4>
+                        <p class="text-sm text-slate-400">Real-time data point verification across multiple nodes.</p>
+                    </div>
+                </div>
+                <!-- Feature 4 -->
+                <div class="feature-card glass-card p-8 rounded-xl tilt-effect transition-all flex flex-col gap-6">
+                    <span class="material-symbols-outlined text-primary text-4xl">link</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Seamless Integration</h4>
+                        <p class="text-sm text-slate-400">Workflow ready for research and content consumption.</p>
+                    </div>
+                </div>
+                <!-- Feature 5 -->
+                <div class="feature-card glass-card p-8 rounded-xl tilt-effect transition-all flex flex-col gap-6">
+                    <span class="material-symbols-outlined text-primary text-4xl">bolt</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Real-Time Analysis</h4>
+                        <p class="text-sm text-slate-400">Instant processing of complex narratives and data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- How It Works -->
+    <section class="py-32 relative overflow-hidden bg-background-light dark:bg-background-dark/50">
+        <div class="max-w-[1320px] mx-auto px-10 relative z-10">
+            <h2 class="text-center text-4xl font-bold mb-24">The Perspective Journey</h2>
+            <div class="flex justify-between items-center relative">
+                <!-- SVG Connector -->
+                <div class="absolute top-1/2 left-0 w-full -translate-y-1/2 -z-10 px-32 hidden lg:block">
+                    <svg fill="none" height="100" viewbox="0 0 800 100" width="100%" xmlns="http://www.w3.org/2000/svg">
+                        <path class="opacity-30" d="M0 50C200 50 200 20 400 20C600 20 600 80 800 80" stroke="#06e0f9"
+                            stroke-dasharray="8 8" stroke-width="2"></path>
+                        <path class="opacity-30" d="M0 50C200 50 200 80 400 80C600 80 600 20 800 20" stroke="#ffbf00"
+                            stroke-dasharray="8 8" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <div class="flex flex-col items-center gap-6 w-1/4">
+                    <div
+                        class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary shadow-[0_0_20px_rgba(6,224,249,0.3)]">
+                        <span class="material-symbols-outlined text-primary text-3xl">search</span>
+                    </div>
+                    <div class="text-center">
+                        <h5 class="font-bold text-xl mb-2">Browse</h5>
+                        <p class="text-slate-400 text-sm">Paste URLs, PDFs, or raw text for the engine to ingest.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-6 w-1/4">
+                    <div
+                        class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border-2 border-slate-700">
+                        <span class="material-symbols-outlined text-slate-100 text-3xl">analytics</span>
+                    </div>
+                    <div class="text-center">
+                        <h5 class="font-bold text-xl mb-2">Analyze</h5>
+                        <p class="text-slate-400 text-sm">Deep narrative parsing identifies biases and hidden patterns.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-6 w-1/4">
+                    <div
+                        class="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center border-2 border-accent shadow-[0_0_20px_rgba(255,191,0,0.3)]">
+                        <span class="material-symbols-outlined text-accent text-3xl">balance</span>
+                    </div>
+                    <div class="text-center">
+                        <h5 class="font-bold text-xl mb-2">See Both Sides</h5>
+                        <p class="text-slate-400 text-sm">A balanced synthesis that respects complexity.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Pipeline Visualizer -->
+    <section class="py-32">
+        <div class="max-w-[1320px] mx-auto px-10 grid grid-cols-12 gap-16">
+            <div class="col-span-5 flex flex-col justify-center">
+                <p class="text-primary font-mono text-sm tracking-widest mb-4 uppercase">Advanced Architecture</p>
+                <h2 class="text-4xl font-bold mb-6">The Multi-Dimensional Pipeline</h2>
+                <p class="text-slate-400 text-lg mb-8">
+                    We don't just prompt an LLM. We run a deterministic graph of agents designed to verify, challenge,
+                    and synthesize information using the latest research in cognitive debiasing.
+                </p>
+                <ul class="space-y-4 font-mono text-sm">
+                    <li class="flex items-center gap-3 text-primary"><span
+                            class="w-1.5 h-1.5 bg-primary rounded-full"></span> Agentic Fact Check</li>
+                    <li class="flex items-center gap-3 text-slate-500"><span
+                            class="w-1.5 h-1.5 bg-slate-700 rounded-full"></span> Semantic Bias Detection</li>
+                    <li class="flex items-center gap-3 text-slate-500"><span
+                            class="w-1.5 h-1.5 bg-slate-700 rounded-full"></span> Dialectic Synthesis</li>
+                </ul>
+            </div>
+            <div
+                class="col-span-7 bg-background-dark/80 rounded-2xl border border-white/5 p-12 min-h-[600px] relative overflow-hidden">
+                <div class="absolute inset-0 particle-mesh opacity-20"></div>
+                <!-- LangGraph Visualization -->
+                <div class="relative w-full h-full flex items-center justify-center">
+                    <div class="grid grid-cols-3 gap-x-16 gap-y-12">
+                        <!-- Row 1 -->
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Input" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">input</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Input</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Fact Fetch" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">cloud_download</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Fact Fetch</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Narrative Parse" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">segment</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Narrative Parse</span>
+                        </div>
+                        <!-- Row 2 (Key Nodes) -->
+                        <div class="flex flex-col items-center gap-2 group cursor-help relative scale-125 hover:scale-110 transition-transform"
+                            data-node="Updated Facts*" tabindex="0" role="button">
+                            <div
+                                class="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center animate-pulse">
+                                <span class="material-symbols-outlined text-primary">verified</span>
+                                <div class="absolute inset-0 rounded-full border-4 border-primary/20 scale-110"></div>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-primary font-bold">Updated Facts*</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help relative scale-125 hover:scale-110 transition-transform"
+                            data-node="Reasoned Thinking*" tabindex="0" role="button">
+                            <div
+                                class="w-20 h-20 rounded-full bg-accent/10 border-2 border-accent flex items-center justify-center">
+                                <span class="material-symbols-outlined text-accent">auto_awesome</span>
+                                <div class="absolute inset-0 rounded-full border-4 border-accent/20 scale-110"></div>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-accent font-bold">Reasoned
+                                Thinking*</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Bias Detect" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">warning</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Bias Detect</span>
+                        </div>
+                        <!-- Row 3 -->
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Synthesis" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">merge</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Synthesis</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Validate" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center group-hover:border-primary transition-all">
+                                <span class="material-symbols-outlined text-slate-400">rule</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-500">Validate</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 group cursor-help hover:scale-110 transition-transform"
+                            data-node="Output" tabindex="0" role="button">
+                            <div
+                                class="w-16 h-16 rounded-lg bg-primary border-2 border-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-background-dark">output</span>
+                            </div>
+                            <span class="text-[10px] font-mono uppercase text-slate-100 font-bold">Output</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Tech Stack -->
+    <section class="py-20 border-y border-white/5 overflow-hidden">
+        <div class="flex justify-center flex-wrap gap-4 max-w-[1320px] mx-auto px-10">
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> LangChain
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> LangGraph
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> GPT-4o
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> Tavily Search
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> Pinecone
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> React
+            </span>
+            <span
+                class="bg-slate-800/50 text-slate-300 px-6 py-2 rounded-full border border-white/10 font-mono text-xs flex items-center gap-2">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div> FastAPI
+            </span>
+        </div>
+    </section>
+    <!-- About Section -->
+    <section class="py-32">
+        <div class="max-w-[1320px] mx-auto px-10">
+            <div class="grid grid-cols-12 gap-16 mb-20">
+                <div class="col-span-12 text-center max-w-3xl mx-auto">
+                    <h2 class="text-4xl font-bold mb-6">Built for Intellectual Autonomy</h2>
+                    <p class="text-slate-400 text-lg">
+                        Perspective-AI was created as an antidote to the "echo chamber" effect of modern algorithms. Our
+                        mission is to provide every individual with the tools to critique information, explore opposing
+                        views, and arrive at more robust, independent conclusions.
+                    </p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-8">
+                <div class="bg-white/5 border border-white/10 p-10 rounded-xl hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-primary text-4xl mb-6">savings</span>
+                    <h5 class="text-xl font-bold mb-4">100% Free</h5>
+                    <p class="text-slate-500 text-sm leading-relaxed">Our core engine remains free to use for individual
+                        researchers and students committed to critical thinking.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-10 rounded-xl hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-primary text-4xl mb-6">all_inclusive</span>
+                    <h5 class="text-xl font-bold mb-4">Works on Any Content</h5>
+                    <p class="text-slate-500 text-sm leading-relaxed">Whether it's a social media thread, a scientific
+                        paper, or a news article, Perspective-AI parses it all.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-10 rounded-xl hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-primary text-4xl mb-6">menu_book</span>
+                    <h5 class="text-xl font-bold mb-4">Sourced &amp; Transparent</h5>
+                    <p class="text-slate-500 text-sm leading-relaxed">Every claim is linked back to primary sources,
+                        allowing you to trace the lineage of any counter-argument.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-10">
+        <div class="max-w-[1320px] mx-auto px-10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 bg-primary rounded-full"></div>
+                <h2 class="text-sm font-bold tracking-tight">
+                    <span class="text-primary">Perspective</span><span class="text-accent">-AI</span>
+                </h2>
+            </div>
+            <p class="text-slate-500 text-xs font-mono uppercase tracking-widest">
+                Challenging Narrative, One Agent at a Time.
+            </p>
+            <div class="flex gap-8 text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+                <a class="hover:text-primary transition-colors" href="#">Terms</a>
+                <a class="hover:text-primary transition-colors" href="#">Privacy</a>
+                <a class="hover:text-primary transition-colors" href="#">Github</a>
+                <a class="hover:text-primary transition-colors" href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Custom Cursor Logic
+        const cursor = document.querySelector('.custom-cursor');
+        const ring = document.querySelector('.custom-cursor-ring');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            // Lag ring
+            setTimeout(() => {
+                ring.style.left = (e.clientX - 11) + 'px';
+                ring.style.top = (e.clientY - 11) + 'px';
+            }, 50);
+        });
+
+        // Tilt effect logic simulation (simple visual state change on hover)
+        const cards = document.querySelectorAll('.tilt-effect');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+                const dx = x - xc;
+                const dy = y - yc;
+                card.style.transform = `perspective(1000px) rotateX(${dy / -20}deg) rotateY(${dx / 20}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        });
+    </script>
+    <!-- Node Detail Modal -->
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-6 opacity-0 pointer-events-none transition-all duration-300"
+        id="node-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="absolute inset-0 bg-[#03050e]/80 backdrop-blur-[12px]" id="modal-backdrop"></div>
+        <div class="glass-card max-w-2xl w-full rounded-2xl p-8 relative z-10 border border-white/10 shadow-2xl">
+            <button class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors" id="close-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div id="modal-content">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-16 h-16 rounded-xl flex items-center justify-center border" id="modal-icon-container">
+                        <span class="material-symbols-outlined text-3xl" id="modal-icon"></span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-white" id="modal-title">Node Name</h3>
+                        <p class="text-xs font-mono uppercase tracking-[0.2em] opacity-50" id="modal-category">Pipeline
+                            Component</p>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div>
+                        <h4 class="text-sm font-mono text-primary uppercase tracking-widest mb-3">Operational
+                            Description</h4>
+                        <p class="text-slate-300 leading-relaxed" id="modal-desc"></p>
+                    </div>
+                    <div class="bg-black/40 rounded-lg p-6 border border-white/5">
+                        <h4
+                            class="text-xs font-mono text-accent uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">account_tree</span> Chain-of-Thought
+                        </h4>
+                        <div class="font-mono text-sm text-slate-400 space-y-2" id="modal-cot">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const nodeData = {
+            "Input": {
+                desc: "Handles raw content ingestion from multiple sources including URLs, PDFs, and plain text. Performs initial cleaning and sanitization of the input data.",
+                icon: "input",
+                color: "#94a3b8",
+                cot: ["> Identifying content format: [Web Article]", "> Sanitizing HTML tags and advertisements", "> Normalizing character encoding for downstream parsing"]
+            },
+            "Fact Fetch": {
+                desc: "Automatically identifies key claims within the input and triggers asynchronous searches across trusted academic and news databases.",
+                icon: "cloud_download",
+                color: "#94a3b8",
+                cot: ["> Extracting claim: 'DeFi policy shifts are greed-motivated'", "> Querying World Bank Policy Database...", "> Retrieving 4 related liquidity incentive reports"]
+            },
+            "Narrative Parse": {
+                desc: "Uses advanced NLP to map the emotional tone, rhetorical devices, and logical fallacies present in the original narrative.",
+                icon: "segment",
+                color: "#94a3b8",
+                cot: ["> Sentiment Analysis: [Cynical/Skeptical]", "> Detecting Rhetorical Device: [Ad Hominem]", "> Mapping narrative arc for 'Greed' theme"]
+            },
+            "Updated Facts*": {
+                desc: "Performs real-time cross-verification. It resolves contradictions between sources and updates the pipeline with the most current, verified data points.",
+                icon: "verified",
+                color: "#06e0f9",
+                cot: ["> Comparing Input Claim vs. Verified Reports", "> Result: Claim found to be 62% speculative", "> Injecting current APR data from Uniswap v3 protocol"]
+            },
+            "Reasoned Thinking*": {
+                desc: "A specialized LLM agent that applies first-principles thinking to synthesize information without the bias of common online discourse.",
+                icon: "auto_awesome",
+                color: "#ffbf00",
+                cot: ["> Breaking problem into basic components: [Liquidity], [Risk], [Reward]", "> Applying Economic Game Theory principles", "> Constructing non-biased logical bridge"]
+            },
+            "Bias Detect": {
+                desc: "Scans for algorithmic echo-chamber patterns and semantic leanings that might skew the user's perception of reality.",
+                icon: "warning",
+                color: "#94a3b8",
+                cot: ["> Scanning for 'Confirmation Bias' signals", "> Identifying lack of counter-incentive mentions", "> Flagging polarizing vocabulary: 'Purely', 'Greed'"]
+            },
+            "Synthesis": {
+                desc: "Merges the original input with the discovered facts and reasoned insights to create a comprehensive multi-dimensional perspective.",
+                icon: "merge",
+                color: "#94a3b8",
+                cot: ["> Merging Input Node with Verified Fact Node", "> Aligning Reasoned Thinking with Narrative Structure", "> Finalizing argument balance (40/60 split)"]
+            },
+            "Validate": {
+                desc: "A final quality control agent that checks the generated output for hallucination, factual accuracy, and adherence to the Dialectic framework.",
+                icon: "rule",
+                color: "#94a3b8",
+                cot: ["> Verifying citations for all claims", "> Checking for internal logical consistency", "> Quality Score: 9.8/10"]
+            },
+            "Output": {
+                desc: "The final delivery layer that formats the insights into a readable dashboard interface for the user.",
+                icon: "output",
+                color: "#06e0f9",
+                cot: ["> Formatting Markdown structure", "> Generating visual confidence score widgets", "> Pushing to Dashboard API"]
+            }
+        };
+
+        const modal = document.getElementById('node-modal');
+        const closeBtn = document.getElementById('close-modal');
+        const backdrop = document.getElementById('modal-backdrop');
+        let previousFocus = null;
+
+        const openModal = (nodeName) => {
+            const data = nodeData[nodeName];
+            if (!data) return;
+
+            document.getElementById('modal-title').textContent = nodeName;
+            document.getElementById('modal-desc').textContent = data.desc;
+            document.getElementById('modal-icon').textContent = data.icon;
+
+            const iconContainer = document.getElementById('modal-icon-container');
+            iconContainer.style.borderColor = data.color + '40';
+            iconContainer.style.backgroundColor = data.color + '10';
+            document.getElementById('modal-icon').style.color = data.color;
+
+            const cotContainer = document.getElementById('modal-cot');
+            cotContainer.innerHTML = '';
+            data.cot.forEach(step => {
+                const p = document.createElement('p');
+                p.textContent = step;
+                cotContainer.appendChild(p);
+            });
+
+            previousFocus = document.activeElement;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+
+            // Move focus to modal
+            setTimeout(() => {
+                closeBtn.focus();
+            }, 100);
+        };
+
+        const closeModal = () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('opacity-100', 'pointer-events-auto');
+            if (previousFocus) {
+                previousFocus.focus();
+            }
+        };
+
+        // Esc to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('opacity-0')) {
+                closeModal();
+            }
+        });
+
+        // Trap focus inside modal
+        const focusableElementsSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        modal.addEventListener('keydown', function (e) {
+            const isTabPressed = e.key === 'Tab' || e.keyCode === 9;
+            if (!isTabPressed) {
+                return;
+            }
+            const focusableContent = modal.querySelectorAll(focusableElementsSelector);
+            const firstFocusableElement = focusableContent[0];
+            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusableElement) {
+                    lastFocusableElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastFocusableElement) {
+                    firstFocusableElement.focus();
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // Attach listeners to pipeline nodes
+        document.querySelectorAll('.cursor-help').forEach(node => {
+            node.addEventListener('click', () => {
+                const name = node.dataset.node;
+                openModal(name);
+            });
+            node.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const name = node.dataset.node;
+                    openModal(name);
+                }
+            });
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+    </script>
+</body>
+
+</html>
