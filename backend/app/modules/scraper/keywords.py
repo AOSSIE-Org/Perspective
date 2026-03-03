@@ -1,62 +1,31 @@
-"""
-keywords.py
------------
-Module for extracting key phrases from text using the RAKE
-(Rapid Automatic Keyword Extraction) algorithm. This utility
-helps identify the most relevant and representative words or
-phrases in a body of text, often useful for summarization,
-tagging, search indexing, and content analysis.
+import re
+from collections import Counter
 
-Functions:
-    extract_keywords(text: str, max_keywords: int = 15)
-        Runs the RAKE algorithm on the provided text and returns
-        the top-ranked keywords or phrases up to the specified limit.
-
-    extract_keyword_data(text: str) -> Dict
-        Higher-level helper function that packages extracted
-        keywords along with the top phrase and the total count
-        into a single dictionary for convenient downstream use.
-"""
-
-
-from rake_nltk import Rake
-from typing import Dict
+_STOP_WORDS = frozenset({
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "as", "is", "was", "are", "were", "been",
+    "be", "have", "has", "had", "do", "does", "did", "will", "would",
+    "could", "should", "may", "might", "shall", "can", "need", "dare",
+    "it", "its", "this", "that", "these", "those", "he", "she", "they",
+    "we", "you", "me", "him", "her", "us", "them", "my", "your",
+    "his", "our", "their", "not", "no", "nor", "if", "then", "than",
+    "so", "such", "very", "too", "also", "just", "about", "above",
+    "after", "again", "all", "any", "because", "before", "being",
+    "below", "between", "both", "during", "each", "few", "further",
+    "get", "got", "here", "how", "into", "more", "most", "much",
+    "must", "new", "now", "off", "old", "once", "only", "other",
+    "out", "over", "own", "per", "same", "some", "still", "there",
+    "through", "under", "until", "upon", "what", "when", "where",
+    "which", "while", "who", "whom", "why", "yet", "said", "like",
+    "one", "two", "many", "way", "even", "back", "well", "also",
+})
 
 
-def extract_keywords(text: str, max_keywords: int = 15):
-    """
-    Extracts important keywords from the input text using RAKE algorithm.
-
-    Args:
-        text (str): The cleaned article text.
-        max_keywords (int): Max number of keywords to return.
-
-    Returns:
-        List[str]: A list of important keywords/phrases.
-    """
-    rake = Rake()
-    rake.extract_keywords_from_text(text)
-    keywords_with_scores = rake.get_ranked_phrases_with_scores()
-
-    # Sort and limit
-    keywords = [phrase for score, phrase in sorted(keywords_with_scores, reverse=True)]
-    return keywords[:max_keywords]
-
-
-def extract_keyword_data(text: str) -> Dict:
-    """
-    High-level utility to package all keyword-related data.
-
-    Returns:
-        Dict: {
-            "keywords": [...],
-            "top_phrase": "...",
-            "count": N
-        }
-    """
-    keywords = extract_keywords(text)
-    return {
-        "keywords": keywords,
-        "top_phrase": keywords[0] if keywords else None,
-        "count": len(keywords),
-    }
+def extract_keywords(text: str, max_keywords: int = 15) -> list[str]:
+    """Extract top keywords by frequency (no external NLP libraries)."""
+    if not text:
+        return []
+    words = re.findall(r"\b[a-zA-Z]{3,}\b", text.lower())
+    filtered = [w for w in words if w not in _STOP_WORDS]
+    freq = Counter(filtered)
+    return [word for word, _ in freq.most_common(max_keywords)]

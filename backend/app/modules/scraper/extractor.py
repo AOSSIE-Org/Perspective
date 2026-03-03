@@ -1,21 +1,3 @@
-"""
-extractor.py
-------------
-Module for extracting article content from a given URL using multiple
-progressively robust methods. Attempts extraction with the following
-approaches in order:
-    1. Trafilatura
-    2. Newspaper3k
-    3. BeautifulSoup + Readability
-
-If one method fails, it falls back to the next until a valid article
-body is found.
-
-Classes:
-    ArticleExtractor
-        Encapsulates all extraction methods and fallback logic.
-"""
-
 import trafilatura
 from newspaper import Article
 from bs4 import BeautifulSoup
@@ -24,31 +6,27 @@ import requests
 import logging
 import json
 
-# This class contains extractors that are more and more advanced from top to
-# bottom and they will try to extract any article.
-
 
 class Article_extractor:
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
         self.headers = {
             "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                " AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/113.0 Safari/537.36"
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0 Safari/537.36"
             )
         }
 
-    def _fetch_html(self):
+    def _fetch_html(self) -> str:
         try:
-            res = requests.get(self.url, self.headers, timeout=10)
+            res = requests.get(self.url, headers=self.headers, timeout=10)
             res.raise_for_status()
             return res.text
         except requests.RequestException as e:
-            logging.error(f"failed to fetch: {self.url}-{e}")
+            logging.error(f"Failed to fetch: {self.url} — {e}")
             return ""
 
-    def extract_with_trafilatura(self):
+    def extract_with_trafilatura(self) -> dict:
         downloaded = trafilatura.fetch_url(self.url)
         if not downloaded:
             return {}
@@ -78,14 +56,13 @@ class Article_extractor:
                 ),
             }
         except Exception as e:
-            logging.error(f"Newspaper3k failed: {e}")
+            logging.error(f"Newspaper failed: {e}")
             return {}
 
     def extract_with_bs4(self) -> dict:
         html = self._fetch_html()
         if not html:
             return {}
-
         try:
             doc = Document(html)
             soup = BeautifulSoup(doc.summary(), "html.parser")
@@ -96,7 +73,7 @@ class Article_extractor:
             logging.error(f"BS4 + Readability fallback failed: {e}")
             return {}
 
-    def extract(self):
+    def extract(self) -> dict:
         methods = [
             self.extract_with_trafilatura,
             self.extract_with_newspaper,

@@ -1,102 +1,89 @@
 """
 chunk_rag_data.py
 -----------------
-Module for converting processed article data into smaller, structured
-chunks suitable for storage and retrieval in a vector database.
-
-The chunking process:
-    1. Validates the presence of required top-level fields such as
-       cleaned_text, perspective, and facts.
-    2. Assigns a unique article ID to all chunks using a hash-based
-       generator.
-    3. Creates a "counter-perspective" chunk containing the alternative
-       viewpoint and its reasoning.
-    4. Splits each fact into its own chunk, including metadata like
-       verdict, explanation, and source link.
-
-This structure enables more efficient semantic search, targeted
-retrieval, and fine-grained analysis.
-
-Functions:
-    chunk_rag_data(data: dict) -> list[dict]
-        Validates and transforms the input data into a list of
-        chunk dictionaries containing text and metadata.
+Converts the LangGraph analysis state into embeddable chunks
+for Pinecone vector storage.
 """
 
-
+from typing import Any
 from app.utils.generate_chunk_id import generate_id
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
 
-def chunk_rag_data(data):
+def chunk_rag_data(state: dict) -> tuple[list[dict[str, Any]], str | None]:
+    """Return ``(chunks, error_message | None)``.
+
+    Each chunk is a dict with keys ``id``, ``text``, and ``metadata``.
+    """
     try:
-        # Validate required top-level fields
-        required_fields = ["cleaned_text", "perspective", "facts"]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+        chunks: list[dict[str, Any]] = []
 
-        if not isinstance(data["facts"], list):
-            raise ValueError("Facts must be a list")
+        # --- Perspective chunk -------------------------------------------
+        perspective_obj = state.get("perspective")
+        if perspective_obj:
+            if hasattr(perspective_obj, "perspective"):
+                p_text = perspective_obj.perspective
+            elif isinstance(perspective_obj, dict):
+                p_text = perspective_obj.get("perspective", "")
+            else:
+                p_text = str(perspective_obj)
 
-        # Validate perspective structure
-        perspective_data = data["perspective"]
-        if hasattr(perspective_data, "dict"):
-            perspective_data = perspective_data.dict()
+            if p_text:
+                chunks.append(
+                    {
+                        "id": generate_id(f"perspective-{p_text[:60]}"),
+                        "text": p_text,
+                        "metadata": {
+                            "type": "perspective",
+                            "sentiment": state.get("sentiment", ""),
+                            "score": state.get("score", 0),
+                        },
+                    }
+                )
 
-        article_id = generate_id(data["cleaned_text"])
-        chunks = []
-
-        # Add counter-perspective chunk
-        perspective_obj = data["perspective"]
-
-        # Optional safety check
-
-        if not (
-            hasattr(perspective_obj, "perspective")
-            and hasattr(perspective_obj, "reasoning")
-        ):
-            raise ValueError("Perspective object missing required fields")
-
-        chunks.append(
-            {
-                "id": f"{article_id}-perspective",
-                "text": perspective_obj.perspective,
-                "metadata": {
-                    "type": "counter-perspective",
-                    "reasoning": perspective_obj.reasoning,
-                    "article_id": article_id,
-                },
-            }
-        )
-
-        # Add each fact as a separate chunk
-        for i, fact in enumerate(data["facts"]):
-            fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
-            for field in fact_fields:
-                if field not in fact:
-                    raise ValueError(
-                        f"Missing required fact field: {field} in fact index {i}"
-                    )
-
+        # --- Summary chunk -----------------------------------------------
+        summary = state.get("article_summary", "")
+        if summary:
             chunks.append(
                 {
-                    "id": f"{article_id}-fact-{i}",
-                    "text": fact["original_claim"],
+                    "id": generate_id(f"summary-{summary[:60]}"),
+                    "text": summary,
                     "metadata": {
-                        "type": "fact",
-                        "verdict": fact["verdict"],
-                        "explanation": fact["explanation"],
-                        "source_link": fact["source_link"],
-                        "article_id": article_id,
+                        "type": "summary",
+                        "sentiment": state.get("sentiment", ""),
                     },
                 }
             )
 
-        return chunks
+        # --- Fact chunks -------------------------------------------------
+        for idx, fact in enumerate(state.get("facts", [])):
+            claim = fact.get("claim", "")
+            reason = fact.get("reason", "")
+            status = fact.get("status", "Unknown")
+            if claim:
+                fact_text = (
+                    f"Claim: {claim}. "
+                    f"Verdict: {status}. "
+                    f"Reason: {reason}"
+                )
+                chunks.append(
+                    {
+                        "id": generate_id(f"fact-{idx}-{claim[:40]}"),
+                        "text": fact_text,
+                        "metadata": {
+                            "type": "fact",
+                            "claim": claim,
+                            "status": status,
+                            "reasoning": reason,
+                        },
+                    }
+                )
+
+        logger.info(f"Created {len(chunks)} chunks for vector storage.")
+        return chunks, None
 
     except Exception as e:
-        logger.exception(f"Failed to chunk the data: {e}")
-        raise
+        logger.exception(f"Error chunking data: {e}")
+        return [], str(e)

@@ -14,7 +14,6 @@ Functions:
         Processes the given state through chunking, embedding, and storage.
 """
 
-
 from app.modules.vector_store.chunk_rag_data import chunk_rag_data
 from app.modules.vector_store.embed import embed_chunks
 from app.utils.store_vectors import store
@@ -24,31 +23,31 @@ logger = setup_logger(__name__)
 
 
 def store_and_send(state):
-    # to store data in vector db
     try:
-        logger.debug(f"Received state for vector storage: {state}")
-        try:
-            chunks = chunk_rag_data(state)
-        except KeyError as e:
-            raise Exception(f"Missing required data field for chunking: {e}")
-        except Exception as e:
-            raise Exception(f"Failed to chunk data: {e}")
-        try:
-            vectors = embed_chunks(chunks)
-            if vectors:
-                logger.info(f"Embedding complete — {len(vectors)} vectors generated.")
-        except Exception as e:
-            raise Exception(f"failed to embed chunks: {e}")
-        
-        store(vectors)
-        logger.info("Vectors successfully stored in Pinecone.")
+        logger.debug("Received state for vector storage.")
+
+        chunks, chunk_error = chunk_rag_data(state)
+        if chunk_error:
+            logger.error(f"Chunking returned error: {chunk_error}")
+
+        if not chunks:
+            logger.warning("No chunks generated. Skipping vector storage.")
+            return {**state, "status": "success"}
+
+        vectors = embed_chunks(chunks)
+        if vectors:
+            logger.info(f"Embedding complete — {len(vectors)} vectors generated.")
+            store(vectors)
+            logger.info("Vectors successfully stored in Pinecone.")
+        else:
+            logger.warning("No vectors generated from embedding.")
 
     except Exception as e:
         logger.exception(f"Error in store_and_send: {e}")
         return {
             "status": "error",
             "error_from": "store_and_send",
-            "message": f"{e}",
+            "message": str(e),
         }
-    #  sending to frontend
+
     return {**state, "status": "success"}

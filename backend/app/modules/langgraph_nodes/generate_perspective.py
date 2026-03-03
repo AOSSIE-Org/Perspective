@@ -20,66 +20,64 @@ Functions:
 """
 
 
-from app.utils.prompt_templates import generation_prompt
-from langchain_groq import ChatGroq
+import asyncio
+from typing import List
+
 from pydantic import BaseModel, Field
+from langchain.schema.runnable import RunnableSequence
+
+from app.utils.prompt_templates import generation_prompt
+from app.llm_config import get_llm
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
 
-prompt = generation_prompt
-
-
 class PerspectiveOutput(BaseModel):
-    reasoning: str = Field(..., description="Chain-of-thought reasoning steps")
-    perspective: str = Field(..., description="Generated opposite perspective")
+    short_title: str = Field(description="A catchy, concise title for this analysis (max 10 words)")
+    perspective: str = Field(description="Generated opposite perspective")
+    reasoning_steps: List[str] = Field(description="Chain-of-thought reasoning steps")
 
 
-my_llm = "llama-3.3-70b-versatile"
-
-llm = ChatGroq(model=my_llm, temperature=0.7)
-
-structured_llm = llm.with_structured_output(PerspectiveOutput)
-
-
-chain = prompt | structured_llm
-
-
-def generate_perspective(state):
+async def generate_perspective(state: dict) -> dict:
     try:
-        retries = state.get("retries", 0)
-        state["retries"] = retries + 1
-
-        text = state["cleaned_text"]
+        retries = state.get("retries", 0) + 1
+        text = state.get("cleaned_text", "")
         facts = state.get("facts")
+        provider = state.get("provider", "groq")
 
         if not text:
             raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not facts:
-            raise ValueError("Missing or empty 'facts' in state")
 
-        facts_str = "\n".join(
-            [
-                f"Claim: {f['original_claim']}\n"
-                "Verdict: {f['verdict']}\nExplanation: "
-                "{f['explanation']}"
-                for f in state["facts"]
-            ]
-        )
+        # Build the chain dynamically based on provider
+        llm = get_llm(provider, temperature=0.7)
+        structured_llm = llm.with_structured_output(PerspectiveOutput)
+        chain: RunnableSequence = generation_prompt | structured_llm
 
-        result = chain.invoke(
+        if not facts:
+            logger.warning("No facts found. Generating perspective based on text only.")
+            facts_str = "No specific claims verified."
+        else:
+            facts_str = "\n".join(
+                [
+                    f"Claim: {f.get('claim', f.get('original_claim', 'Unknown'))}\n"
+                    f"Verdict: {f.get('status', f.get('verdict', 'Unknown'))}\n"
+                    f"Explanation: {f.get('reason', f.get('explanation', 'No explanation'))}"
+                    for f in facts
+                ]
+            )
+
+        result = await asyncio.to_thread(
+            chain.invoke,
             {
                 "cleaned_article": text,
                 "facts": facts_str,
                 "sentiment": state.get("sentiment", "neutral"),
-            }
+            },
         )
+
+        return {**state, "perspective": result, "retries": retries, "status": "success"}
+
     except Exception as e:
         logger.exception(f"Error in generate_perspective: {e}")
-        return {
-            "status": "error",
-            "error_from": "generate_perspective",
-            "message": f"{e}",
-        }
-    return {**state, "perspective": result, "status": "success"}
+        return {"status": "error", "error_from": "generate_perspective", "message": str(e)}

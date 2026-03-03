@@ -44,13 +44,17 @@ logger = setup_logger(__name__)
 def run_fact_check_pipeline(state):
     result = run_claim_extractor_sdk(state)
 
-    if state.get("status") != "success":
+    if result.get("status") != "success":
         logger.error("❌ Claim extraction failed.")
         return [], "Claim extraction failed."
 
     # Step 1: Extract claims
     raw_output = result.get("verifiable_claims", "")
     claims = re.findall(r"^[\*\-•]\s+(.*)", raw_output, re.MULTILINE)
+
+    if not claims and raw_output:
+        claims = [line.strip() for line in raw_output.split('\n') if len(line.strip()) > 10]
+
     claims = [claim.strip() for claim in claims if claim.strip()]
     logger.info(f"🧠 Extracted claims: {claims}")
 
@@ -60,7 +64,7 @@ def run_fact_check_pipeline(state):
     # Step 2: Search each claim with polite delay
     search_results = []
     for claim in claims:
-        logger.info(f"\n🔍 Searching for claim: {claim}")
+        logger.info(f"\nSearching for claim: {claim}")
         try:
             results = search_google(claim)
             if results:

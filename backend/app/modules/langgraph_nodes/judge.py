@@ -1,73 +1,58 @@
-"""
-judge.py
---------
-Evaluates a generated counter-perspective using an LLM-based scoring system.
-
-This module:
-    - Uses Groq's LLM to rate the originality, reasoning quality,
-      and factual grounding of a generated perspective.
-    - Returns a score from 0 (very poor) to 100 (excellent).
-    - Handles parsing errors and unexpected responses gracefully.
-
-Functions:
-    judge_perspective(state: dict) -> dict:
-        Evaluates the given perspective and returns an integer score with status metadata.
-"""
-
-
 import re
-from langchain_groq import ChatGroq
+import asyncio
 from langchain.schema import HumanMessage
 from app.logging.logging_config import setup_logger
+from app.llm_config import get_llm
 
 logger = setup_logger(__name__)
 
-# Init once
-groq_llm = ChatGroq(
-    model="gemma2-9b-it",
-    temperature=0.0,
-    max_tokens=10,
-)
 
-
-def judge_perspective(state):
+async def judge_perspective(state: dict) -> dict:
     try:
         perspective_obj = state.get("perspective")
-        text = getattr(perspective_obj, "perspective", "").strip()
-        if not text:
-            raise ValueError("Empty 'perspective' for scoring")
 
-        prompt = f"""
-You are an expert evaluator. Please rate the following counter-perspective
-on originality, reasoning quality, and factual grounding. Provide ONLY
-a single integer score from 0 (very poor) to 100 (excellent).
-
-=== Perspective to score ===
-{text}
-"""
-
-        response = groq_llm.invoke([HumanMessage(content=prompt)])
-
-        if isinstance(response, list) and response:
-            raw = response[0].content.strip()
-        elif hasattr(response, "content"):
-            raw = response.content.strip()
+        # Extract the actual text from whichever shape perspective_obj has
+        if hasattr(perspective_obj, "perspective"):
+            text = perspective_obj.perspective
+        elif isinstance(perspective_obj, dict):
+            text = perspective_obj.get("perspective", "")
         else:
-            raw = str(response).strip()
+            text = str(perspective_obj) if perspective_obj else ""
 
-        # 5) Pull the first integer 0–100
-        m = re.search(r"\b(\d{1,3})\b", raw)
-        if not m:
-            raise ValueError(f"Couldn’t parse a score from: '{raw}'")
+        if not text:
+            logger.warning("No perspective text found to judge.")
+            return {**state, "score": 0, "status": "success"}
 
-        score = max(0, min(100, int(m.group(1))))
+        provider = state.get("provider", "groq")
+        llm = get_llm(provider, temperature=0.3)
 
+        prompt = (
+            "Rate the following counter-perspective on a scale of 0-100 based on:\n"
+            "1. Originality and insight\n"
+            "2. Quality of reasoning\n"
+            "3. Factual grounding\n\n"
+            f"Perspective:\n{text}\n\n"
+            "Return ONLY a number between 0 and 100. No text, no explanation."
+        )
+
+        response = await asyncio.to_thread(
+            llm.invoke, [HumanMessage(content=prompt)]
+        )
+
+        content = response.content.strip()
+        numbers = re.findall(r"\d+", content)
+        score = int(numbers[0]) if numbers else 50
+        score = max(0, min(100, score))
+
+        logger.info(f"Judge score: {score}")
         return {**state, "score": score, "status": "success"}
 
     except Exception as e:
         logger.exception(f"Error in judge_perspective: {e}")
         return {
+            **state,
+            "score": 50,
             "status": "error",
-            "error_from": "judge_perspective",
+            "error_from": "judge",
             "message": str(e),
         }
