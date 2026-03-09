@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Analyze Article Synthesis Tool</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;family=Space+Mono&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e0f9",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0B0E14",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "mono": ["Space Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .grid-pattern {
+            background-image: linear-gradient(to right, rgba(6, 224, 249, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(6, 224, 249, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glow-button {
+            box-shadow: 0 0 15px rgba(6, 224, 249, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            box-shadow: 0 0 25px rgba(6, 224, 249, 0.5);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 8px rgba(6, 224, 249, 0.6);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen selection:bg-primary/30">
+    <div class="relative min-h-screen flex flex-col grid-pattern">
+        <!-- Navbar -->
+        <nav
+            class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <div class="text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-3xl">psychology</span>
+                </div>
+                <h2 class="text-primary text-lg font-bold tracking-tight glow-text">Perspective-AI</h2>
+            </div>
+            <div class="flex gap-4">
+                <button class="text-slate-400 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="text-slate-400 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </nav>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-lg mx-auto w-full">
+            <div class="text-center mb-10 space-y-4">
+                <span
+                    class="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-2">
+                    System Node: Active
+                </span>
+                <h1 class="text-slate-100 font-serif text-4xl md:text-5xl leading-tight">
+                    Enter the <span class="italic text-primary">Echo Chamber</span>
+                </h1>
+                <p class="text-slate-400 text-base font-light leading-relaxed max-w-sm mx-auto">
+                    Paste any article URL below for deep narrative parsing and counter-perspective synthesis.
+                </p>
+            </div>
+            <!-- Glassmorphic Input Card -->
+            <div class="w-full glass-card rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-1 h-full bg-primary/40"></div>
+                <div class="space-y-6">
+                    <div>
+                        <label for="target-url"
+                            class="block font-mono text-primary text-xs tracking-widest uppercase mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">terminal</span>
+                            TARGET_URL &gt;
+                        </label>
+                        <div class="relative">
+                            <input id="target-url" aria-label="Analysis target URL, include scheme like https://"
+                                class="w-full bg-black/40 border border-white/10 rounded-lg py-4 px-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all font-mono text-sm"
+                                placeholder="https://example.com/analysis-target" type="url" />
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+                                <span class="material-symbols-outlined text-sm">link</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <button
+                            class="w-full bg-primary text-background-dark font-bold py-4 rounded-lg flex items-center justify-center gap-2 uppercase tracking-widest text-sm glow-button transition-transform active:scale-[0.98]">
+                            <span class="material-symbols-outlined">bolt</span>
+                            Initiate Synthesis
+                        </button>
+                        <div
+                            class="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase tracking-tighter">
+                            <span>Baudrillard-Lacan Protocol V.4.2</span>
+                            <span>Latency: 24ms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Recent Activity / Intel -->
+            <div class="mt-12 w-full">
+                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                    <h3 class="text-slate-500 text-[10px] font-bold tracking-[0.2em] uppercase">Global Feed</h3>
+                    <span class="text-primary text-[10px] animate-pulse">● LIVE</span>
+                </div>
+                <div class="space-y-3">
+                    <div
+                        class="flex items-center gap-4 p-3 rounded-lg border border-white/5 hover:bg-white/5 transition-colors group">
+                        <div
+                            class="size-10 rounded bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">newspaper</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium text-slate-200 truncate">The Future of Decentralized
+                                Intelligence</p>
+                            <p class="text-[10px] text-slate-500 font-mono italic">Analysis Complete - 98% Confidence
+                            </p>
+                        </div>
+                        <div class="text-primary">
+                            <span class="material-symbols-outlined text-lg">chevron_right</span>
+                        </div>
+                    </div>
+                    <div
+                        class="flex items-center gap-4 p-3 rounded-lg border border-white/5 hover:bg-white/5 transition-colors group">
+                        <div
+                            class="size-10 rounded bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">public</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium text-slate-200 truncate">Geopolitical Shifts in the Silicon
+                                Era</p>
+                            <p class="text-[10px] text-slate-500 font-mono italic">Counter-Narrative Generated</p>
+                        </div>
+                        <div class="text-primary">
+                            <span class="material-symbols-outlined text-lg">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Bottom Navigation -->
+        <footer class="mt-auto border-t border-white/5 bg-background-dark/95 backdrop-blur-xl pb-6 pt-3 px-6">
+            <div class="flex items-center justify-around max-w-md mx-auto">
+                <a class="flex flex-col items-center gap-1 text-primary" href="#">
+                    <span class="material-symbols-outlined fill-1">analytics</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Analyze</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Archive</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Trends</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+                    <span class="material-symbols-outlined">settings_suggest</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Core</span>
+                </a>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

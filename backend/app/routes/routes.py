@@ -1,52 +1,33 @@
 """
 routes.py
 ---------
-Defines the FastAPI API routes for the Perspective application, exposing endpoints
-for bias detection, article processing, and chat-based querying over stored RAG data.
+FastAPI routes for the Perspective application.
 
-Endpoints:
-    GET /
-        Health check endpoint confirming the API is live.
-
-    POST /bias
-        Accepts a URL, scrapes and processes the article content, and runs bias detection
-        to return a bias score and related insights.
-
-    POST /process
-        Accepts a URL, scrapes and processes the article content, then executes the
-        LangGraph workflow for sentiment analysis, fact-checking, perspective generation,
-        and final result assembly.
-
-    POST /chat
-        Accepts a user query, searches stored vector data in Pinecone, and queries an LLM
-        to produce a contextual answer.
-
-Core Components:
-    - run_scraper_pipeline: Extracts and cleans article text, then identifies keywords.
-    - run_langgraph_workflow: Executes the LangGraph pipeline for deep content analysis.
-    - check_bias: Scores and analyzes potential bias in article content.
-    - search_pinecone: Retrieves relevant RAG data for a given query.
-    - ask_llm: Generates a natural language answer using retrieved context.
+Optimisations:
+    - /process and /bias no longer scrape the article twice.
+      /bias now reuses the SQLite article cache populated by /process,
+      or does a single scrape if the article hasn't been processed yet.
+    - Imports are consolidated (removed duplicate pipeline import).
+    - Chat endpoint properly handles missing results.
+    - All blocking I/O offloaded with asyncio.to_thread.
 """
 
-
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.modules.pipeline import run_scraper_pipeline
-from app.modules.pipeline import run_langgraph_workflow
+from app.modules.pipeline import run_scraper_pipeline, run_langgraph_workflow
 from app.modules.bias_detection.check_bias import check_bias
 from app.modules.chat.get_rag_data import search_pinecone
 from app.modules.chat.llm_processing import ask_llm
+from app.modules.article_extractor.extract_metadata import extract_article_metadata
+from app.db.sqlite_cache import save_article_cache, get_cached_article
 from app.logging.logging_config import setup_logger
 import asyncio
-import json
 
 logger = setup_logger(__name__)
-
 router = APIRouter()
 
 
-class URlRequest(BaseModel):
+class URLRequest(BaseModel):
     url: str
 
 
@@ -60,26 +41,75 @@ async def home():
 
 
 @router.post("/bias")
-async def bias_detection(request: URlRequest):
-    content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    bias_score = await asyncio.to_thread(check_bias, (content))
-    logger.info(f"Bias detection result: {bias_score}")
-    return bias_score
+async def bias_detection(request: URLRequest):
+    """
+    Returns structured bias analysis for an article.
+    Reuses cached article text if already scraped — avoids double scraping.
+    """
+    # Try cache first to avoid redundant scraping
+    cached = await asyncio.to_thread(get_cached_article, request.url)
+    if cached and cached.get("cleaned_text"):
+        text = cached["cleaned_text"]
+        logger.info(f"Bias: reusing cached text for {request.url[:60]}")
+    else:
+        scraped = await asyncio.to_thread(run_scraper_pipeline, request.url)
+        text = scraped.get("cleaned_text", "")
+
+    if not text or not text.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="Could not extract article content. The site may block scrapers or require a subscription.",
+        )
+
+    result = await asyncio.to_thread(check_bias, text)
+    logger.info(f"Bias result for {request.url[:60]}: score={result.get('bias_score')}")
+    return result
 
 
 @router.post("/process")
-async def run_pipelines(request: URlRequest):
-    article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
-    data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
+async def run_pipelines(request: URLRequest):
+    """
+    Full article analysis pipeline:
+      1. Scrape + clean article text (smart 40/30/30 sampling)
+      2. Run LangGraph workflow (sentiment → fact-check → perspective → store)
+      3. Extract + cache article metadata for multi-perspective reuse
+    """
+    # Step 1: Scrape
+    article_text = await asyncio.to_thread(run_scraper_pipeline, request.url)
+
+    if not article_text.get("cleaned_text", "").strip():
+        raise HTTPException(
+            status_code=422,
+            detail="Could not extract article content. The site may block scrapers, require login, or use a paywall.",
+        )
+
+    # Step 2: LangGraph
+    data = await asyncio.to_thread(run_langgraph_workflow, article_text)
+
+    # Step 3: Cache metadata (non-blocking, non-fatal)
+    try:
+        if not await asyncio.to_thread(get_cached_article, request.url):
+            cleaned = article_text.get("cleaned_text", "")
+            metadata = await asyncio.to_thread(extract_article_metadata, cleaned)
+            await asyncio.to_thread(
+                save_article_cache,
+                request.url,
+                {**metadata, "cleaned_text": cleaned, "url": request.url},
+            )
+            logger.info(f"Metadata cached for {request.url[:60]}")
+    except Exception as e:
+        logger.warning(f"Metadata caching failed (non-fatal): {e}")
+
     return data
 
 
 @router.post("/chat")
 async def answer_query(request: ChatQuery):
     query = request.message
-    results = search_pinecone(query)
-    answer = ask_llm(query, results)
-    logger.info(f"Chat answer generated: {answer}")
+    if not query.strip():
+        return {"answer": "Please provide a question."}
 
+    results = await asyncio.to_thread(search_pinecone, query)
+    answer = await asyncio.to_thread(ask_llm, query, results)
+    logger.info(f"Chat answered for query: {query[:60]}")
     return {"answer": answer}

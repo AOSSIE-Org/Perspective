@@ -1,59 +1,47 @@
 """
 prompt_templates.py
 -------------------
-Houses reusable prompt templates for LLM-based processing tasks within
-the pipeline. These templates define structured, instructive contexts
-for generating consistent and high-quality responses from language models.
+Prompt templates for LLM-based analysis tasks.
 
-Variables:
-    generation_prompt (ChatPromptTemplate)
-        - A LangChain ChatPromptTemplate configured to produce a 
-          well-reasoned counter-perspective to an article.
-        - Inputs:
-            cleaned_article (str): The main text of the article.
-            sentiment (str): The detected sentiment of the article.
-            facts (list): Verified factual information related to the article.
-        - Output:
-            LLM is instructed to return a JSON object containing:
-                - "counter_perspective": Opposite viewpoint to the article.
-                - "reasoning_steps": Step-by-step reasoning sequence.
-
-Usage:
-    This prompt ensures responses are logical, respectful, and grounded 
-    in evidence, making it suitable for perspective analysis, debate 
-    generation, and bias exploration tasks.
+generation_prompt:
+    Generates a rigorous, evidence-grounded counter-perspective.
+    The improved prompt enforces:
+    - Intellectual honesty (acknowledge valid points in the article)
+    - Specific counter-arguments tied to evidence
+    - structured JSON output with perspective + reasoning chain
 """
-
 
 from langchain.prompts import ChatPromptTemplate
 
 generation_prompt = ChatPromptTemplate.from_template("""
-You are an AI assistant that generates a well-reasoned '
-'counter-perspective to a given article.
+You are a rigorous critical thinker and expert analyst. Your job is to construct
+a well-reasoned, intellectually honest counter-perspective to a given article.
 
-## Article:
+## Article Text (excerpt):
 {cleaned_article}
 
-## Sentiment:
+## Detected Sentiment:
 {sentiment}
 
-## Verified Facts:
+## Verified Facts (treat these as ground truth):
 {facts}
 
 ---
 
-Generate a logical and respectful *opposite perspective* to the article.
-Use *step-by-step reasoning* and return your output in this JSON format:
+### Instructions:
+1. First, identify 1-2 valid points the article makes (steelmanning).
+2. Then, construct a substantive, fact-grounded counter-perspective that challenges
+   the article's main thesis or framing.
+3. The counter-perspective should NOT be a mirror opposite — it should reflect a
+   genuinely different but defensible viewpoint.
+4. Ground every claim in evidence, logic, or established academic/journalistic consensus.
+5. Avoid personal attacks, false equivalence, or strawmanning.
 
-```json
+Return ONLY the following JSON (no markdown fences, no extra text):
 {{
-  "counter_perspective": "<your opposite point of view>",
-  "reasoning_steps": [
-    "<step 1>",
-    "<step 2>",
-    "<step 3>",
-    "...",
-    "<final reasoning>"
-  ]
+  "perspective": "<2-4 sentence counter-perspective that directly challenges the article's central argument>",
+  "reasoning": "<detailed 100-150 word reasoning chain explaining HOW and WHY this counter-perspective is valid>",
+  "steelman": "<one sentence acknowledging the strongest point the article makes>",
+  "themes": [<3-5 keyword themes the counter-perspective addresses>]
 }}
 """)

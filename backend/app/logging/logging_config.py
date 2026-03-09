@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def setup_logger(name: str) -> logging.Logger:
     """
     Creates and configures a logger with console + file output.
@@ -21,7 +22,7 @@ def setup_logger(name: str) -> logging.Logger:
     # Formatter with timestamp, log level, module name
     formatter = logging.Formatter(
         "[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # Console Handler

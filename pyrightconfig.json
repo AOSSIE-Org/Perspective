@@ -1,0 +1,19 @@
+﻿{
+    "executionEnvironments": [
+        {
+            "root": "backend",
+            "venvPath": "d:/gsoc/Perspective/backend",
+            "venv": ".venv",
+            "extraPaths": [
+                "d:/gsoc/Perspective/backend",
+                "d:/gsoc/Perspective/backend/.venv/Lib/site-packages"
+            ]
+        }
+    ],
+    "venvPath": "d:/gsoc/Perspective/backend",
+    "venv": ".venv",
+    "extraPaths": [
+        "d:/gsoc/Perspective/backend",
+        "d:/gsoc/Perspective/backend/.venv/Lib/site-packages"
+    ]
+}

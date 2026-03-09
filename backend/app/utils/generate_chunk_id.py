@@ -10,7 +10,7 @@ Functions:
         - Uses SHA-256 hashing to produce a deterministic hash value.
         - Returns an identifier string in the format:
               "article-{first_15_characters_of_hash}"
-        - Ensures the same input text always results in the same ID, 
+        - Ensures the same input text always results in the same ID,
           useful for deduplication or versioning in storage systems.
 
 Raises:
@@ -21,7 +21,6 @@ Example:
     generate_id("Breaking news: AI takes over the world!")
     'article-3f9a2b1c5de74a1'
 """
-
 
 import hashlib
 

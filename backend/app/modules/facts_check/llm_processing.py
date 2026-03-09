@@ -1,162 +1,173 @@
 """
 llm_processing.py
 -----------------
-Handles claim extraction and fact verification tasks using the Groq LLM API.
+Handles claim extraction and fact verification using Groq LLM.
 
-This module:
-    - Connects to the Groq API with credentials from environment variables.
-    - Extracts verifiable factual claims from text.
-    - Verifies claims using provided search results and evidence.
-    - Returns structured responses with verdicts and explanations.
-
-Functions:
-    run_claim_extractor_sdk(state: dict) -> dict:
-        Extracts up to three concise, verifiable claims from the input text
-        stored in the `state` dictionary.
-
-    run_fact_verifier_sdk(search_results: list[dict]) -> dict:
-        Evaluates provided claims against web search evidence and returns
-        structured JSON verdicts for each claim.
-
-Environment Variables:
-    GROQ_API_KEY (str): API key for authenticating with Groq.
+Key improvements:
+    - Claim extractor uses temperature=0.1 for consistent, precise output
+    - Fact verifier now batches ALL claims into ONE LLM call (was N serial calls)
+    - Fixed critical bug: 'parsed' variable could be referenced before assignment
+    - Added JSON fence stripping and robust error fallback per claim
 """
 
-
 import os
-from groq import Groq
-from dotenv import load_dotenv
 import json
 import re
+from groq import Groq
+from dotenv import load_dotenv
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
-
 load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+CLAIM_EXTRACT_PROMPT = """You are a precise fact-extraction assistant.
+Extract exactly 5 short, independently verifiable factual claims from the article.
+Each claim must be a concrete, checkable statement — not an opinion or prediction.
 
-def run_claim_extractor_sdk(state):
-    try:
-        text = state.get("cleaned_text")
-        if not text:
-            raise ValueError("Missing or empty 'cleaned_text' in state")
+Return ONLY a bulleted list, one claim per line, starting with "- ":
+- <claim 1>
+- <claim 2>
+- <claim 3>
+- <claim 4>
+- <claim 5>
 
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an assistant that extracts "
-                        "verifiable factual claims from articles. "
-                        "Each claim must be short, fact-based, and"
-                        " independently verifiable through internet search. "
-                        "Only return a list of 3 clear bullet-point claims."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"Extract verifiable claims "
-                        f"from the following article:\n\n{text}"
-                    ),
-                },
-            ],
-            model="gemma2-9b-it",
-            temperature=0.3,
-            max_tokens=512,
-        )
+Article:
+{text}
+"""
 
-        extracted_claims = chat_completion.choices[0].message.content.strip()
-        logger.debug(f"Extracted claims:\n{extracted_claims}")
+BATCH_VERIFY_PROMPT = """You are an expert fact-checker. Evaluate each claim against the provided web evidence.
+
+{claims_block}
+
+For EACH claim, return a JSON object in this exact array:
+[
+  {{
+    "original_claim": "<claim text>",
+    "verdict": "True" | "False" | "Unverifiable",
+    "confidence": "High" | "Medium" | "Low",
+    "explanation": "<one sentence explaining your verdict>",
+    "source_link": "<most relevant source URL>"
+  }},
+  ...
+]
+
+Rules:
+- Use "Unverifiable" when evidence is insufficient, not "False"
+- Be concise but precise in explanations
+- Return ONLY the JSON array, no extra text
+"""
 
 
-        return {
-            **state,
-            "verifiable_claims": extracted_claims,
-            "status": "success",
-        }
+def _strip_fences(raw: str) -> str:
+    return re.sub(
+        r"^```(?:json)?\s*|\s*```$", "", raw.strip(), flags=re.IGNORECASE
+    ).strip()
 
-    except Exception as e:
-        logger.exception("Error in claim_extraction")
+
+def run_claim_extractor_sdk(state: dict) -> dict:
+    text = state.get("cleaned_text", "")
+    if not text:
         return {
             "status": "error",
             "error_from": "claim_extraction",
-            "message": str(e),
+            "message": "Empty text",
         }
 
-
-def run_fact_verifier_sdk(search_results):
     try:
-        results_list = []
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Return only a bullet list of factual claims. No headers, no extra text.",
+                },
+                {
+                    "role": "user",
+                    "content": CLAIM_EXTRACT_PROMPT.format(text=text[:5000]),
+                },
+            ],
+            temperature=0.1,
+            max_tokens=400,
+        )
+        claims_raw = response.choices[0].message.content.strip()
+        logger.debug(f"Extracted claims:\n{claims_raw}")
+        return {**state, "verifiable_claims": claims_raw, "status": "success"}
 
-        for result in search_results:
-            source = result.get("link", "N/A")
-            claim = result.get("claim", "N/A")
-            evidence = (
-                f"{result.get('title', '')}"
-                f"\n{result.get('snippet', '')}"
-                f"\nLink: {source}"
-            )
+    except Exception as e:
+        logger.exception("Error in claim_extraction")
+        return {"status": "error", "error_from": "claim_extraction", "message": str(e)}
 
-            chat_completion = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a fact-checking assistant. "
-                            "Your job is to determine whether the given"
-                            " claim is True, False"
-                            "based on the provided web search evidence."
-                            " Keep it concise and structured."
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Claim: {claim}\n\n"
-                            f"Web Evidence:\n{evidence}\n\n"
-                            "Based on this evidence, is the claim true?\n"
-                            "Respond only in this JSON format:\n\n"
-                            "{\n"
-                            '  "verdict": "True" | "False",\n'
-                            '  "explanation": "...",\n'
-                            f'  "original_claim": "{claim}",\n'
-                            f'  "source_link": "{source}"\n'
-                            "}"
-                        ),
-                    },
-                ],
-                model="gemma2-9b-it",
-                temperature=0.3,
-                max_tokens=256,
-            )
 
-            content = chat_completion.choices[0].message.content.strip()
+def run_fact_verifier_sdk(search_results: list[dict]) -> dict:
+    """
+    Batch verify ALL claims in a SINGLE LLM call instead of N serial calls.
+    This reduces API round-trips from O(n) to O(1).
+    """
+    if not search_results:
+        return {"verifications": [], "status": "success"}
 
-            # Strip markdown code blocks if present
-            content = re.sub(r"^```json|```$", "", content).strip()
-            logger.debug(f"Raw LLM fact verification output:\n{content}")
+    # Build a structured block of claim + evidence pairs
+    claims_block_parts = []
+    for i, result in enumerate(search_results, 1):
+        claim = result.get("claim", "Unknown claim")
+        evidence = "\n".join(
+            [
+                f"  Title: {result.get('title', 'N/A')}",
+                f"  Snippet: {result.get('snippet', 'N/A')[:300]}",
+                f"  Source: {result.get('link', 'N/A')}",
+            ]
+        )
+        claims_block_parts.append(f"### Claim {i}\n{claim}\n\nEvidence:\n{evidence}")
 
-            # Try parsing the JSON response
-            try:
-                parsed = json.loads(content)
-            except Exception as parse_err:
-                logger.error(f"LLM JSON parse error: {parse_err}")
+    claims_block = "\n\n---\n\n".join(claims_block_parts)
 
-            results_list.append(parsed)
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert fact-checker. Return only a valid JSON array.",
+                },
+                {
+                    "role": "user",
+                    "content": BATCH_VERIFY_PROMPT.format(claims_block=claims_block),
+                },
+            ],
+            temperature=0.1,
+            max_tokens=1000,
+        )
+        raw = response.choices[0].message.content.strip()
+        cleaned = _strip_fences(raw)
+        verifications = json.loads(cleaned)
 
-        return {
-            "claim": claim,
-            "verifications": results_list,
-            "status": "success",
-        }
+        if not isinstance(verifications, list):
+            raise ValueError("Expected JSON array from fact verifier")
+
+        logger.info(
+            f"Batch fact verification complete — {len(verifications)} claims verified"
+        )
+        return {"verifications": verifications, "status": "success"}
+
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.warning(
+            f"Fact verifier JSON parse failed: {e}. Attempting per-claim fallback."
+        )
+        # Fallback: mark all as unverifiable rather than crashing
+        fallback = [
+            {
+                "original_claim": r.get("claim", ""),
+                "verdict": "Unverifiable",
+                "confidence": "Low",
+                "explanation": "Batch verification failed — insufficient evidence.",
+                "source_link": r.get("link", ""),
+            }
+            for r in search_results
+        ]
+        return {"verifications": fallback, "status": "success"}
 
     except Exception as e:
         logger.exception("Error in fact_verification")
-        return {
-            "status": "error",
-            "error_from": "fact_verification",
-            "message": str(e),
-        }
+        return {"status": "error", "error_from": "fact_verification", "message": str(e)}

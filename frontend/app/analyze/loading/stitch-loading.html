@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;family=Space+Mono&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e0f9",
+                        "accent-amber": "#FFBF00",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0b0e14",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "mono": ["Space Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .grid-pattern {
+            background-image: radial-gradient(circle, rgba(6, 224, 249, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 224, 249, 0.4);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col grid-pattern">
+    <!-- Top Navigation Bar -->
+    <nav
+        class="flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-2xl">lens_blur</span>
+            <span class="font-bold tracking-tight text-lg uppercase">Perspective-AI</span>
+        </div>
+        <button class="text-slate-400 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+    </nav>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col p-6 max-w-md mx-auto w-full gap-8">
+        <!-- Header -->
+        <header class="text-center space-y-2 mt-4">
+            <h1 class="font-serif text-3xl italic text-slate-100">Initiating Narrative Synthesis...</h1>
+            <p class="text-primary/60 text-xs font-mono tracking-widest uppercase">System Core v4.0.2</p>
+        </header>
+        <!-- Terminal Box -->
+        <div class="glass-panel rounded-xl p-4 font-mono text-xs overflow-hidden relative">
+            <div class="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
+                <div class="w-2 h-2 rounded-full bg-red-500/50"></div>
+                <div class="w-2 h-2 rounded-full bg-amber-500/50"></div>
+                <div class="w-2 h-2 rounded-full bg-green-500/50"></div>
+                <span class="ml-2 text-primary/40">TARGET_INPUT</span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="text-primary/70">Source:</span>
+                <span
+                    class="text-slate-300 break-all">https://analysis.ai/narrative-synthesis-v1/the-philosophical-matrix</span>
+            </div>
+            <div class="absolute right-2 bottom-2 opacity-10">
+                <span class="material-symbols-outlined text-4xl">terminal</span>
+            </div>
+        </div>
+        <!-- Central Circular Loader -->
+        <div class="relative flex justify-center items-center py-6">
+            <div class="relative w-48 h-48 flex items-center justify-center">
+                <!-- Outer Ring -->
+                <div
+                    class="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-[spin_3s_linear_infinite]">
+                </div>
+                <!-- Inner Ring -->
+                <div
+                    class="absolute inset-4 rounded-full border border-primary/10 border-b-primary/60 animate-[spin_2s_linear_infinite_reverse]">
+                </div>
+                <!-- Technical Motif Center -->
+                <div
+                    class="glass-panel w-32 h-32 rounded-full flex flex-col items-center justify-center glow-cyan border-primary/30">
+                    <span class="material-symbols-outlined text-primary text-4xl animate-pulse">psychology</span>
+                    <span class="text-[10px] font-mono text-primary mt-2 uppercase tracking-tighter">Processing</span>
+                </div>
+            </div>
+        </div>
+        <!-- Processing Nodes -->
+        <div class="space-y-4">
+            <!-- Node: Completed -->
+            <div class="flex items-center gap-4 group">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 rounded-full border border-accent-amber/50 flex items-center justify-center bg-accent-amber/10">
+                        <span class="material-symbols-outlined text-accent-amber text-lg">check</span>
+                    </div>
+                    <div class="w-px h-6 bg-accent-amber/30 my-1"></div>
+                </div>
+                <div class="flex-1 pb-4">
+                    <h3 class="text-sm font-semibold text-slate-300">Fetching Article</h3>
+                    <p class="text-[10px] font-mono text-accent-amber/60 uppercase">Node Verified</p>
+                </div>
+            </div>
+            <!-- Node: Completed -->
+            <div class="flex items-center gap-4 group">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 rounded-full border border-accent-amber/50 flex items-center justify-center bg-accent-amber/10">
+                        <span class="material-symbols-outlined text-accent-amber text-lg">check</span>
+                    </div>
+                    <div class="w-px h-6 bg-accent-amber/30 my-1"></div>
+                </div>
+                <div class="flex-1 pb-4">
+                    <h3 class="text-sm font-semibold text-slate-300">AI Analysis</h3>
+                    <p class="text-[10px] font-mono text-accent-amber/60 uppercase">Entropy Mapped</p>
+                </div>
+            </div>
+            <!-- Node: Completed -->
+            <div class="flex items-center gap-4 group">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 rounded-full border border-accent-amber/50 flex items-center justify-center bg-accent-amber/10">
+                        <span class="material-symbols-outlined text-accent-amber text-lg">check</span>
+                    </div>
+                    <div class="w-px h-6 bg-accent-amber/30 my-1"></div>
+                </div>
+                <div class="flex-1 pb-4">
+                    <h3 class="text-sm font-semibold text-slate-300">Bias Detection</h3>
+                    <p class="text-[10px] font-mono text-accent-amber/60 uppercase">Cognitive Filter Applied</p>
+                </div>
+            </div>
+            <!-- Node: Completed -->
+            <div class="flex items-center gap-4 group">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 rounded-full border border-accent-amber/50 flex items-center justify-center bg-accent-amber/10">
+                        <span class="material-symbols-outlined text-accent-amber text-lg">check</span>
+                    </div>
+                    <div class="w-px h-6 bg-primary/30 my-1"></div>
+                </div>
+                <div class="flex-1 pb-4">
+                    <h3 class="text-sm font-semibold text-slate-300">Fact Checking</h3>
+                    <p class="text-[10px] font-mono text-accent-amber/60 uppercase">Cross-Reference Complete</p>
+                </div>
+            </div>
+            <!-- Node: Active -->
+            <div class="flex items-center gap-4 group">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 rounded-full border border-primary flex items-center justify-center bg-primary/20 glow-cyan animate-pulse">
+                        <span class="material-symbols-outlined text-primary text-lg">settings_suggest</span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-bold text-white tracking-wide">Generating Perspectives</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <div class="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary w-2/3 shadow-[0_0_8px_#06e0f9]"></div>
+                        </div>
+                        <span class="text-[10px] font-mono text-primary animate-pulse">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation Bar -->
+    <div class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="flex gap-2 border-t border-primary/10 bg-background-dark/95 backdrop-blur-xl px-4 pb-8 pt-4">
+            <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="#">
+                <span class="material-symbols-outlined">speed</span>
+                <span class="text-[10px] font-mono">DASH</span>
+            </a>
+            <a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+                <div class="relative">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">terminal</span>
+                    <div class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-ping"></div>
+                </div>
+                <span class="text-[10px] font-mono">PROCESS</span>
+            </a>
+            <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="#">
+                <span class="material-symbols-outlined">pie_chart</span>
+                <span class="text-[10px] font-mono">DATA</span>
+            </a>
+            <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-[10px] font-mono">CONFIG</span>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -23,7 +23,6 @@ Dependencies:
     - pinecone (Pinecone client library)
 """
 
-
 from pinecone import Pinecone
 from dotenv import load_dotenv
 from app.modules.chat.embed_query import embed_query

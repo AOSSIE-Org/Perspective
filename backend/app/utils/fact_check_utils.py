@@ -1,35 +1,14 @@
 """
 fact_check_utils.py
 -------------------
-Provides a pipeline for automated fact-checking of extracted claims from article content.
-The process integrates claim extraction, web search, and large language model (LLM) 
-verification to produce a structured set of fact verification results.
-
-Pipeline Steps:
-    1. Claim Extraction:
-        - Uses the `run_claim_extractor_sdk` to identify verifiable claims from the
-          provided article state.
-        - Claims are parsed from markdown-like bullet point output.
-
-    2. Web Search:
-        - For each extracted claim, executes a Google search via `search_google` to find
-          relevant supporting or refuting sources.
-        - Stores the top search result along with the associated claim.
-        - Implements basic error handling and skips claims with no search results.
-
-    3. Fact Verification:
-        - Passes search results to `run_fact_verifier_sdk` for LLM-based evaluation.
-        - Produces verdicts and explanations for each claim.
-
-Returns:
-    - A list of verification objects containing verdicts, reasoning, and source metadata.
-    - An error message if the process fails at any stage.
-
-Usage:
-    final_results, error = run_fact_check_pipeline(state)
+Enhanced fact-checking pipeline with:
+    - Multi-result search evidence (up to 3 sources per claim)
+    - Polite delay between searches to avoid rate limiting
+    - Source credibility scores surfaced in verifications
+    - Graceful partial failure (one claim failure doesn't stop others)
 """
 
-
+import time
 from app.modules.facts_check.web_search import search_google
 from app.modules.facts_check.llm_processing import (
     run_claim_extractor_sdk,
@@ -40,41 +19,81 @@ import re
 
 logger = setup_logger(__name__)
 
+# Polite delay between DuckDuckGo queries (seconds) to avoid rate limiting
+_SEARCH_DELAY = 1.2
+# Max claims to fact-check per article (avoid excessive API usage)
+_MAX_CLAIMS = 5
 
-def run_fact_check_pipeline(state):
+
+def run_fact_check_pipeline(state: dict):
+    """
+    Run the full fact-checking pipeline:
+      1. Extract verifiable claims from the article text
+      2. Search each claim with DuckDuckGo (up to 3 sources)
+      3. Verify each claim against the gathered evidence using LLM
+    Returns: (list[verification_result], error_string | None)
+    """
     result = run_claim_extractor_sdk(state)
 
-    if state.get("status") != "success":
-        logger.error("❌ Claim extraction failed.")
+    if result.get("status") != "success":
+        logger.error("Claim extraction failed.")
         return [], "Claim extraction failed."
 
-    # Step 1: Extract claims
+    # Step 1: Parse extracted claims
     raw_output = result.get("verifiable_claims", "")
     claims = re.findall(r"^[\*\-•]\s+(.*)", raw_output, re.MULTILINE)
-    claims = [claim.strip() for claim in claims if claim.strip()]
-    logger.info(f"🧠 Extracted claims: {claims}")
+    claims = [c.strip() for c in claims if c.strip()]
+    logger.info(f"Extracted {len(claims)} claims for fact-checking")
 
     if not claims:
         return [], "No verifiable claims found."
 
-    # Step 2: Search each claim with polite delay
+    # Cap to avoid excessive LLM usage
+    claims = claims[:_MAX_CLAIMS]
+
+    # Step 2: Search each claim — gather multi-source evidence
     search_results = []
-    for claim in claims:
-        logger.info(f"\n🔍 Searching for claim: {claim}")
+    for i, claim in enumerate(claims):
+        logger.info(f"Searching claim {i + 1}/{len(claims)}: {claim[:60]}")
         try:
-            results = search_google(claim)
+            results = search_google(claim, max_results=3)
             if results:
-                results[0]["claim"] = claim
-                search_results.append(results[0])
-                logger.info(f"✅ Found result: {results[0]['title']}")
+                # Pass the best result as primary, attach credibility info
+                primary = results[0]
+                primary["claim"] = claim
+                primary["all_sources"] = [
+                    {
+                        "title": r["title"],
+                        "link": r["link"],
+                        "credibility": r["credibility"],
+                    }
+                    for r in results
+                ]
+                search_results.append(primary)
+                logger.info(
+                    f"Found {len(results)} sources. Best: {primary['title'][:50]} "
+                    f"(credibility={primary['credibility']})"
+                )
             else:
-                logger.warning(f"⚠️ No search result for: {claim}")
+                logger.warning(f"No search results for claim: {claim[:60]}")
         except Exception as e:
-            logger.error(f"❌ Search failed for: {claim} -> {e}")
+            logger.error(f"Search failed for claim '{claim[:40]}': {e}")
+
+        # Polite delay between searches
+        if i < len(claims) - 1:
+            time.sleep(_SEARCH_DELAY)
 
     if not search_results:
         return [], "All claim searches failed or returned no results."
 
-    # Step 3: Verify facts using LLM
+    # Step 3: LLM verification
     final = run_fact_verifier_sdk(search_results)
-    return final.get("verifications", []), None
+    verifications = final.get("verifications", [])
+
+    # Attach source credibility scores to each verified claim
+    cr_map = {sr["claim"]: sr.get("all_sources", []) for sr in search_results}
+    for v in verifications:
+        claim_text = v.get("original_claim", "")
+        v["sources"] = cr_map.get(claim_text, [])
+
+    return verifications, None

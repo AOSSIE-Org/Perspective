@@ -12,7 +12,6 @@ Functions:
         Logs error details and returns a structured error response.
 """
 
-
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)

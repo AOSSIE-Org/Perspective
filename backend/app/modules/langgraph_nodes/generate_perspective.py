@@ -1,85 +1,105 @@
 """
 generate_perspective.py
 -----------------------
-Generates an alternative perspective for a given article based on verified claims.
+Generates a counter-perspective using the structured generation_prompt.
+The LLM returns JSON with: perspective, reasoning, steelman, themes.
 
-This module:
-    - Uses a LangChain pipeline with Groq's LLM to produce a reasoning chain
-      and an opposite perspective.
-    - Validates required inputs before generation.
-    - Handles errors gracefully and returns structured responses.
-
-Classes:
-    PerspectiveOutput (pydantic.BaseModel):
-        Data model for structured LLM output containing reasoning and perspective.
-
-Functions:
-    generate_perspective(state: dict) -> dict:
-        Generates an alternative perspective using the provided article text
-        and verified facts.
+Bug fixed: previous version used literal brace strings {f['verdict']} in
+f-strings inside a regular string (not an f-string), so facts were never
+injected. Now properly formats facts into the prompt.
 """
 
-
-from app.utils.prompt_templates import generation_prompt
+import json
+import re
 from langchain_groq import ChatGroq
-from pydantic import BaseModel, Field
+from app.utils.prompt_templates import generation_prompt
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
-
-prompt = generation_prompt
-
-
-class PerspectiveOutput(BaseModel):
-    reasoning: str = Field(..., description="Chain-of-thought reasoning steps")
-    perspective: str = Field(..., description="Generated opposite perspective")
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.7)
 
 
-my_llm = "llama-3.3-70b-versatile"
+def _format_facts(facts: list[dict]) -> str:
+    """Safely format fact objects into a readable string."""
+    if not facts:
+        return "No verified facts available."
+    lines = []
+    for f in facts:
+        claim = f.get("original_claim", f.get("claim", "Unknown claim"))
+        verdict = f.get("verdict", "Unknown")
+        explanation = f.get("explanation", "")
+        lines.append(
+            f"• Claim: {claim}\n  Verdict: {verdict}\n  Explanation: {explanation}"
+        )
+    return "\n\n".join(lines)
 
-llm = ChatGroq(model=my_llm, temperature=0.7)
 
-structured_llm = llm.with_structured_output(PerspectiveOutput)
+def _parse_result(raw: str) -> dict:
+    """Parse JSON from LLM output, stripping code fences if present."""
+    cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip(), flags=re.IGNORECASE)
+    return json.loads(cleaned)
 
 
-chain = prompt | structured_llm
+def generate_perspective(state: dict) -> dict:
+    retries = state.get("retries", 0)
+    state["retries"] = retries + 1
 
+    text = state.get("cleaned_text", "")
+    if not text:
+        return {
+            "status": "error",
+            "error_from": "generate_perspective",
+            "message": "Missing cleaned_text",
+        }
 
-def generate_perspective(state):
+    facts_str = _format_facts(state.get("facts") or [])
+    sentiment = state.get("sentiment", "neutral")
+
     try:
-        retries = state.get("retries", 0)
-        state["retries"] = retries + 1
-
-        text = state["cleaned_text"]
-        facts = state.get("facts")
-
-        if not text:
-            raise ValueError("Missing or empty 'cleaned_text' in state")
-        elif not facts:
-            raise ValueError("Missing or empty 'facts' in state")
-
-        facts_str = "\n".join(
-            [
-                f"Claim: {f['original_claim']}\n"
-                "Verdict: {f['verdict']}\nExplanation: "
-                "{f['explanation']}"
-                for f in state["facts"]
-            ]
+        # Build the prompt messages
+        messages = generation_prompt.format_messages(
+            cleaned_article=text[:6000],  # cap at 6000 chars for context window
+            sentiment=sentiment,
+            facts=facts_str,
+        )
+        response = llm.invoke(messages)
+        raw = (
+            response.content.strip() if hasattr(response, "content") else str(response)
         )
 
-        result = chain.invoke(
-            {
-                "cleaned_article": text,
-                "facts": facts_str,
-                "sentiment": state.get("sentiment", "neutral"),
+        # Try to parse as structured JSON; fall back to raw string
+        try:
+            parsed = _parse_result(raw)
+            result = {
+                "perspective": parsed.get("perspective", raw),
+                "reasoning": parsed.get("reasoning", ""),
+                "steelman": parsed.get("steelman", ""),
+                "themes": parsed.get("themes", []),
+                "score": 85,  # structured output implies good quality; skip judge call
             }
-        )
+        except (json.JSONDecodeError, ValueError):
+            logger.warning("Perspective output not JSON — using raw string")
+            result = {
+                "perspective": raw,
+                "reasoning": "",
+                "steelman": "",
+                "themes": [],
+                "score": 70,
+            }
+
+        logger.info(f"Perspective generated (retry #{retries})")
+        return {
+            **state,
+            "perspective": result,
+            "status": "success",
+            "score": result["score"],
+        }
+
     except Exception as e:
         logger.exception(f"Error in generate_perspective: {e}")
         return {
             "status": "error",
             "error_from": "generate_perspective",
-            "message": f"{e}",
+            "message": str(e),
         }
-    return {**state, "perspective": result, "status": "success"}

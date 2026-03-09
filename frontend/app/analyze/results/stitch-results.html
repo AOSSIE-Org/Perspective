@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Space+Mono&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e0f9",
+                        "accent-amber": "#FFBF00",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0b0e14",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "mono": ["Space Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .grid-bg {
+            background-image: radial-gradient(circle at 2px 2px, rgba(6, 224, 249, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gauge-mask {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 font-display selection:bg-primary/30">
+    <div class="relative flex min-h-screen w-full flex-col grid-bg overflow-x-hidden pb-20">
+        <!-- Top Navbar -->
+        <nav
+            class="flex items-center bg-background-dark/80 backdrop-blur-md border-b border-primary/10 p-4 sticky top-0 z-50 justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">analytics</span>
+                <h2 class="text-slate-100 text-lg font-bold leading-tight tracking-tight">Perspective-AI</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="material-symbols-outlined text-slate-400 hover:text-primary cursor-pointer">search</span>
+                <button
+                    class="flex items-center justify-center rounded-full bg-primary/10 p-2 border border-primary/20">
+                    <span class="material-symbols-outlined text-primary text-[20px]">person</span>
+                </button>
+            </div>
+        </nav>
+        <!-- Hero Section -->
+        <div class="p-4 pt-6">
+            <div class="flex flex-col gap-1 mb-6">
+                <h1 class="font-serif text-4xl font-bold text-slate-100 tracking-tight">Synthesis Complete</h1>
+                <div class="flex items-center mt-2">
+                    <div
+                        class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 shadow-[0_0_15px_rgba(6,224,249,0.2)]">
+                        <span class="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+                        <p class="text-primary text-xs font-bold uppercase tracking-widest">Sentiment: Balanced</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Bias Meter Gauge -->
+            <div class="glass rounded-xl p-6 mb-6 flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-20">
+                    <span class="material-symbols-outlined text-6xl text-primary">network_node</span>
+                </div>
+                <!-- Semi-circular gauge visual -->
+                <div class="relative w-48 h-24 mb-4">
+                    <div class="absolute inset-0 border-[12px] border-slate-800 rounded-t-full"></div>
+                    <!-- Indicator segment for 12/100 -->
+                    <div
+                        class="absolute inset-0 border-[12px] border-accent-amber rounded-t-full rotate-[21.6deg] origin-bottom gauge-mask shadow-[0_0_10px_rgba(255,191,0,0.4)]">
+                    </div>
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex flex-col items-center">
+                        <span class="text-3xl font-bold text-slate-100">12<span
+                                class="text-slate-500 text-sm font-normal">/100</span></span>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <p class="text-slate-400 text-xs uppercase tracking-widest mb-1">Bias Meter Score</p>
+                    <p class="text-accent-amber text-lg font-bold font-mono">LOW-BIAS DETECTED</p>
+                </div>
+            </div>
+            <!-- Split Layout for Mobile (Stacked) -->
+            <div class="flex flex-col gap-6">
+                <!-- Analysis Tabs Content -->
+                <div class="glass rounded-xl overflow-hidden">
+                    <div class="flex border-b border-white/10">
+                        <button
+                            class="flex-1 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 border-b-2 border-transparent">Article</button>
+                        <button
+                            class="flex-1 py-3 text-xs font-bold uppercase tracking-wider text-primary border-b-2 border-primary bg-primary/5">Perspective</button>
+                        <button
+                            class="flex-1 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 border-b-2 border-transparent">Fact
+                            Check</button>
+                    </div>
+                    <div class="p-5 flex flex-col gap-6">
+                        <section>
+                            <h3
+                                class="text-xs font-bold text-primary/60 uppercase tracking-widest mb-3 flex items-center gap-2 font-mono">
+                                <span class="material-symbols-outlined text-sm">visibility_off</span>
+                                Counter-Perspective
+                            </h3>
+                            <p class="font-serif italic text-lg text-slate-200 leading-relaxed">
+                                "The prevailing narrative overlooks the structural inertia inherent in these systems,
+                                suggesting that change is purely a function of will rather than a reconfiguration of
+                                material constraints."
+                            </p>
+                        </section>
+                        <div class="h-px bg-white/5"></div>
+                        <section>
+                            <h3
+                                class="text-xs font-bold text-primary/60 uppercase tracking-widest mb-3 flex items-center gap-2 font-mono">
+                                <span class="material-symbols-outlined text-sm">psychology</span>
+                                Reasoning
+                            </h3>
+                            <div class="font-mono text-sm text-slate-400 leading-relaxed space-y-2">
+                                <p>&gt; Analyzed 4,209 datasets for ideological consistency.</p>
+                                <p>&gt; Synthesized divergent viewpoints using nodal analysis.</p>
+                                <p>&gt; Logical conclusion suggests high probability of outcome B under current
+                                    parameters.</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <!-- AI Discussion Widget -->
+                <div class="glass rounded-xl flex flex-col min-h-[300px]">
+                    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="size-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_#06e0f9]"></div>
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-slate-200">AI Discussion</h3>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 text-sm">open_in_full</span>
+                    </div>
+                    <div class="flex-1 p-4 space-y-4 overflow-y-auto">
+                        <div class="flex gap-3 max-w-[85%]">
+                            <div
+                                class="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+                            </div>
+                            <div class="bg-white/5 rounded-2xl rounded-tl-none p-3 border border-white/5">
+                                <p class="text-sm text-slate-300 leading-relaxed">I've completed the synthesis of the
+                                    three primary narratives. Would you like to explore the potential impact of the
+                                    counter-perspective on the immediate forecast?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <div class="relative">
+                            <input aria-label="Ask a question"
+                                class="w-full bg-white/5 border border-white/10 rounded-full py-3 px-5 pr-12 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all font-display"
+                                placeholder="Ask a question..." type="text" />
+                            <button
+                                class="absolute right-2 top-1/2 -translate-y-1/2 size-8 bg-primary rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(6,224,249,0.4)]">
+                                <span class="material-symbols-outlined text-background-dark text-[18px]">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bottom Navigation (Fixed) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 flex justify-around items-center px-4 py-3">
+            <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-primary" href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">pie_chart</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+                <span class="material-symbols-outlined">chat_bubble</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+                <span class="material-symbols-outlined">settings</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>

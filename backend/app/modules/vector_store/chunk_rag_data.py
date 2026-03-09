@@ -1,28 +1,13 @@
 """
 chunk_rag_data.py
 -----------------
-Module for converting processed article data into smaller, structured
-chunks suitable for storage and retrieval in a vector database.
+Converts processed article data into structured chunks for vector storage.
 
-The chunking process:
-    1. Validates the presence of required top-level fields such as
-       cleaned_text, perspective, and facts.
-    2. Assigns a unique article ID to all chunks using a hash-based
-       generator.
-    3. Creates a "counter-perspective" chunk containing the alternative
-       viewpoint and its reasoning.
-    4. Splits each fact into its own chunk, including metadata like
-       verdict, explanation, and source link.
-
-This structure enables more efficient semantic search, targeted
-retrieval, and fine-grained analysis.
-
-Functions:
-    chunk_rag_data(data: dict) -> list[dict]
-        Validates and transforms the input data into a list of
-        chunk dictionaries containing text and metadata.
+Updated to handle perspective as a plain dict (instead of a Pydantic object),
+matching the new generate_perspective.py output format.
+Also made fact field validation tolerant — missing fields get defaults
+rather than hard-crashing.
 """
-
 
 from app.utils.generate_chunk_id import generate_id
 from app.logging.logging_config import setup_logger
@@ -30,73 +15,80 @@ from app.logging.logging_config import setup_logger
 logger = setup_logger(__name__)
 
 
-def chunk_rag_data(data):
-    try:
-        # Validate required top-level fields
-        required_fields = ["cleaned_text", "perspective", "facts"]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+def _extract_perspective(obj) -> tuple[str, str, list[str]]:
+    """
+    Safely extract (perspective_text, reasoning, themes) from the perspective
+    object, which can be a dict or a legacy Pydantic model.
+    """
+    if isinstance(obj, dict):
+        return (
+            obj.get("perspective", ""),
+            obj.get("reasoning", ""),
+            obj.get("themes", []),
+        )
+    # Legacy Pydantic object fallback
+    if hasattr(obj, "perspective"):
+        return (
+            getattr(obj, "perspective", ""),
+            getattr(obj, "reasoning", ""),
+            getattr(obj, "themes", []),
+        )
+    return str(obj), "", []
 
-        if not isinstance(data["facts"], list):
-            raise ValueError("Facts must be a list")
 
-        # Validate perspective structure
-        perspective_data = data["perspective"]
-        if hasattr(perspective_data, "dict"):
-            perspective_data = perspective_data.dict()
+def chunk_rag_data(data: dict) -> list[dict]:
+    """
+    Transform pipeline state into a flat list of searchable chunks:
+      - One counter-perspective chunk (text + reasoning metadata)
+      - One chunk per verified fact (claim + verdict metadata)
+    """
+    # Soft validation — missing facts is acceptable
+    if "cleaned_text" not in data:
+        raise KeyError("cleaned_text missing from pipeline state")
+    if "perspective" not in data:
+        raise KeyError("perspective missing from pipeline state")
 
-        article_id = generate_id(data["cleaned_text"])
-        chunks = []
+    article_id = generate_id(data["cleaned_text"])
+    chunks: list[dict] = []
 
-        # Add counter-perspective chunk
-        perspective_obj = data["perspective"]
-
-        # Optional safety check
-
-        if not (
-            hasattr(perspective_obj, "perspective")
-            and hasattr(perspective_obj, "reasoning")
-        ):
-            raise ValueError("Perspective object missing required fields")
-
+    # Perspective chunk
+    persp_text, reasoning, themes = _extract_perspective(data["perspective"])
+    if persp_text:
         chunks.append(
             {
                 "id": f"{article_id}-perspective",
-                "text": perspective_obj.perspective,
+                "text": persp_text,
                 "metadata": {
                     "type": "counter-perspective",
-                    "reasoning": perspective_obj.reasoning,
+                    "reasoning": reasoning,
+                    "themes": themes,
                     "article_id": article_id,
                 },
             }
         )
 
-        # Add each fact as a separate chunk
-        for i, fact in enumerate(data["facts"]):
-            fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
-            for field in fact_fields:
-                if field not in fact:
-                    raise ValueError(
-                        f"Missing required fact field: {field} in fact index {i}"
-                    )
+    # Fact chunks
+    facts = data.get("facts") or []
+    if not isinstance(facts, list):
+        facts = []
 
-            chunks.append(
-                {
-                    "id": f"{article_id}-fact-{i}",
-                    "text": fact["original_claim"],
-                    "metadata": {
-                        "type": "fact",
-                        "verdict": fact["verdict"],
-                        "explanation": fact["explanation"],
-                        "source_link": fact["source_link"],
-                        "article_id": article_id,
-                    },
-                }
-            )
+    for i, fact in enumerate(facts):
+        if not isinstance(fact, dict):
+            continue
+        chunks.append(
+            {
+                "id": f"{article_id}-fact-{i}",
+                "text": fact.get("original_claim", ""),
+                "metadata": {
+                    "type": "fact",
+                    "verdict": fact.get("verdict", "Unverifiable"),
+                    "confidence": fact.get("confidence", "Low"),
+                    "explanation": fact.get("explanation", ""),
+                    "source_link": fact.get("source_link", ""),
+                    "article_id": article_id,
+                },
+            }
+        )
 
-        return chunks
-
-    except Exception as e:
-        logger.exception(f"Failed to chunk the data: {e}")
-        raise
+    logger.info(f"Chunked into {len(chunks)} vectors for article {article_id[:8]}")
+    return chunks

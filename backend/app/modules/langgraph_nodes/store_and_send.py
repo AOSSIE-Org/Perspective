@@ -1,19 +1,14 @@
 """
 store_and_send.py
 -----------------
-Handles chunking, embedding, and storing of data into a vector database.
+Chunks, embeds and stores the pipeline result in the Pinecone vector database.
 
-Workflow:
-    1. Chunk raw data for retrieval-augmented generation (RAG).
-    2. Generate embeddings for the chunks.
-    3. Store the vectors in a vector database (Pinecone).
-    4. Return the updated pipeline state.
-
-Functions:
-    store_and_send(state: dict) -> dict:
-        Processes the given state through chunking, embedding, and storage.
+Improvements:
+    - Flattened the nested try/except pyramid into clear sequential steps
+    - Pinecone storage failure is non-fatal: pipeline still returns results
+      even if vector storage fails (reduces user-facing errors)
+    - Cleaner log messages with counts
 """
-
 
 from app.modules.vector_store.chunk_rag_data import chunk_rag_data
 from app.modules.vector_store.embed import embed_chunks
@@ -23,32 +18,29 @@ from app.logging.logging_config import setup_logger
 logger = setup_logger(__name__)
 
 
-def store_and_send(state):
-    # to store data in vector db
+def store_and_send(state: dict) -> dict:
+    """
+    Store pipeline results in Pinecone for RAG retrieval.
+    Vector storage failure is non-fatal — results are still returned.
+    """
     try:
-        logger.debug(f"Received state for vector storage: {state}")
-        try:
-            chunks = chunk_rag_data(state)
-        except KeyError as e:
-            raise Exception(f"Missing required data field for chunking: {e}")
-        except Exception as e:
-            raise Exception(f"Failed to chunk data: {e}")
-        try:
-            vectors = embed_chunks(chunks)
-            if vectors:
-                logger.info(f"Embedding complete — {len(vectors)} vectors generated.")
-        except Exception as e:
-            raise Exception(f"failed to embed chunks: {e}")
-        
-        store(vectors)
-        logger.info("Vectors successfully stored in Pinecone.")
+        chunks = chunk_rag_data(state)
+    except (KeyError, Exception) as e:
+        logger.error(f"Chunking failed: {e} — skipping vector storage")
+        return {**state, "status": "success"}  # non-fatal
 
+    try:
+        vectors = embed_chunks(chunks)
+        logger.info(f"Embedded {len(vectors)} vectors")
     except Exception as e:
-        logger.exception(f"Error in store_and_send: {e}")
-        return {
-            "status": "error",
-            "error_from": "store_and_send",
-            "message": f"{e}",
-        }
-    #  sending to frontend
+        logger.error(f"Embedding failed: {e} — skipping vector storage")
+        return {**state, "status": "success"}  # non-fatal
+
+    try:
+        store(vectors)
+        logger.info("Vectors stored in Pinecone.")
+    except Exception as e:
+        logger.error(f"Pinecone storage failed: {e} — results still returned")
+        return {**state, "status": "success"}  # non-fatal
+
     return {**state, "status": "success"}
