@@ -24,14 +24,20 @@ def setup_logger(name: str) -> logging.Logger:
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    # Console Handler
+    # Console Handler with UTF-8 encoding for Windows support
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
+    # Enable UTF-8 encoding to handle emoji and special characters on Windows
+    if hasattr(console_handler.stream, 'reconfigure'):
+        try:
+            console_handler.stream.reconfigure(encoding='utf-8')
+        except (AttributeError, ValueError):
+            pass
     logger.addHandler(console_handler)
 
-    # File Handler
-    file_handler = logging.FileHandler("app.log")
+    # File Handler with UTF-8 encoding
+    file_handler = logging.FileHandler("app.log", encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)  # Keep detailed logs in file
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)

@@ -28,15 +28,24 @@ GOOGLE_SEARCH = os.getenv("SEARCH_KEY")
 
 
 def search_google(query):
-    results = requests.get(
-        f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_SEARCH}&cx=f637ab77b5d8b4a3c&q={query}"
-    )
-    res = results.json()
-    first = {}
-    first["title"] = res["items"][0]["title"]
-    first["link"] = res["items"][0]["link"]
-    first["snippet"] = res["items"][0]["snippet"]
+    try:
+        results = requests.get(
+            f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_SEARCH}&cx=f637ab77b5d8b4a3c&q={query}"
+        )
+        res = results.json()
+        
+        # Check if the response contains 'items' (successful search)
+        if "items" not in res:
+            # Handle error responses from Google API
+            error_msg = res.get("error", {}).get("message", "Unknown error")
+            raise ValueError(f"Google API Error: {error_msg}")
+        
+        first = {}
+        first["title"] = res["items"][0]["title"]
+        first["link"] = res["items"][0]["link"]
+        first["snippet"] = res["items"][0]["snippet"]
 
-    return [
-        first,
-    ]
+        return [first]
+    except Exception as e:
+        print(f"Search Google Error: {e}")
+        raise
