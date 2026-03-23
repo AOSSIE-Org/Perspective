@@ -63,7 +63,7 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model="llama-3.1-8b-instant",
             temperature=0.3,
             max_tokens=512,
         )
@@ -128,7 +128,7 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="gemma2-9b-it",
+                model="llama-3.1-8b-instant",
                 temperature=0.3,
                 max_tokens=256,
             )

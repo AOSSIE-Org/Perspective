@@ -16,7 +16,7 @@ import {
 import ThemeToggle from "@/components/theme-toggle";
 import axios from "axios";
 
-// const backend_url = process.env.NEXT_PUBLIC_API_URL;
+const backend_url = process.env.NEXT_PUBLIC_API_URL;
 
 
 
@@ -74,10 +74,10 @@ export default function LoadingPage() {
 
         try {
           const [processRes, biasRes] = await Promise.all([
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/process", {
+            axios.post(`${backend_url}/api/process`, {
               url: storedUrl,
             }),
-            axios.post("https://thunder1245-perspective-backend.hf.space/api/bias", {
+            axios.post(`${backend_url}/api/bias`, {
               url: storedUrl,
             }),
           ]);

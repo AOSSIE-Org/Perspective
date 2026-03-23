@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Send, Link as LinkIcon } from "lucide-react";
@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import BiasMeter from "@/components/bias-meter";
 import axios from "axios";
 
-// const backend_url = process.env.NEXT_PUBLIC_API_URL;
+const backendUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").trim();
 
 /**
  * Renders the article analysis page with summary, perspectives, fact checks, bias meter, AI chat, and sources.
@@ -32,6 +32,7 @@ export default function AnalyzePage() {
   const [activeTab, setActiveTab] = useState("summary");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     [
       {
@@ -80,21 +81,110 @@ export default function AnalyzePage() {
 
   async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!message.trim()) return;
-    const newMessages = [...messages, { role: "user", content: message }];
+    const userMessage = message.trim();
+    if (!userMessage || isChatLoading) return;
+
+    const newMessages = [...messages, { role: "user", content: userMessage }];
     setMessages(newMessages);
     setMessage("");
+    setIsChatLoading(true);
 
-    const res = await axios.post("https://thunder1245-perspective-backend.hf.space/api/chat", {
-      message: message,
-    });
-    const data = res.data;
+    try {
+      const articleContext = analysisData?.cleaned_text?.trim() ?? "";
+      const res = await axios.post(
+        `${backendUrl}/api/chat`,
+        {
+          message: userMessage,
+          article_context: articleContext,
+        },
+        { timeout: 45000 }
+      );
+      const answer = res.data?.answer ?? "I could not generate an answer right now.";
 
-    console.log(data);
-
-    // 🔹 Step 2: Append LLM’s response
-    setMessages([...newMessages, { role: "assistant", content: data.answer }]);
+      setMessages([...newMessages, { role: "assistant", content: answer }]);
+    } catch (error: any) {
+      const fallback =
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Chat request failed. Please try again.";
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content: `Sorry, I couldn't fetch a reply: ${fallback}`,
+        },
+      ]);
+    } finally {
+      setIsChatLoading(false);
+    }
   }
+
+  const cleanedTextForView = analysisData?.cleaned_text ?? "";
+
+  const articleLayout = useMemo(() => {
+    if (!cleanedTextForView) {
+      return {
+        highlights: [] as string[],
+        sections: [] as { title: string | null; paragraphs: string[] }[],
+      };
+    }
+
+    const blocks = cleanedTextForView
+      .split(/\n{2,}/)
+      .map((block: string) => block.trim())
+      .filter(Boolean);
+
+    const isTitleLike = (block: string) => {
+      const wordCount = block.split(/\s+/).length;
+      return (
+        block.length <= 90 &&
+        wordCount <= 12 &&
+        !/[.]$/.test(block) &&
+        !/^\d+[.)]/.test(block)
+      );
+    };
+
+    const highlights: string[] = [];
+    const sections: { title: string | null; paragraphs: string[] }[] = [];
+
+    for (let i = 0; i < blocks.length; i += 1) {
+      const block = blocks[i];
+      const nextBlock = blocks[i + 1];
+
+      if (isTitleLike(block)) {
+        if (nextBlock && !isTitleLike(nextBlock)) {
+          sections.push({ title: block, paragraphs: [nextBlock] });
+          i += 1;
+        } else {
+          highlights.push(block);
+        }
+        continue;
+      }
+
+      const lastSection = sections[sections.length - 1];
+      if (lastSection && lastSection.paragraphs.length < 2) {
+        lastSection.paragraphs.push(block);
+      } else {
+        sections.push({ title: null, paragraphs: [block] });
+      }
+    }
+
+    return { highlights, sections };
+  }, [cleanedTextForView]);
+
+  const articleStats = useMemo(() => {
+    const words = cleanedTextForView.trim()
+      ? cleanedTextForView.trim().split(/\s+/).length
+      : 0;
+    const readTimeMin = words > 0 ? Math.max(1, Math.round(words / 220)) : 0;
+
+    return {
+      words,
+      readTimeMin,
+      sectionCount: articleLayout.sections.length,
+    };
+  }, [cleanedTextForView, articleLayout.sections.length]);
+
    if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -105,11 +195,9 @@ export default function AnalyzePage() {
 
 
   const {
-    cleaned_text,
     facts = [],
     sentiment,
     perspective,
-    score,
   } = analysisData;
 
   
@@ -150,12 +238,70 @@ export default function AnalyzePage() {
               </TabsList>
 
               <TabsContent value="summary">
-                <div className="prose max-w-none">
-                  {cleaned_text
-                    .split("\n\n")
-                    .map((para: string, idx: number) => (
-                      <p key={idx}>{para}</p>
-                    ))}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-b from-card via-card to-card/70 p-5 sm:p-7">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-primary/10 to-transparent" />
+
+                  <div className="relative mb-6 flex flex-wrap gap-2">
+                    <Badge variant="outline">{articleStats.sectionCount} sections</Badge>
+                    <Badge variant="outline">{articleStats.words} words</Badge>
+                    <Badge variant="outline">~{articleStats.readTimeMin} min read</Badge>
+                  </div>
+
+                  {articleLayout.highlights.length > 0 && (
+                    <section className="relative mb-5 rounded-xl border border-border/70 bg-background/40 p-4 sm:p-5">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-primary/90">
+                        Article Highlights
+                      </p>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {articleLayout.highlights.map((headline: string, idx: number) => (
+                          <div
+                            key={`${headline}-${idx}`}
+                            className="rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-sm font-medium text-foreground/90"
+                          >
+                            {headline}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  <div className="relative space-y-4 sm:space-y-5">
+                    {articleLayout.sections.map(
+                      (
+                        section: { title: string | null; paragraphs: string[] },
+                        idx: number
+                      ) => (
+                        <article
+                          key={idx}
+                          className="rounded-xl border border-border/70 bg-background/40 p-4 sm:p-5"
+                        >
+                          <div className="mb-3 flex items-center gap-3">
+                            <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary/15 px-2 text-xs font-semibold text-primary">
+                              {(idx + 1).toString().padStart(2, "0")}
+                            </span>
+                            <h3 className="text-lg font-semibold leading-snug text-foreground">
+                              {section.title ?? `Key Point ${idx + 1}`}
+                            </h3>
+                          </div>
+
+                          <div className="space-y-3">
+                            {section.paragraphs.map((paragraph: string, pIdx: number) => (
+                              <p
+                                key={pIdx}
+                                className={`text-base leading-8 text-foreground/90 ${
+                                  idx === 0 && pIdx === 0
+                                    ? "first-letter:float-left first-letter:mr-2 first-letter:text-3xl first-letter:font-semibold first-letter:leading-none"
+                                    : ""
+                                }`}
+                              >
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
+                        </article>
+                      )
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
@@ -187,10 +333,10 @@ export default function AnalyzePage() {
                             <Badge
                               variant={
                                 fact.verdict === "True"
-                                  ? "success"
+                                  ? "secondary"
                                   : fact.verdict === "False"
                                   ? "destructive"
-                                  : "warning"
+                                  : "outline"
                               }
                             >
                               {fact.verdict}
@@ -255,7 +401,7 @@ export default function AnalyzePage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
-                  <Button type="submit" disabled={!message.trim()}>
+                  <Button type="submit" disabled={!message.trim() || isChatLoading}>
                     <Send />
                   </Button>
                 </form>

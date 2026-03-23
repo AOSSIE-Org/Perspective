@@ -30,7 +30,7 @@ Core Components:
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
@@ -52,6 +52,7 @@ class URlRequest(BaseModel):
 
 class ChatQuery(BaseModel):
     message: str
+    article_context: str | None = None
 
 
 @router.get("/")
@@ -77,9 +78,20 @@ async def run_pipelines(request: URlRequest):
 
 @router.post("/chat")
 async def answer_query(request: ChatQuery):
-    query = request.message
-    results = search_pinecone(query)
-    answer = ask_llm(query, results)
-    logger.info(f"Chat answer generated: {answer}")
+    try:
+        query = request.message.strip()
+        if not query:
+            raise HTTPException(status_code=400, detail="Message cannot be empty.")
 
-    return {"answer": answer}
+        article_context = (request.article_context or "").strip()
+
+        results = search_pinecone(query)
+        answer = ask_llm(query, results, article_context)
+        logger.info("Chat answer generated successfully.")
+
+        return {"answer": answer}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Chat request failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate chat response.")
