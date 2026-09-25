@@ -34,8 +34,8 @@
     --accent: #f7e0b5;
     --accent-foreground: #451a03;
 
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
 
     --success: #059669;
     --success-foreground: #ffffff;
@@ -120,8 +120,8 @@
     --accent: #1e3a8a;
     --accent-foreground: #bfdbfe;
 
-    --destructive: #f87171;
-    --destructive-foreground: #ffffff;
+    --destructive: 248 113 113;
+    --destructive-foreground: 255 255 255;
 
     --success: #34d399;
     --success-foreground: #02183c;

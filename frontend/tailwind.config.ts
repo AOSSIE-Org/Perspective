@@ -50,8 +50,8 @@ const config: Config = {
           foreground: "var(--accent-foreground)",
         },
         destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
+          DEFAULT: "rgb(var(--destructive) / <alpha-value>)",
+          foreground: "rgb(var(--destructive-foreground) / <alpha-value>)",
         },
         success: {
           DEFAULT: "var(--success)",

@@ -193,6 +193,13 @@ export default function HomePage() {
 
       sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
       sessionStorage.setItem("analysisResult", JSON.stringify(processRes.data));
+
+      // Navigate only on success — schedule after animation completes or immediately if already done
+      apiDone = true;
+      if (step >= animationSteps.length - 1) {
+        clearInterval(stepInterval);
+        setTimeout(() => router.push("/analyze/results"), 250);
+      }
     } catch (err) {
       clearInterval(stepInterval);
       setIsAnalyzing(false);
@@ -201,13 +208,6 @@ export default function HomePage() {
       setErrorMsg(`${t("invalidUrlError")} (${msg})`);
       setIsHighlighted(true);
       setTimeout(() => setIsHighlighted(false), 3000);
-      return;
-    } finally {
-      apiDone = true;
-      if (step >= animationSteps.length - 1) {
-        clearInterval(stepInterval);
-        setTimeout(() => router.push("/analyze/results"), 250);
-      }
     }
   };
 
