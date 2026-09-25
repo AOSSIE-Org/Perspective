@@ -62,26 +62,22 @@ def run_fact_check_pipeline(state):
     # Limit to top 3 claims for fast verification
     claims = claims[:3]
 
-    # Step 2: Search claims in parallel (max 3 concurrent)
-    search_results = []
+    # Step 2: Search claims in parallel (max 3 concurrent), preserving extracted order
+    search_results = [None] * len(claims)
     with ThreadPoolExecutor(max_workers=3) as executor:
-        future_to_claim = {executor.submit(_search_single_claim, claim): claim for claim in claims}
-        for future in as_completed(future_to_claim):
+        future_to_index = {executor.submit(_search_single_claim, claim): i for i, claim in enumerate(claims)}
+        for future in as_completed(future_to_index):
+            idx = future_to_index[future]
             res = future.result()
             if res:
-                search_results.append(res)
+                search_results[idx] = res
+
+    # Remove unfilled slots; if nothing found, return early without fabricated evidence
+    search_results = [r for r in search_results if r is not None]
 
     if not search_results:
-        logger.warning("[WARNING] All searches returned empty; using context fallback.")
-        search_results = [
-            {
-                "claim": claim,
-                "title": f"Context: {claim[:60]}",
-                "link": "https://en.wikipedia.org",
-                "snippet": f"Public reporting and coverage on {claim}",
-            }
-            for claim in claims
-        ]
+        logger.warning("[WARNING] All searches returned empty; skipping fact verification.")
+        return [], "No search results available for fact verification."
 
     # Step 3: Verify facts using LLM
     final = run_fact_verifier_sdk(search_results)

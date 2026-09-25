@@ -150,6 +150,15 @@ export default function HomePage() {
       return;
     }
 
+    // Only allow http/https protocols
+    const parsedUrl = new URL(url.trim());
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      setErrorMsg(t("invalidUrlError"));
+      setIsHighlighted(true);
+      setTimeout(() => setIsHighlighted(false), 2000);
+      return;
+    }
+
     setErrorMsg("");
     setIsAnalyzing(true);
     setCurrentStepIndex(0);
@@ -184,33 +193,15 @@ export default function HomePage() {
 
       sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
       sessionStorage.setItem("analysisResult", JSON.stringify(processRes.data));
-    } catch {
-      sessionStorage.setItem(
-        "BiasScore",
-        JSON.stringify({
-          bias_score: 48,
-          bias_category: "Editorial & Perspective Framing",
-          explanation: "The article presents predominantly single-source perspectives with moderate selective sourcing.",
-        })
-      );
-      sessionStorage.setItem(
-        "analysisResult",
-        JSON.stringify({
-          cleaned_text: `Analysis for article at ${targetUrl}. Content analyzed across semantic dimensions.`,
-          sentiment: "Analytical / Cautionary",
-          score: 82,
-          facts: [
-            {
-              claim: "Primary argument presented in the article content.",
-              verified: true,
-              sources: ["Online Media Index", "FactCheck Database"],
-              details: "Empirical verification confirms foundational context with notable counter-arguments.",
-            },
-          ],
-          perspective:
-            "An alternative perspective suggests examining the unaddressed trade-offs, localized socioeconomic consequences, and long-term systemic incentives rather than accepting the initial narrative as complete.",
-        })
-      );
+    } catch (err) {
+      clearInterval(stepInterval);
+      setIsAnalyzing(false);
+      setCurrentStepIndex(0);
+      const msg = err instanceof Error ? err.message : "Analysis failed";
+      setErrorMsg(`${t("invalidUrlError")} (${msg})`);
+      setIsHighlighted(true);
+      setTimeout(() => setIsHighlighted(false), 3000);
+      return;
     } finally {
       apiDone = true;
       if (step >= animationSteps.length - 1) {

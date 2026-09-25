@@ -65,14 +65,16 @@ def check_bias(text):
             ],
             model="openai/gpt-oss-120b",
             temperature=0.2,
-            max_tokens=16,
+            max_tokens=32,
         )
-        raw_score = chat_completion.choices[0].message.content.strip()
+        raw_score = (chat_completion.choices[0].message.content or "").strip()
         logger.info(f"Raw bias score calculated: {raw_score}")
 
         import re
         m = re.search(r"\b(\d{1,3})\b", raw_score)
-        score_val = max(0, min(100, int(m.group(1)))) if m else 50
+        if not m:
+            raise ValueError(f"No parseable score in model response: {raw_score!r}")
+        score_val = max(0, min(100, int(m.group(1))))
 
         return {
             "bias_score": score_val,

@@ -21,8 +21,8 @@ def judge_perspective(state):
         perspective_obj = state.get("perspective")
         text = getattr(perspective_obj, "perspective", str(perspective_obj or "")).strip()
         if not text:
-            logger.warning("Empty perspective text in judge_perspective, assigning default score 85")
-            return {**state, "score": 85, "status": "success"}
+            logger.warning("Empty perspective text in judge_perspective; returning low score to trigger retry")
+            return {**state, "score": 0, "status": "success"}
 
         prompt = (
             "You are an expert perspective evaluator. Please rate the following counter-perspective "
@@ -37,17 +37,20 @@ def judge_perspective(state):
             ],
             model="openai/gpt-oss-20b",
             temperature=0.0,
-            max_tokens=64,
+            max_tokens=256,
         )
 
-        raw = chat_completion.choices[0].message.content.strip()
+        raw = (chat_completion.choices[0].message.content or "").strip()
 
-        # Pull the first integer 0–100
+        # Pull the first integer 0–100; treat unparseable output as a low score to trigger retry
         m = re.search(r"\b(\d{1,3})\b", raw)
-        score = max(0, min(100, int(m.group(1)))) if m else 88
+        if not m:
+            logger.warning(f"judge_perspective: no score found in response {raw!r}; returning low score to trigger retry")
+            return {**state, "score": 0, "status": "success"}
 
+        score = max(0, min(100, int(m.group(1))))
         return {**state, "score": score, "status": "success"}
 
     except Exception as e:
         logger.exception(f"Error in judge_perspective: {e}")
-        return {**state, "score": 85, "status": "success"}
+        return {**state, "status": "error", "error_from": "judge", "message": str(e)}

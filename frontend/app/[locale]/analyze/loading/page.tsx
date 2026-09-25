@@ -27,22 +27,28 @@ export default function LoadingPage() {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    let stepInterval: ReturnType<typeof setInterval> | null = null;
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+    let navTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const runAnalysis = async () => {
       const storedUrl = sessionStorage.getItem("articleUrl");
       if (!storedUrl) {
-        router.push("/");
+        if (!cancelled) router.push("/");
         return;
       }
 
-      setArticleUrl(storedUrl);
+      if (!cancelled) setArticleUrl(storedUrl);
 
       // Check if we already have pre-computed results (e.g. from preset topics)
       const existingResult = sessionStorage.getItem("analysisResult");
       if (existingResult) {
+        if (cancelled) return;
         setProgress(100);
         setCurrentStep(steps.length - 1);
-        setTimeout(() => {
-          router.push("/analyze/results");
+        navTimeout = setTimeout(() => {
+          if (!cancelled) router.push("/analyze/results");
         }, 1200);
         return;
       }
@@ -53,62 +59,52 @@ export default function LoadingPage() {
           axios.post(`${BACKEND_BASE}/api/bias`, { url: storedUrl }, { timeout: 90000 }),
         ]);
 
+        if (cancelled) return;
         sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
         sessionStorage.setItem("analysisResult", JSON.stringify(processRes.data));
       } catch {
-        sessionStorage.setItem(
-          "BiasScore",
-          JSON.stringify({
-            bias_score: 48,
-            bias_category: "Editorial & Perspective Framing",
-            explanation: "The article presents predominantly single-source perspectives with moderate selective sourcing.",
-          })
-        );
-        sessionStorage.setItem(
-          "analysisResult",
-          JSON.stringify({
-            cleaned_text: `Analysis for article at ${storedUrl}. Content analyzed across semantic dimensions.`,
-            sentiment: "Analytical / Cautionary",
-            score: 82,
-            facts: [
-              {
-                claim: "Primary argument presented in the article content.",
-                verified: true,
-                sources: ["Online Media Index", "FactCheck Database"],
-                details: "Empirical verification confirms foundational context with notable counter-arguments.",
-              },
-            ],
-            perspective:
-              "An alternative perspective suggests examining the unaddressed trade-offs, localized socioeconomic consequences, and long-term systemic incentives rather than accepting the initial narrative as complete.",
-          })
-        );
+        if (cancelled) return;
+        sessionStorage.setItem("analysisResult", JSON.stringify({ error: true }));
+        sessionStorage.setItem("BiasScore", JSON.stringify({ bias_score: 0 }));
       }
 
-      const stepInterval = setInterval(() => {
+      if (cancelled) return;
+
+      stepInterval = setInterval(() => {
+        if (cancelled) {
+          if (stepInterval) clearInterval(stepInterval);
+          return;
+        }
         setCurrentStep((prev) => {
           if (prev < steps.length - 1) {
             return prev + 1;
           } else {
-            clearInterval(stepInterval);
-            setTimeout(() => {
-              router.push("/analyze/results");
+            if (stepInterval) clearInterval(stepInterval);
+            navTimeout = setTimeout(() => {
+              if (!cancelled) router.push("/analyze/results");
             }, 800);
             return prev;
           }
         });
       }, 1200);
 
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
+        if (cancelled) {
+          if (progressInterval) clearInterval(progressInterval);
+          return;
+        }
         setProgress((prev) => (prev < 100 ? prev + 1 : prev));
       }, 60);
-
-      return () => {
-        clearInterval(stepInterval);
-        clearInterval(progressInterval);
-      };
     };
 
     runAnalysis();
+
+    return () => {
+      cancelled = true;
+      if (stepInterval) clearInterval(stepInterval);
+      if (progressInterval) clearInterval(progressInterval);
+      if (navTimeout) clearTimeout(navTimeout);
+    };
   }, [router, steps.length]);
 
   return (

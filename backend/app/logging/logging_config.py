@@ -38,7 +38,17 @@ def setup_logger(name: str) -> logging.Logger:
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-    except Exception:
-        pass
+    except Exception as file_exc:
+        console_handler.emit(
+            logging.LogRecord(
+                name=name,
+                level=logging.WARNING,
+                pathname=__file__,
+                lineno=0,
+                msg=f"File logging disabled (app.log could not be opened): {file_exc}",
+                args=(),
+                exc_info=None,
+            )
+        )
 
     return logger

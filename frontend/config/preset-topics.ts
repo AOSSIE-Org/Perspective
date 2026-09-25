@@ -625,7 +625,7 @@ export const PRESET_TOPICS: PresetTopic[] = [
       score: 88,
       facts: [
         {
-          claim: "CRISPR-based synthetic gene drives achieve over 95% inheritance inheritance rates in target insect populations.",
+          claim: "CRISPR-based synthetic gene drives achieve over 95% inheritance rates in target insect populations.",
           verified: true,
           sources: ["Target Malaria Scientific Consortium", "Nature Biotechnology 2026 Field Assessment"],
           details: "Contained trial releases demonstrated localized Anopheles mosquito population suppression without immediate ecosystem collapse.",

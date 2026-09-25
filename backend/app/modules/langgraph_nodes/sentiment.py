@@ -51,7 +51,8 @@ def run_sentiment_sdk(state):
             ],
             model="openai/gpt-oss-20b",
             temperature=0.2,
-            max_tokens=3,
+            max_tokens=64,
+            extra_body={"reasoning_effort": "low"},
         )
 
         sentiment = chat_completion.choices[0].message.content.strip()

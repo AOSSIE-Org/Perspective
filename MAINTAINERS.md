@@ -17,6 +17,7 @@ This document lists the individuals fulfilling the key roles of [Maintainer](htt
 | Name | GitHub Username | Discord Username | Area / Focus |
 | ---- | --------------- | ---------------- | ------------ |
 | Parag Ghatage | [@ParagGhatage](https://github.com/ParagGhatage) | @parag_dev | GSoC 2025 Contributor, Core Architecture |
+| Saksham Jain | [@reach2saksham](https://github.com/reach2saksham) | @theonlypro47 | GSoC 2026 Contributor, Complete Frontend Revamp, Backend Modernization |
 
 ---
 

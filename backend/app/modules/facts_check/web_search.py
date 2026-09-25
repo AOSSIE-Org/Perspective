@@ -23,7 +23,8 @@ def search_google(query):
     if GOOGLE_SEARCH and GOOGLE_SEARCH != "your_google_search_api_key_here":
         try:
             results = requests.get(
-                f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_SEARCH}&cx=f637ab77b5d8b4a3c&q={query}",
+                "https://www.googleapis.com/customsearch/v1",
+                params={"key": GOOGLE_SEARCH, "cx": "f637ab77b5d8b4a3c", "q": query},
                 timeout=8,
             )
             res = results.json()
@@ -51,11 +52,5 @@ def search_google(query):
     except Exception as e:
         logger.warning(f"DuckDuckGo search error: {e}")
 
-    # 3. Default contextual fallback
-    return [
-        {
-            "title": f"Context for: {query[:60]}",
-            "link": "https://en.wikipedia.org",
-            "snippet": f"Public web context and reporting on: {query}",
-        }
-    ]
+    # 3. Both providers failed — return empty; caller decides how to handle
+    return []

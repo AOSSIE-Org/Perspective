@@ -9,7 +9,7 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://perspective-aossie.vercel.app/openapi.yaml",
+    "url": "https://thunder1245-perspective-backend.hf.space/openapi.json",
     "is_user_authenticated": false
   },
   "logo_url": "https://perspective-aossie.vercel.app/brand/icons/perspective_logo.svg",
