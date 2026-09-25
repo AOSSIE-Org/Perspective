@@ -19,6 +19,11 @@ Attributes:
     app (FastAPI): The FastAPI application instance.
 """
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from fastapi import FastAPI
 from app.routes.routes import router as article_router
 from fastapi.middleware.cors import CORSMiddleware

@@ -1,0 +1,23 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environments & secrets (keep sensitive files local)
+.env
+.env.*
+.env*.local
+*.env
+!.env.example
+!.env.*.example
+.secrets
+*.key
+*.pem
+credentials.json
+
+# Virtual environments
+.venv/
+venv/
+env/
+.uv-cache/

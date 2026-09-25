@@ -1,44 +1,41 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 
-/**
- * Renders a button that toggles between light and dark themes.
- *
- * Displays a Sun or Moon icon depending on the current theme, with smooth transitions and accessible labeling.
- * The button is only interactive after the component has mounted to ensure correct theme detection on the client.
- */
-export function ThemeToggle() {
-  const { setTheme, theme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+export function ThemeToggle({ className = "" }: { className?: string }) {
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  const t = useTranslations("ThemeToggle");
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="rounded-full w-10 h-10">
-        <Sun className="h-5 w-5" />
-      </Button>
-    )
+      <div className={`w-10 h-10 rounded-full bg-switcher-bg animate-pulse ${className}`} />
+    );
   }
 
+  const isDark = resolvedTheme === "dark";
+
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-full w-10 h-10 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={t("toggleTheme")}
+      className={`flex items-center justify-center w-10 h-10 rounded-full border border-brand-border bg-switcher-bg hover:bg-switcher-hover text-foreground shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer backdrop-blur-md ${className}`}
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  )
+      {isDark ? (
+        <Sun className="w-5 h-5 text-foreground transition-transform hover:rotate-45" />
+      ) : (
+        <Moon className="w-5 h-5 text-foreground transition-transform hover:-rotate-12" />
+      )}
+    </button>
+  );
 }
 
-export default ThemeToggle
+export default ThemeToggle;

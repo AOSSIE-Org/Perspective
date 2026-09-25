@@ -40,36 +40,42 @@ def check_bias(text):
         logger.debug(f"Raw article text: {text}")
         logger.debug(f"JSON dump of text: {json.dumps(text)}")
 
-        if not text:
+        # Extract string if passed a dict from scraper pipeline
+        article_text = text.get("cleaned_text", "") if isinstance(text, dict) else str(text or "")
+        article_text = article_text.strip()
+
+        if not article_text:
             logger.error("Missing or empty 'cleaned_text'")
-            raise ValueError("Missing or empty 'cleaned_text'")
+            raise ValueError("No readable text could be extracted from this article.")
 
         chat_completion = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
                     "content": (
-                        "You are an assistant that checks  "
-                        "if given article is biased and give"
-                        "score to each based on biasness where 0 is lowest bias and 100 is highest bias"
-                        "Only return a number between 0 to 100 base on bias."
-                        "only return Number No Text"
+                        "You are an assistant that checks if a given article is biased and provides "
+                        "a score based on biasness where 0 is lowest bias (neutral) and 100 is highest bias. "
+                        "Only return a single integer number between 0 and 100. Do not return any text, markdown, or explanation."
                     ),
                 },
                 {
                     "role": "user",
-                    "content": (f"Give bias score to the following article \n\n{text}"),
+                    "content": f"Give bias score to the following article:\n\n{article_text}",
                 },
             ],
-            model="gemma2-9b-it",
-            temperature=0.3,
-            max_tokens=512,
+            model="openai/gpt-oss-120b",
+            temperature=0.2,
+            max_tokens=16,
         )
-        bias_score = chat_completion.choices[0].message.content.strip()
-        logger.info(f"Bias score calculated: {bias_score}")
+        raw_score = chat_completion.choices[0].message.content.strip()
+        logger.info(f"Raw bias score calculated: {raw_score}")
+
+        import re
+        m = re.search(r"\b(\d{1,3})\b", raw_score)
+        score_val = max(0, min(100, int(m.group(1)))) if m else 50
 
         return {
-            "bias_score": bias_score,
+            "bias_score": score_val,
             "status": "success",
         }
 

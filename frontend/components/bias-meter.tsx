@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface BiasMeterProps {
   score: number;
 }
@@ -12,21 +14,22 @@ interface BiasMeterProps {
  * @param score - The bias score to display, expected to be between 0 and 100.
  */
 export default function BiasMeter({ score }: BiasMeterProps) {
+  const t = useTranslations("BiasMeter");
 
-if(!score){
-  score = 0
-}
+  if (!score) {
+    score = 0;
+  }
 
   const getScoreColor = (score: number) => {
-    if (score <= 30) return "text-green-500";
-    if (score <= 60) return "text-yellow-500";
-    return "text-red-500";
+    if (score <= 30) return "text-success";
+    if (score <= 60) return "text-warning";
+    return "text-destructive";
   };
 
   const getScoreLabel = (score: number) => {
-    if (score <= 30) return "Low Bias";
-    if (score <= 60) return "Moderate Bias";
-    return "High Bias";
+    if (score <= 30) return t("lowBias");
+    if (score <= 60) return t("moderateBias");
+    return t("highBias");
   };
 
   const circumference = 2 * Math.PI * 45;
@@ -36,7 +39,7 @@ if(!score){
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium text-sm">Bias Score</h3>
+        <h3 className="font-medium text-sm">{t("biasScore")}</h3>
         <span className={`text-sm font-semibold ${getScoreColor(score)}`}>
           {score}/100
         </span>

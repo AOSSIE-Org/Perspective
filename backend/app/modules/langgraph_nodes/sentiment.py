@@ -49,7 +49,7 @@ def run_sentiment_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model="openai/gpt-oss-20b",
             temperature=0.2,
             max_tokens=3,
         )

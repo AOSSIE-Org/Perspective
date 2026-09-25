@@ -55,7 +55,7 @@ Question:
 """
 
     response = client.chat.completions.create(
-        model="gemma2-9b-it",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": "Use only the context to answer."},
             {"role": "user", "content": prompt},

@@ -1,0 +1,30 @@
+# Perspective AI
+
+Perspective AI is an open-source platform by AOSSIE designed to combat echo chambers and algorithmic confirmation bias by generating structured, credible counter-perspectives for online articles.
+
+---
+
+## 📂 Project Architecture
+
+- **`app/[locale]/`**: Localized dynamic route group. All pages and layouts live here.
+- **`app/[locale]/page.tsx`**: Main landing page with 3D WebGL Globe, preset trending topics, and article analysis input.
+- **`app/[locale]/impact/`**: Measurable impact statistics and real-world media literacy applications.
+- **`app/[locale]/contribute/`**: Open-source developer onboarding and contribution guidelines.
+- **`app/[locale]/about/`**: Mission statement and multi-agent AI pipeline architecture.
+- **`app/[locale]/contact/`**: Community feedback channels (Discord, GitHub).
+- **`app/[locale]/analyze/`**: Article URL submission, loading progress, and structured result scorecard with RAG chat.
+- **`public/brand/`**: Repository branding folder containing logos, favicon, and brand specifications (`Brand.md`).
+- **`config/languages.ts`**: Supported locales configuration list (`en`, `hi`).
+- **`messages/`**: Translation catalogs (`en.json`, `hi.json`).
+
+---
+
+## 🎨 Theme & Style System
+- Built with Tailwind CSS and Next-Themes.
+- Semantic CSS variables in `globals.css` provide Deep Navy Blue for dark mode and Warm Biscuit Cream for light mode.
+
+---
+
+## 📦 Build Commands
+- **Build:** `npm run build`
+- **Develop:** `npm run dev`

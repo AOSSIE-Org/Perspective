@@ -21,11 +21,14 @@ Raises:
 """
 
 import os
+from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec, CloudProvider, AwsRegion
 from app.logging.logging_config import setup_logger
 
-
 logger = setup_logger(__name__)
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Load Pinecone credentials from environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
