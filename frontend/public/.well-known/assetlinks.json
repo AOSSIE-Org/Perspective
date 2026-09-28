@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.aossie.perspective",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:83:C5:E9:9D:03:7F:10:97:DF:A6:45:12:26:1F:EE:3A:84:14:6D:E9:83:C5:E9:9D:03:7F:10:97:00"
+      ]
+    }
+  }
+]

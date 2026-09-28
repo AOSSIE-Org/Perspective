@@ -63,7 +63,7 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="gemma2-9b-it",
+            model="openai/gpt-oss-20b",
             temperature=0.3,
             max_tokens=512,
         )
@@ -128,22 +128,41 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="gemma2-9b-it",
+                model="openai/gpt-oss-20b",
                 temperature=0.3,
-                max_tokens=256,
+                max_tokens=1024,
             )
 
             content = chat_completion.choices[0].message.content.strip()
 
             # Strip markdown code blocks if present
-            content = re.sub(r"^```json|```$", "", content).strip()
+            content = re.sub(r"^```json\s*|```$", "", content, flags=re.MULTILINE).strip()
             logger.debug(f"Raw LLM fact verification output:\n{content}")
+
+            parsed = {
+                "verdict": "True",
+                "explanation": "Evidence supports the stated claim.",
+                "original_claim": claim,
+                "source_link": source,
+            }
 
             # Try parsing the JSON response
             try:
-                parsed = json.loads(content)
+                # Find JSON object bounds if surrounded by conversational filler
+                start_idx = content.find("{")
+                end_idx = content.rfind("}")
+                if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                    parsed = json.loads(content[start_idx : end_idx + 1])
+                else:
+                    parsed = json.loads(content)
             except Exception as parse_err:
                 logger.error(f"LLM JSON parse error: {parse_err}")
+                parsed = {
+                    "verdict": "Unverified",
+                    "explanation": "The verifier response could not be parsed.",
+                    "original_claim": claim,
+                    "source_link": source,
+                }
 
             results_list.append(parsed)
 

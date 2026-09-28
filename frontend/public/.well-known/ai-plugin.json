@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Perspective AI",
+  "name_for_model": "perspective_ai",
+  "description_for_human": "Analyze articles for media bias and generate balanced counter-perspectives with factual verification.",
+  "description_for_model": "Extract claims, detect biases, and generate structured alternative viewpoints for online news articles.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://thunder1245-perspective-backend.hf.space/openapi.json",
+    "is_user_authenticated": false
+  },
+  "logo_url": "https://perspective-aossie.vercel.app/brand/icons/perspective_logo.svg",
+  "contact_email": "admin@aossie.org",
+  "legal_info_url": "https://perspective-aossie.vercel.app/about"
+}
