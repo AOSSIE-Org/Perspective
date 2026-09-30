@@ -62,7 +62,7 @@ Routing is locale-prefixed via `next-intl` (`localePrefix: 'always'`), so every 
 - **Translation catalogs** live in [`messages/en.json`](messages/en.json) and [`messages/hi.json`](messages/hi.json).
 - **next-intl wiring** is in [`i18n/`](i18n): `routing.ts` (locales/default), `request.ts` (per-request config), `navigation.ts` (locale-aware `Link`/`useRouter`), and `messages.ts` (catalog map).
 
-To **add a locale**: add an entry to `config/languages.ts` and create a matching `messages/<code>.json` catalog.
+To **add a locale**: add an entry to `config/languages.ts`, create a matching `messages/<code>.json` catalog, and register the catalog in `i18n/messages.ts`.
 
 ## Project Structure
 
