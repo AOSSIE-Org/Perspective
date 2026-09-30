@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Perspective — Frontend
+
+The web client for **Perspective-AI**, an app that analyzes an article and generates a balanced, fact-grounded counter-perspective. This directory contains the Next.js frontend; the FastAPI backend lives in [`../backend`](../backend), and the full system overview is in the [root README](../README.md).
+
+## Tech Stack
+
+- **Framework:** [Next.js 15](https://nextjs.org) (App Router) with [React 19](https://react.dev)
+- **Language:** TypeScript
+- **Styling:** [Tailwind CSS](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) (Radix UI primitives)
+- **Internationalization:** [next-intl](https://next-intl.dev) (English + Hindi)
+- **Icons / motion / charts:** `lucide-react`, `motion`, `recharts`
+- **HTTP:** `axios`
+
+## Prerequisites
+
+- **Node.js** 20.9 or newer
+- **npm** (ships with Node)
 
 ## Getting Started
 
-First, run the development server:
+From this `frontend/` directory:
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure the backend API URL (see "Environment Variables" below)
+#    Create a .env.local file:
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+
+# 3. Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). You'll be redirected to the default locale (e.g. `/en`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> The app talks to the backend. Run it locally (see [`../backend/README.md`](../backend/README.md)) or point `NEXT_PUBLIC_API_URL` at a hosted instance.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+| Variable | Required | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | No | Base URL of the Perspective backend. Defaults to the hosted Hugging Face Space if unset. Set to `http://localhost:8000` for local backend development. |
 
-To learn more about Next.js, take a look at the following resources:
+Because it is prefixed with `NEXT_PUBLIC_`, this value is exposed to the browser. Put it in a git-ignored `.env.local` file.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run dev:turbo` | Start the dev server with Turbopack |
+| `npm run build` | Create a production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
-## Deploy on Vercel
+## Internationalization (i18n)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Routing is locale-prefixed via `next-intl` (`localePrefix: 'always'`), so every route lives under a locale segment — `/en/about`, `/hi/about`, etc.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Supported locales** are defined in [`config/languages.ts`](config/languages.ts) — currently `en` (English) and `hi` (हिन्दी), with `en` as the default.
+- **Translation catalogs** live in [`messages/en.json`](messages/en.json) and [`messages/hi.json`](messages/hi.json).
+- **next-intl wiring** is in [`i18n/`](i18n): `routing.ts` (locales/default), `request.ts` (per-request config), `navigation.ts` (locale-aware `Link`/`useRouter`), and `messages.ts` (catalog map).
+
+To **add a locale**: add an entry to `config/languages.ts` and create a matching `messages/<code>.json` catalog.
+
+## Project Structure
+
+```
+frontend/
+├── app/
+│   └── [locale]/          # Locale-prefixed routes
+│       ├── about/
+│       ├── analyze/       # Analyze flow (loading, results)
+│       ├── contribute/
+│       └── impact/
+├── components/
+│   └── ui/                # shadcn/ui components
+├── config/languages.ts    # Supported locales (source of truth)
+├── i18n/                  # next-intl configuration
+├── lib/utils.ts           # `cn()` class-merge helper
+├── messages/              # Translation catalogs (en, hi)
+├── components.json        # shadcn/ui config
+└── next.config.mjs        # Next.js + next-intl config
+```
+
+## UI Components (shadcn/ui)
+
+This project uses [shadcn/ui](https://ui.shadcn.com). Configuration (aliases, style, base color) is in [`components.json`](components.json). Add a component with:
+
+```bash
+npx shadcn@latest add <component>
+```
+
+Components are generated into `components/ui`. Import path aliases (e.g. `@/components`, `@/lib/utils`) are configured in [`tsconfig.json`](tsconfig.json).
+
+## Notes
+
+- `next.config.mjs` redirects `/:locale/analyze` → `/:locale`, sets `images.unoptimized`, and currently sets `eslint.ignoreDuringBuilds` / `typescript.ignoreBuildErrors` to `true` — so `next build` will not fail on lint or type errors. Run `npm run lint` separately to catch issues.
+
+## Contributing
+
+See the repository [CONTRIBUTING guide](../CONTRIBUTING.md) for branch naming, commit conventions (Conventional Commits + DCO sign-off), and the PR process.
