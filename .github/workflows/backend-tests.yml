@@ -1,0 +1,36 @@
+name: Backend Tests
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --all-groups
+
+      - name: Run pytest
+        working-directory: backend
+        env:
+          GROQ_API_KEY: "dummy-key-for-ci"
+          PINECONE_API_KEY: "dummy-pinecone-key-for-ci"
+        run: uv run pytest tests/ -v --tb=short
