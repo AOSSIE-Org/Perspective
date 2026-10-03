@@ -1,0 +1,33 @@
+name: "🐞 Bug report"
+description: "File a bug to help us improve"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: "Steps to reproduce"
+      placeholder: "1. Go to …\n2. Click on …\n3. Observe …"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behaviour"
+      placeholder: "Describe what you expected to happen."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual behaviour"
+      placeholder: "Describe what actually happened."
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: "Environment (OS, browser, version, etc.)"
+      placeholder: "e.g., Windows 11, Chrome 110, Node.js 20"
+    validations:
+      required: true

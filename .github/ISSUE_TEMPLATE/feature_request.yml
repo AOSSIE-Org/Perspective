@@ -1,0 +1,24 @@
+name: "✨ Feature request"
+description: "Suggest an idea or improvement for this project"
+title: "[Feat]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem / Motivation"
+      placeholder: "Describe the problem this feature solves or improves."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed solution"
+      placeholder: "Describe the solution or approach you suggest."
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional context / mock-ups / screenshots"
+      placeholder: "Provide any extra context, links, or visual examples if applicable."
