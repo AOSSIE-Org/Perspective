@@ -105,9 +105,11 @@ class TestBiasEndpoint:
 
 class TestProcessEndpoint:
     def _mock_workflow_result(self):
-        perspective = MagicMock()
-        perspective.perspective = "Counter view on climate."
-        perspective.reasoning = "Step 1: examine data."
+        perspective = {
+            "perspective": "Counter view on climate.",
+            "reasoning": "Step 1: examine data.",
+        }
+
         return {
             "cleaned_text": "Article text.",
             "sentiment": "negative",
@@ -130,6 +132,10 @@ class TestProcessEndpoint:
         response = client.post("/api/process", json={"url": "https://example.com/article"})
         assert response.status_code == 200
 
+        assert response.json()["perspective"] == {
+            "perspective": "Counter view on climate.",
+            "reasoning": "Step 1: examine data.",
+        }
     def test_rejects_missing_url(self):
         response = client.post("/api/process", json={})
         assert response.status_code == 422

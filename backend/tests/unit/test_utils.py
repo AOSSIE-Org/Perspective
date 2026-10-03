@@ -40,7 +40,7 @@ class TestGenerateId:
             generate_id("")
 
     def test_raises_on_non_string(self):
-        with pytest.raises((ValueError, AttributeError)):
+        with pytest.raises(ValueError):
             generate_id(None)
 
 
@@ -115,19 +115,19 @@ class TestChunkRagData:
     def test_raises_on_missing_required_field(self):
         data = _valid_data()
         del data["perspective"]
-        with pytest.raises((ValueError, KeyError, Exception)):
+        with pytest.raises(ValueError):
             chunk_rag_data(data)
 
     def test_raises_on_facts_not_a_list(self):
         data = _valid_data()
         data["facts"] = "not a list"
-        with pytest.raises((ValueError, Exception)):
+        with pytest.raises(ValueError):
             chunk_rag_data(data)
 
     def test_raises_on_missing_fact_field(self):
         data = _valid_data()
         data["facts"] = [{"original_claim": "claim"}]  # missing verdict, explanation, source_link
-        with pytest.raises((ValueError, KeyError, Exception)):
+        with pytest.raises(ValueError):
             chunk_rag_data(data)
 
 
