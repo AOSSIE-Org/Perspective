@@ -84,7 +84,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/", label: t("home") },
-    { href: "/impact", label: t("impact") },
+    // { href: "/impact", label: t("impact") },
     { href: "/contribute", label: t("contribute") },
     { href: "/about", label: t("about") },
   ];
