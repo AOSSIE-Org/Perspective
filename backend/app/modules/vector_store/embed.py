@@ -22,10 +22,29 @@ Functions:
 """
 
 
-from sentence_transformers import SentenceTransformer
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+if TYPE_CHECKING:
+    from sentence_transformers import SentenceTransformer
+
+_embedder: Optional[Any] = None
+
+
+def get_embedder():
+    """Return the cached SentenceTransformer instance, initializing it lazily on first access."""
+    global _embedder
+    if _embedder is None:
+        from sentence_transformers import SentenceTransformer
+
+        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedder
+
+
+def __getattr__(name: str) -> Any:
+    """Maintain backward compatibility for callers importing `embedder` directly."""
+    if name == "embedder":
+        return get_embedder()
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -33,13 +52,20 @@ def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return []
 
     # Validate chunk structure
+    required_fields = ("id", "text", "metadata")
     for i, chunk in enumerate(chunks):
-        if not isinstance(chunk, dict) or "text" not in chunk:
+        if not isinstance(chunk, dict):
             raise ValueError(
-                f"Invalid chunk structure at index {i}: missing 'text' field"
+                f"Invalid chunk structure at index {i}: expected dict, got {type(chunk).__name__}"
             )
+        for field in required_fields:
+            if field not in chunk:
+                raise ValueError(
+                    f"Invalid chunk structure at index {i}: missing '{field}' field"
+                )
 
     texts = [chunk["text"] for chunk in chunks]
+    embedder = get_embedder()
     embeddings = embedder.encode(texts).tolist()
 
     vectors = []
@@ -48,3 +74,4 @@ def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             {"id": chunk["id"], "values": embedding, "metadata": chunk["metadata"]}
         )
     return vectors
+
