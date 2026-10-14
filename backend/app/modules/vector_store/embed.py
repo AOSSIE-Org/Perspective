@@ -22,21 +22,25 @@ Functions:
 """
 
 
+import threading
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sentence_transformers import SentenceTransformer
 
 _embedder: Optional[Any] = None
+_embedder_lock = threading.Lock()
 
 
 def get_embedder():
     """Return the cached SentenceTransformer instance, initializing it lazily on first access."""
     global _embedder
     if _embedder is None:
-        from sentence_transformers import SentenceTransformer
+        with _embedder_lock:
+            if _embedder is None:
+                from sentence_transformers import SentenceTransformer
 
-        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+                _embedder = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedder
 
 
