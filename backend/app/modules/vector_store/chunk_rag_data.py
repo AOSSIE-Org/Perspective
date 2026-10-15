@@ -24,49 +24,83 @@ Functions:
 """
 
 
+from typing import Any, Dict, List, Mapping
 from app.utils.generate_chunk_id import generate_id
 from app.logging.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
 
-def chunk_rag_data(data):
+def chunk_rag_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Validate and transform processed article data into structured RAG vector chunks.
+
+    Args:
+        data: A dictionary containing 'cleaned_text', 'perspective', and 'facts'.
+            The 'perspective' field can be a dictionary, a Pydantic model, or an object
+            with 'perspective' and 'reasoning' attributes. The 'facts' field must be a list
+            of dictionaries or models containing 'original_claim', 'verdict', 'explanation',
+            and 'source_link'.
+
+    Returns:
+        A list of chunk dictionaries with 'id', 'text', and 'metadata'.
+
+    Raises:
+        ValueError: If input data or required fields are missing, invalid, or malformed.
+    """
     try:
+        if not isinstance(data, Mapping):
+            raise ValueError("Input data must be a dictionary or mapping")
+
         # Validate required top-level fields
         required_fields = ["cleaned_text", "perspective", "facts"]
         for field in required_fields:
-            if field not in data:
+            if field not in data or data[field] is None:
                 raise ValueError(f"Missing required field: {field}")
+
+        cleaned_text = data["cleaned_text"]
+        if not isinstance(cleaned_text, str) or not cleaned_text.strip():
+            raise ValueError("cleaned_text must be a non-empty string")
 
         if not isinstance(data["facts"], list):
             raise ValueError("Facts must be a list")
 
-        # Validate perspective structure
-        perspective_data = data["perspective"]
-        if hasattr(perspective_data, "dict"):
-            perspective_data = perspective_data.dict()
+        # Validate and extract perspective structure polymorphically
+        perspective_raw = data["perspective"]
+        if hasattr(perspective_raw, "model_dump"):
+            perspective_dict = perspective_raw.model_dump()
+        elif hasattr(perspective_raw, "dict"):
+            perspective_dict = perspective_raw.dict()
+        elif isinstance(perspective_raw, Mapping):
+            perspective_dict = perspective_raw
+        else:
+            perspective_dict = None
 
-        article_id = generate_id(data["cleaned_text"])
-        chunks = []
+        if perspective_dict is not None:
+            perspective_text = perspective_dict.get("perspective")
+            reasoning_text = perspective_dict.get("reasoning")
+        else:
+            perspective_text = getattr(perspective_raw, "perspective", None)
+            reasoning_text = getattr(perspective_raw, "reasoning", None)
+
+        if not perspective_text or not reasoning_text:
+            raise ValueError(
+                "Perspective object missing required fields: 'perspective' and 'reasoning'"
+            )
+
+        if not isinstance(perspective_text, str) or not isinstance(reasoning_text, str):
+            raise ValueError("Perspective and reasoning must be strings")
+
+        article_id = generate_id(cleaned_text)
+        chunks: List[Dict[str, Any]] = []
 
         # Add counter-perspective chunk
-        perspective_obj = data["perspective"]
-
-        # Optional safety check
-
-        if not (
-            hasattr(perspective_obj, "perspective")
-            and hasattr(perspective_obj, "reasoning")
-        ):
-            raise ValueError("Perspective object missing required fields")
-
         chunks.append(
             {
                 "id": f"{article_id}-perspective",
-                "text": perspective_obj.perspective,
+                "text": perspective_text.strip(),
                 "metadata": {
                     "type": "counter-perspective",
-                    "reasoning": perspective_obj.reasoning,
+                    "reasoning": reasoning_text.strip(),
                     "article_id": article_id,
                 },
             }
@@ -74,22 +108,31 @@ def chunk_rag_data(data):
 
         # Add each fact as a separate chunk
         for i, fact in enumerate(data["facts"]):
+            if hasattr(fact, "model_dump"):
+                fact_dict = fact.model_dump()
+            elif hasattr(fact, "dict"):
+                fact_dict = fact.dict()
+            elif isinstance(fact, Mapping):
+                fact_dict = fact
+            else:
+                raise ValueError(f"Fact at index {i} must be a dictionary or mapping")
+
             fact_fields = ["original_claim", "verdict", "explanation", "source_link"]
             for field in fact_fields:
-                if field not in fact:
+                if field not in fact_dict or fact_dict[field] is None:
                     raise ValueError(
-                        f"Missing required fact field: {field} in fact index {i}"
+                        f"Missing required fact field: '{field}' in fact index {i}"
                     )
 
             chunks.append(
                 {
                     "id": f"{article_id}-fact-{i}",
-                    "text": fact["original_claim"],
+                    "text": str(fact_dict["original_claim"]).strip(),
                     "metadata": {
                         "type": "fact",
-                        "verdict": fact["verdict"],
-                        "explanation": fact["explanation"],
-                        "source_link": fact["source_link"],
+                        "verdict": str(fact_dict["verdict"]).strip(),
+                        "explanation": str(fact_dict["explanation"]).strip(),
+                        "source_link": str(fact_dict["source_link"]).strip(),
                         "article_id": article_id,
                     },
                 }
