@@ -1,0 +1,19 @@
+name: "📖 Documentation update"
+description: "Report missing, outdated, or incorrect documentation"
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: "Affected page / section"
+      placeholder: "e.g., README.md, API guide, paragraph 3"
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: "Suggested change"
+      placeholder: "Explain what needs to be updated, added, or removed."
+    validations:
+      required: true
