@@ -2,8 +2,8 @@
 ![Perspective banner](frontend/public/perspective_banner.jpg)
 
 ### Table of Contents
-- [Perspective-AI](#perspective-ai)
-    - [Table of Contents](#table-of-contents)
+- [System Overview](#system-overview)
+  - [High-Level Concept](#high-level-concept)
   - [System Overview](#system-overview)
     - [High-Level Concept](#high-level-concept)
   - [Architecture Components](#architecture-components)
@@ -42,7 +42,7 @@ Imagine having a smart, opinionated friend who isn’t afraid to challenge your 
 
 ## Architecture Components
 
-### 1. Frontend Layer
+### 1.Frontend Layer
 - **Next.js UI**: A sleek, responsive interface that displays content alongside counter perspectives.
 
 ### 3. Core Backend
@@ -72,7 +72,7 @@ Imagine having a smart, opinionated friend who isn’t afraid to challenge your 
   - **database**: Any VectorDB
 
 
-### I Integration
+### AI Integration
 
   - **LLM**: OpenAI, Other NLP Models
   - **processing**:Context-Aware
@@ -139,7 +139,7 @@ Setup environment variables:*
   - add .env file in `/frontend`directory.
   - add following environment variable in your .env file.
 ```
-NEXT_PUBLIC_API_URL = http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ```
 
@@ -158,8 +158,7 @@ npm run dev
 *Install uv:*
 - install **uv** from [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
 
-
-*Setup environment variables:*
+**Setup environment variables:**
   - add .env file in `/backend`directory.
   - add following environment variable in your .env file.
   ```
@@ -205,7 +204,7 @@ graph TB
     subgraph AI & NLP Layer
         style LLM fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
         style LangChain fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
-        style Langgraph fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
+        style LangGraph fill:#E6FFCC,stroke:#66BB66,stroke-width:2px,color:#000,font-weight:bold
         LLM[LLM Service]
         LangChain[LangChain]
         Langgraph[Langgraph]
