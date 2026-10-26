@@ -29,9 +29,8 @@ Core Components:
     - ask_llm: Generates a natural language answer using retrieved context.
 """
 
-
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
 from app.modules.bias_detection.check_bias import check_bias
@@ -47,11 +46,44 @@ router = APIRouter()
 
 
 class URlRequest(BaseModel):
-    url: str
+    """
+    Request model for endpoints that accept an article URL.
+
+    Attributes:
+        url (HttpUrl): Valid HTTP or HTTPS URL of the article to process.
+    """
+
+    url: HttpUrl
 
 
 class ChatQuery(BaseModel):
-    message: str
+    """
+    Request model for the chat endpoint.
+
+    Attributes:
+        message (str): Non-empty user query or message for RAG search.
+    """
+
+    message: str = Field(..., min_length=1)
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        """
+        Validates that the query message contains non-whitespace characters.
+
+        Args:
+            v (str): Input message string.
+
+        Returns:
+            str: Trimmed message string.
+
+        Raises:
+            ValueError: If the message is empty or whitespace-only.
+        """
+        if not v.strip():
+            raise ValueError("Message cannot be empty or whitespace")
+        return v.strip()
 
 
 @router.get("/")
@@ -61,17 +93,19 @@ async def home():
 
 @router.post("/bias")
 async def bias_detection(request: URlRequest):
-    content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    bias_score = await asyncio.to_thread(check_bias, (content))
+    content = await asyncio.to_thread(run_scraper_pipeline, str(request.url))
+    bias_score = await asyncio.to_thread(check_bias, content)
     logger.info(f"Bias detection result: {bias_score}")
     return bias_score
 
 
 @router.post("/process")
 async def run_pipelines(request: URlRequest):
-    article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
-    logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
-    data = await asyncio.to_thread(run_langgraph_workflow, (article_text))
+    article_text = await asyncio.to_thread(run_scraper_pipeline, str(request.url))
+    logger.debug(
+        f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}"
+    )
+    data = await asyncio.to_thread(run_langgraph_workflow, article_text)
     return data
 
 
