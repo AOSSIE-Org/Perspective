@@ -17,13 +17,13 @@
 
 | Category           | Met | N/A | Total (Applicable) | Status |
 |--------------------|-----|-----|--------------------|--------|
-| Basics             | 8   | 0   | 8                  | 🟢     |
+| Basics             | 7   | 0   | 8                  | 🟡     |
 | Change Control     | 1   | 5   | 1 (6)              | 🟢     |
 | Reporting          | 7   | 1   | 7 (8)              | 🟢     |
-| Quality            | 11  | 0   | 11                 | 🟢     |
+| Quality            | 9   | 0   | 11                 | 🟡     |
 | Security           | 3   | 6   | 3 (9)              | 🟢     |
-| Analysis           | 5   | 2   | 5 (7)              | 🟢     |
-| **Total**          | **35** | **14** | **35 (49)**    | **100.0%** |
+| Analysis           | 4   | 2   | 5 (7)              | 🟡     |
+| **Total**          | **31** | **14** | **35 (49)**    | **88.6%** |
 
 *N/A items are excluded from the denominator.*
 
@@ -43,13 +43,13 @@
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md
 
 - [x] 🟡 **contribution_requirements** — `CONTRIBUTING.md` references acceptable contribution standards (coding style, tests required, etc.).
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-code-style--architecture
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#️-code-style--architecture
 
 - [x] 🔴 **documentation_basics** — Basic documentation exists for the software (README, Wiki, or docs folder).
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective#readme
 
-- [x] 🔴 **documentation_interface** — Reference documentation describes the external interface (API inputs/outputs, CLI flags, config schema, etc.).
-  - *Note:* The backend REST API (`/api/process`, `/api/bias`, `/api/chat`) and the frontend configuration (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`) are documented in [README](https://github.com/AOSSIE-Org/Perspective#readme) and [AGENTS.md](https://github.com/AOSSIE-Org/Perspective/blob/main/AGENTS.md).
+- [ ] 🔴 **documentation_interface** — Reference documentation describes the external interface (API inputs/outputs, CLI flags, config schema, etc.).
+  - *Not met yet:* the frontend configuration (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`) is documented in the [README](https://github.com/AOSSIE-Org/Perspective#readme) and `frontend/.env.example`, but the request and response shapes of the backend endpoints (`/api/process`, `/api/bias`, `/api/chat`) are not documented yet.
 
 ### Other Basics
 
@@ -85,7 +85,7 @@
   - *Note:* `[~]` N/A: continuously deployed website from `main`; there are no versioned releases to number or tag. Change history is the merged PR list.
 
 - [-] 🔴 **release_notes_vulns** — Release notes identify every publicly known vulnerability (with CVE) fixed in that release.
-  - *Note:* `[~]` N/A: no publicly known vulnerabilities have been reported or fixed.
+  - *Note:* `[~]` N/A: continuously deployed from `main`; there are no versioned releases or release notes. Security fixes (e.g. dependency CVEs) are described in the PR that ships them.
 
 ---
 
@@ -139,19 +139,21 @@
 - [x] 🔵 **test_invocation** — The test suite can be invoked in a standard way. *(SUGGESTED)*
   - *Evidence URL:* `npm test` / `npm run test:coverage` in `frontend/` (https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/package.json)
 
-- [x] 🔵 **test_most** — The test suite covers most code branches and functionality. *(SUGGESTED)*
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/vitest.config.mts (90% line/branch/function thresholds on logic modules, enforced in CI)
+- [ ] 🔵 **test_most** — The test suite covers most code branches and functionality. *(SUGGESTED)*
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/vitest.config.mts (90% line/branch/function thresholds, enforced in CI, on the frontend config, metadata, sitemap and `lib/`)
+  - *Not met yet:* the frontend pages and components and the whole backend have no automated tests.
 
 ### New Functionality Testing Policy
 
-- [x] 🔴 **test_policy** — The project has a general policy that new functionality must include tests in the automated test suite.
+- [ ] 🔴 **test_policy** — The project has a general policy that new functionality must include tests in the automated test suite.
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-pull-request-guidelines
+  - *Not met yet:* CONTRIBUTING.md requires tests only for changes to `frontend/config/`, `frontend/i18n/metadata.ts`, `frontend/app/sitemap.ts` and `frontend/lib/`, not for all new functionality.
 
 - [x] 🔴 **tests_are_added** — Evidence exists that the test policy has been followed in recent major changes.
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/tree/main/frontend/tests
 
 - [x] 🔵 **tests_documented_added** — The test policy is documented in contribution instructions. *(SUGGESTED)*
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-pull-request-guidelines
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-pull-request-guidelines (for the frontend logic modules listed there)
 
 ### Linting / Warning Flags
 
@@ -159,7 +161,7 @@
   - *Tool used:* ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit` in CI for the frontend; Ruff via CodeRabbit for the backend.
 
 - [x] 🔴 **warnings_fixed** — Warnings from the linter are addressed.
-  - *Note:* Frontend lint, type-check, tests and build run in CI on every PR without warnings. The build no longer sets `ignoreBuildErrors` / `ignoreDuringBuilds`.
+  - *Note:* Frontend lint, type-check, tests and build run in CI, without warnings, on every PR and push to `main` that changes `frontend/`. The build no longer sets `ignoreBuildErrors` / `ignoreDuringBuilds`.
 
 - [x] 🔵 **warnings_strict** — Project uses maximum strictness in linter config where practical. *(SUGGESTED)*
   - *Note:* Next.js recommended + core-web-vitals rule sets; type errors fail the build.
@@ -171,7 +173,7 @@
 ### Secure Development Knowledge
 
 - [x] 🔴 **know_secure_design** — Primary developer knows how to design secure software.
-  - *Self-certification note:* Frontend is a static export with no cookies; the backend keeps API keys in environment secrets and does not store submitted URLs or analyses.
+  - *Self-certification note:* Frontend is a static export with no cookies, and the backend keeps API keys in environment secrets. The backend logs submitted article URLs, and when vector storage succeeds it sends embeddings of the analysis with their metadata to Pinecone.
 
 - [x] 🔴 **know_common_errors** — Primary developer knows common vulnerability types (XSS, CSRF, SSRF) and mitigations.
   - *Self-certification note:* Article text and LLM output are rendered as escaped React text (no `dangerouslySetInnerHTML`); SSRF and prompt-injection risks of the URL input are tracked in the CodeRabbit backend rules; dependencies are pinned via `package-lock.json` and `uv.lock`.
@@ -212,12 +214,12 @@
   - *Tool + ruleset:* CodeRabbit security review (https://github.com/AOSSIE-Org/Perspective/blob/main/.coderabbit.yaml) and OpenSSF Scorecard (https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/scorecard.yml).
 
 - [x] 🔵 **static_analysis_often** — Static analysis runs on every commit or at least daily. *(SUGGESTED)*
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/frontend-ci.yml (ESLint on every PR and push to main)
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/frontend-ci.yml (ESLint on PRs and pushes to `main` that change `frontend/`); CodeRabbit reviews every PR
 
 ### Dynamic Code Analysis
 
-- [x] 🔵 **dynamic_analysis** — Dynamic analysis applied before major releases. *(SUGGESTED)*
-  - *Tool used:* Lighthouse (performance, accessibility, best practices, SEO) on the deployed site.
+- [ ] 🔵 **dynamic_analysis** — Dynamic analysis applied before major releases. *(SUGGESTED)*
+  - *Not met yet:* no fuzzer or input-varying scanner runs before deploys, and branch coverage above 80% is only measured on the scoped frontend modules (see `test_most`). Lighthouse audits are run on the deployed site, but they do not vary inputs.
 
 - [x] 🔵 **dynamic_analysis_enable_assertions** — Dynamic analysis runs with assertions enabled. *(SUGGESTED)*
   - *Note:* Vitest executes hooks and modules in jsdom with React's development build, so runtime invariant checks are active.

@@ -110,15 +110,17 @@ reviews:
     - label: CI/CD
       instructions: Apply when files in `.github/workflows/` are updated
 
-  instructions: >-
-    - Perspective is AOSSIE's AI tool against echo chambers: the user submits an article URL, the FastAPI + LangGraph backend scrapes it, scores bias and generates fact-checked counter-perspectives, and the Next.js frontend (static export on GitHub Pages) shows the results.
-    - Verify that documentation and comments are free of spelling mistakes
-    - Verify that new frontend logic is covered by tests and that the 90% coverage threshold in frontend/vitest.config.mts still holds
-    - Point out redundant comments that do not add clarity to the code
-    - Look for code duplication
-    - Flag any TODO or FIXME left in code or docs (the project follows a zero-TODO policy)
-
   path_instructions:
+    # Review instructions that apply to all files
+    - path: "**/*"
+      instructions: |
+        - Perspective is AOSSIE's AI tool against echo chambers: the user submits an article URL, the FastAPI + LangGraph backend scrapes it, scores bias and generates fact-checked counter-perspectives, and the Next.js frontend (static export on GitHub Pages) shows the results.
+        - Verify that documentation and comments are free of spelling mistakes
+        - Verify that new frontend logic is covered by tests and that the 90% coverage threshold in frontend/vitest.config.mts still holds
+        - Point out redundant comments that do not add clarity to the code
+        - Look for code duplication
+        - Flag any TODO or FIXME left in code or docs (the project follows a zero-TODO policy)
+
     - path: "frontend/**/*.{ts,tsx}"
       instructions: |
         Next.js App Router (static export):

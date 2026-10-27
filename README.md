@@ -186,7 +186,7 @@ npm test                # run the Vitest suite once
 npm run test:coverage   # with coverage; fails below 90% (same as CI)
 ```
 
-Tests in [`frontend/tests/`](frontend/tests/) cover the backend API config, SEO metadata, the sitemap, translation-catalog parity and the integrity of the curated preset topics, including [fast-check](https://fast-check.dev) property tests. CI ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) runs lint, type-check, tests and build on every PR.
+Tests in [`frontend/tests/`](frontend/tests/) cover the backend API config, SEO metadata, the sitemap, translation-catalog parity and the integrity of the curated preset topics, including [fast-check](https://fast-check.dev) property tests. CI ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) runs lint, type-check, tests and build on pull requests and pushes to `main` that change `frontend/` or the workflow itself.
 
 ### Building & Deploying the Frontend
 
@@ -198,7 +198,7 @@ npm run build      # writes static HTML to frontend/out
 npx serve out      # preview locally
 ```
 
-[`deploy-frontend-pages.yml`](.github/workflows/deploy-frontend-pages.yml) deploys `frontend/out` to GitHub Pages on every push to `main`. Set the repository variables `NEXT_PUBLIC_SITE_URL` (planned: `https://perspective.aossie.org`) and `NEXT_PUBLIC_API_URL` to override the defaults. The backend is deployed to Hugging Face Spaces by [`deploy-backend-to-hf.yml`](.github/workflows/deploy-backend-to-hf.yml).
+[`deploy-frontend-pages.yml`](.github/workflows/deploy-frontend-pages.yml) deploys `frontend/out` to GitHub Pages on pushes to `main` that change `frontend/` or the workflow itself (it can also be run manually). Set the repository variables `NEXT_PUBLIC_SITE_URL` (planned: `https://perspective.aossie.org`) and `NEXT_PUBLIC_API_URL` to override the defaults. The backend is deployed to Hugging Face Spaces by [`deploy-backend-to-hf.yml`](.github/workflows/deploy-backend-to-hf.yml).
 
 ---
 
