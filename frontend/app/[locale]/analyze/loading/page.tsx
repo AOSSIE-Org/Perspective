@@ -5,8 +5,8 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Globe, Brain, Shield, CheckCircle, Database, Zap } from "lucide-react";
 import axios from "axios";
+import { apiUrl, API_TIMEOUT_MS } from "@/config/api";
 
-const BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "https://thunder1245-perspective-backend.hf.space";
 
 export default function LoadingPage() {
   const t = useTranslations("AnalyzeLoading");
@@ -55,8 +55,8 @@ export default function LoadingPage() {
 
       try {
         const [processRes, biasRes] = await Promise.all([
-          axios.post(`${BACKEND_BASE}/api/process`, { url: storedUrl }, { timeout: 90000 }),
-          axios.post(`${BACKEND_BASE}/api/bias`, { url: storedUrl }, { timeout: 90000 }),
+          axios.post(apiUrl("process"), { url: storedUrl }, { timeout: API_TIMEOUT_MS.analysis }),
+          axios.post(apiUrl("bias"), { url: storedUrl }, { timeout: API_TIMEOUT_MS.analysis }),
         ]);
 
         if (cancelled) return;
