@@ -12,7 +12,8 @@ Perspective is an AI-powered platform by AOSSIE designed to combat echo chambers
 
 - **Frontend:** Next.js 15 App Router, React 19, Tailwind CSS v3/v4, `next-intl` (i18n & l10n), `next-themes` (light/dark state manager), `cobe` (3D interactive globe), `motion`.
 - **Backend:** FastAPI, Python 3.13, LangGraph, LangChain, Groq SDK (LLaMA 3.3), Pinecone Vector DB, Sentence Transformers (`all-MiniLM-L6-v2`), `uv` package manager.
-- **Frontend Build:** `npm run build` (inside `frontend/`)
+- **Frontend Build:** `npm run build` (inside `frontend/`; static export to `frontend/out`, deployed to GitHub Pages)
+- **Frontend Lint / Types / Tests:** `npm run lint`, `npx tsc --noEmit`, `npm run test:coverage` (90% threshold on `config/`, `i18n/metadata.ts`, `app/sitemap.ts`, `lib/`; enforced in CI)
 - **Frontend Develop:** `npm run dev` (inside `frontend/`)
 - **Backend Develop:** `uv run main.py` (inside `backend/`)
 
@@ -41,3 +42,6 @@ Perspective is an AI-powered platform by AOSSIE designed to combat echo chambers
 
 - **Config Alias Map:** `"next-intl/config"` is mapped to local request setup inside [`frontend/next.config.mjs`](frontend/next.config.mjs) using `createNextIntlPlugin('./i18n/request.ts')`.
 - **Branding Assets:** Official branding logo, favicon, and style specifications reside inside [`frontend/public/brand/`](frontend/public/brand/).
+- **Static export:** no server-only features in the frontend (`redirects()`, route handlers, cookies, middleware). The bare `/` and `/[locale]/analyze` forward with `<meta http-equiv="refresh">`.
+- **No magic constants:** backend URL, endpoints and timeouts live in [`frontend/config/api.ts`](frontend/config/api.ts); site URL, public pages and the 1200x630 OG image in [`frontend/config/site.ts`](frontend/config/site.ts).
+- **Metadata:** use `generateLocaleMetadata()` / `generatePageMetadata()` from [`frontend/i18n/metadata.ts`](frontend/i18n/metadata.ts); titles and descriptions come from the `Metadata`, `About` and `Contribute` catalog entries.

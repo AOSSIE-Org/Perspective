@@ -1,4 +1,8 @@
 {
+  "Metadata": {
+    "title": "Perspective AI – See the other side of every story",
+    "description": "AI analyzes the content you read and instantly shows credible counter-perspectives so you can think critically and understand the full picture."
+  },
   "Common": {
     "getPerspective": "Get Perspective"
   },

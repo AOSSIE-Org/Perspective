@@ -1,0 +1,155 @@
+# Enables IDE autocompletion for this config file
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# Language for CodeRabbit's review comments
+language: en
+
+# Enable experimental features (currently not using any specific early_access features)
+early_access: true
+
+chat:
+  # CodeRabbit will automatically respond to @coderabbitai mentions in PR comments
+  auto_reply: true
+
+reviews:
+  profile: assertive # Options: chill (focuses on significant issues, less nitpicky about style), assertive (more thorough, flags style issues and minor improvements too)
+
+  auto_review:
+    # Automatically trigger reviews when PRs are opened or updated
+    enabled: true
+    # Skip auto-review if PR title contains these keywords
+    ignore_title_keywords:
+      - "WIP"
+    # Don't auto-review draft PRs
+    drafts: false
+    # Only auto-review PRs targeting these branches
+    base_branches:
+      - main
+      - develop
+
+  # Include a high-level summary at the start of each review
+  high_level_summary: true
+
+  # Generate sequence diagrams for complex code flows
+  sequence_diagrams: true
+
+  # Include poems in reviews
+  poem: true
+
+  # Show review completion status
+  review_status: true
+
+  # Keep the walkthrough section expanded by default
+  collapse_walkthrough: false
+
+  # Include summary of all changed files
+  changed_files_summary: true
+
+  # Automatically request changes on the PR (just leave comments)
+  request_changes_workflow: true
+
+  # Pre-merge checks to enforce before merging PRs
+  pre_merge_checks:
+    description:
+      # Validate that PR has a proper description
+      mode: warning # Options: off, warning, error
+    docstrings:
+      # Disable docstring coverage checks (let's assume we don't need them)
+      mode: off
+
+  # Exclude generated output and dependencies from reviews
+  path_filters:
+    - "!**/node_modules/**"
+    - "!frontend/.next/**"
+    - "!frontend/out/**"
+    - "!**/coverage/**"
+    - "!backend/.venv/**"
+    - "!backend/.uv-cache/**"
+    - "!**/__pycache__/**"
+    - "!backend/uv.lock"
+    - "!**/*.log"
+
+  tools:
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    languagetool:
+      enabled: true
+      enabled_only: false
+      level: default
+    biome:
+      enabled: true
+    hadolint:
+      enabled: true
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    eslint:
+      enabled: true
+
+  labeling_instructions:
+    - label: Frontend
+      instructions: Apply when the PR changes files in `frontend/`
+    - label: Backend
+      instructions: Apply when the PR changes files in `backend/`
+    - label: AI Pipeline
+      instructions: Apply when the PR changes LangGraph nodes, prompts, or the RAG / vector-store logic in `backend/app/modules/`
+    - label: i18n
+      instructions: Apply when the PR changes `frontend/messages/*.json` or `frontend/i18n/`
+    - label: Tests
+      instructions: Apply when the PR adds or modifies tests or test configuration
+    - label: Documentation
+      instructions: Apply whenever markdown documentation is updated
+    - label: CI/CD
+      instructions: Apply when files in `.github/workflows/` are updated
+
+  path_instructions:
+    # Review instructions that apply to all files
+    - path: "**/*"
+      instructions: |
+        - Perspective is AOSSIE's AI tool against echo chambers: the user submits an article URL, the FastAPI + LangGraph backend scrapes it, scores bias and generates fact-checked counter-perspectives, and the Next.js frontend (static export on GitHub Pages) shows the results.
+        - Verify that documentation and comments are free of spelling mistakes
+        - Verify that new frontend logic is covered by tests and that the 90% coverage threshold in frontend/vitest.config.mts still holds
+        - Point out redundant comments that do not add clarity to the code
+        - Look for code duplication
+        - Flag any TODO or FIXME left in code or docs (the project follows a zero-TODO policy)
+
+    - path: "frontend/**/*.{ts,tsx}"
+      instructions: |
+        Next.js App Router (static export):
+        - Server Components by default; "use client" only for interactive components or browser APIs.
+        - No server-only features (`redirects()`, route handlers, cookies, headers, middleware); the site is deployed as static HTML.
+        - Layout and page params are Promises: always `await params`.
+        - Import Link, useRouter and usePathname from `@/i18n/navigation`.
+        - The backend URL, endpoints and timeouts come from `@/config/api` (`apiUrl()`, `API_TIMEOUT_MS`); never hard-code them.
+        - Every user-visible string must exist in both `frontend/messages/en.json` and `frontend/messages/hi.json`.
+        - Use the semantic tokens (`bg-background`, `text-foreground`, `bg-card`); no inline `dark:` utilities.
+        - Treat article text and LLM output from the API as untrusted: never render it with `dangerouslySetInnerHTML`.
+
+    - path: "frontend/messages/*.json"
+      instructions: |
+        - Keys and ICU placeholders must match exactly between `en.json` and `hi.json` (enforced by frontend/tests/messages.test.ts).
+
+    - path: "frontend/tests/**/*.{ts,tsx}"
+      instructions: |
+        - Tests use Vitest and fast-check. Ensure they are non-trivial and non-tautological, and use property tests for large input spaces.
+
+    - path: "backend/**/*.py"
+      instructions: |
+        - Follow PEP 8 and type-hint public functions.
+        - Never log or return API keys; read secrets only from environment variables.
+        - The article URL is user input: validate the scheme (http/https only) and guard against SSRF to internal addresses.
+        - Treat scraped article text as untrusted input to LLM prompts (prompt injection); keep system instructions separate from article content.
+        - Network calls to Groq, Pinecone and search providers need timeouts and error handling.
+
+    - path: ".github/workflows/**"
+      instructions: |
+        - Workflows must request least-privilege `permissions`.
+        - The Pages deploy must not use `static_site_generator: next`; it overwrites next.config.mjs.

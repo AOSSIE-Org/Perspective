@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, MessageSquare, Shield, CheckCircle2, Sparkles, ExternalLink, Send } from "lucide-react";
 import BiasMeter from "@/components/bias-meter";
 import axios from "axios";
+import { apiUrl, API_TIMEOUT_MS } from "@/config/api";
 
-const BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "https://thunder1245-perspective-backend.hf.space";
 
 interface FactItem {
   claim?: string;
@@ -91,9 +91,9 @@ export default function ResultsPage() {
 
     try {
       const res = await axios.post(
-        `${BACKEND_BASE}/api/chat`,
+        apiUrl("chat"),
         { message: userMsg },
-        { timeout: 30000 }
+        { timeout: API_TIMEOUT_MS.chat }
       );
       setMessages([...updated, { role: "assistant", content: res.data.answer }]);
     } catch {

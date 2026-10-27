@@ -10,7 +10,8 @@ This document lists the individuals fulfilling the key roles of [Maintainer](htt
 | ---- | --------------- | ---------------- | ------------ |
 | Manav Sarkar | [@ManavSarkar](https://github.com/ManavSarkar) | @manavsarkar | Project Guidance & Architecture |
 | Pranavi Tadivalasa | [@pranavitadivalasa](https://github.com/pranavitadivalasa) | @pranavit | Backend Architecture & LangGraph Review |
-| Bruno | [@bruno](https://github.com/bruno) | @bruno | Project Oversight & Coordination |
+| Bruno | [@Zahnentferner](https://github.com/Zahnentferner) | @b.wp | Project Oversight & Coordination |
+| Madhav | [@M4dhav](https://github.com/M4dhav) | @m4dhav | Architecture, Code Quality & PR Reviews |
 
 ## Contributors & Maintainers
 

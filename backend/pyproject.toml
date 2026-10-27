@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Perspective backend: FastAPI + LangGraph pipeline that scrapes an article, detects bias and generates fact-checked counter-perspectives."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

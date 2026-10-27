@@ -4,21 +4,8 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/:locale/analyze',
-        destination: '/:locale',
-        permanent: false,
-      },
-    ];
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // Static HTML export for GitHub Pages; the app talks to the FastAPI backend from the browser.
+  output: 'export',
   images: {
     unoptimized: true,
   },

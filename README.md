@@ -1,6 +1,8 @@
 # Perspective-AI
 ![Perspective banner](frontend/public/perspective_banner.jpg)
 
+[![Frontend CI](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml) [![Deploy frontend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml) [![Deploy backend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AOSSIE-Org/Perspective/badge)](https://scorecard.dev/viewer/?uri=github.com/AOSSIE-Org/Perspective)
+
 ### Table of Contents
 - [Perspective-AI](#perspective-ai)
     - [Table of Contents](#table-of-contents)
@@ -14,7 +16,7 @@
   - [Technical Stack](#technical-stack)
     - [Frontend Technologies](#frontend-technologies)
     - [Backend Technologies](#backend-technologies)
-    - [I Integration](#i-integration)
+    - [AI Integration](#ai-integration)
   - [Core Features](#core-features)
     - [1. Counter-Perspective Generation](#1-counter-perspective-generation)
     - [2. Reasoned Thinking](#2-reasoned-thinking)
@@ -25,6 +27,8 @@
   - [Setup \& Deployment](#setup--deployment)
     - [Frontend Setup](#frontend-setup)
     - [Backend Setup](#backend-setup)
+    - [Testing](#testing)
+    - [Building & Deploying the Frontend](#building--deploying-the-frontend)
   - [Architecture Diagram](#architecture-diagram)
   - [Expected Outcomes](#expected-outcomes)
   - [Required Skills](#required-skills)
@@ -72,7 +76,7 @@ Imagine having a smart, opinionated friend who isn’t afraid to challenge your 
   - **database**: Any VectorDB
 
 
-### I Integration
+### AI Integration
 
   - **LLM**: OpenAI, Other NLP Models
   - **processing**:Context-Aware
@@ -135,12 +139,11 @@ sequenceDiagram
 
 ### Frontend Setup
 
-Setup environment variables:*
-  - add .env file in `/frontend`directory.
-  - add following environment variable in your .env file.
+*Setup environment variables (optional):*
+  - copy `frontend/.env.example` to `frontend/.env.local` (git-ignored).
+  - `NEXT_PUBLIC_API_URL` points the frontend at a backend (default: the hosted Hugging Face Space, see `frontend/config/api.ts`).
 ```
-NEXT_PUBLIC_API_URL = http://localhost:8000
-
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 ```bash
@@ -158,9 +161,8 @@ npm run dev
 *Install uv:*
 - install **uv** from [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
 
-
-*Setup environment variables:*
-  - add .env file in `/backend`directory.
+**Setup environment variables:**
+  - copy `backend/.env.example` to `backend/.env`, or add a `.env` file in the `backend/` directory.
   - add following environment variable in your .env file.
   ```
 GROQ_API_KEY= <groq_api_key>
@@ -175,6 +177,28 @@ cd backend
 uv sync # Creating virtual environment at: .venv
 uv run main.py #Runs the backend server
 ```
+
+### Testing
+
+```bash
+cd frontend
+npm test                # run the Vitest suite once
+npm run test:coverage   # with coverage; fails below 90% (same as CI)
+```
+
+Tests in [`frontend/tests/`](frontend/tests/) cover the backend API config, SEO metadata, the sitemap, translation-catalog parity and the integrity of the curated preset topics, including [fast-check](https://fast-check.dev) property tests. CI ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) runs lint, type-check, tests and build on pull requests and pushes to `main` that change `frontend/` or the workflow itself.
+
+### Building & Deploying the Frontend
+
+The frontend is a static export (`output: "export"`), so it can be hosted on GitHub Pages:
+
+```bash
+cd frontend
+npm run build      # writes static HTML to frontend/out
+npx serve out      # preview locally
+```
+
+[`deploy-frontend-pages.yml`](.github/workflows/deploy-frontend-pages.yml) deploys `frontend/out` to GitHub Pages on pushes to `main` that change `frontend/` or the workflow itself (it can also be run manually). Set the repository variables `NEXT_PUBLIC_SITE_URL` (planned: `https://perspective.aossie.org`) and `NEXT_PUBLIC_API_URL` to override the defaults. The backend is deployed to Hugging Face Spaces by [`deploy-backend-to-hf.yml`](.github/workflows/deploy-backend-to-hf.yml).
 
 ---
 

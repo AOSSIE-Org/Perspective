@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { messagesMap, defaultMessages } from "@/i18n/messages";
+import { generateLocaleMetadata, generateStructuredData, serializeJsonLd } from "@/i18n/metadata";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { MarqueeTicker } from "@/components/marquee-ticker";
@@ -36,15 +37,7 @@ export async function generateMetadata({
     notFound();
   }
   setRequestLocale(locale);
-
-  return {
-    title: "Perspective AI",
-    description:
-      "AI analyzes the content you read and instantly shows credible counter-perspectives so you can think critically and understand the full picture.",
-    icons: {
-      icon: "/favicon.ico",
-    },
-  };
+  return generateLocaleMetadata(locale);
 }
 
 export default async function LocaleLayout({
@@ -67,6 +60,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${inter.variable} h-full overflow-hidden antialiased`} suppressHydrationWarning>
       <body className="h-full max-h-[100dvh] w-full overflow-hidden bg-background text-foreground transition-colors selection:bg-primary/20 selection:text-primary">
+        <script
+          type="application/ld+json"
+          // Static, build-time data serialized with "<" escaped (see serializeJsonLd)
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateStructuredData(locale)) }}
+        />
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <NavigationProgress />

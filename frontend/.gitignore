@@ -18,6 +18,7 @@ yarn-error.log*
 
 # env files
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -25,3 +26,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# test coverage reports
+/coverage/

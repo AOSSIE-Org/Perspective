@@ -6,11 +6,10 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link as LinkIcon, ExternalLink } from "lucide-react";
 import axios from "axios";
+import { apiUrl, API_TIMEOUT_MS } from "@/config/api";
 import { PresetTopics, type PresetTopic } from "@/components/preset-topics";
 import { GetPerspectiveButton } from "@/components/get-perspective-button";
 
-const BACKEND_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://thunder1245-perspective-backend.hf.space";
 
 const Globe = dynamic(() => import("@/components/globe").then((m) => m.Globe), {
   ssr: false,
@@ -187,8 +186,8 @@ export default function HomePage() {
 
     try {
       const [processRes, biasRes] = await Promise.all([
-        axios.post(`${BACKEND_BASE}/api/process`, { url: targetUrl }, { timeout: 90000 }),
-        axios.post(`${BACKEND_BASE}/api/bias`, { url: targetUrl }, { timeout: 90000 }),
+        axios.post(apiUrl("process"), { url: targetUrl }, { timeout: API_TIMEOUT_MS.analysis }),
+        axios.post(apiUrl("bias"), { url: targetUrl }, { timeout: API_TIMEOUT_MS.analysis }),
       ]);
 
       sessionStorage.setItem("BiasScore", JSON.stringify(biasRes.data));
