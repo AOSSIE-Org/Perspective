@@ -15,7 +15,6 @@ dependencies = [
     "langchain-community>=0.3.25",
     "langchain-groq>=0.3.2",
     "langgraph>=0.4.8",
-    "logging>=0.4.9.6",
     "newspaper3k>=0.2.8",
     "nltk>=3.9.1",
     "pinecone>=7.3.0",
