@@ -7,7 +7,9 @@ def test_keeps_sentences_that_contain_boilerplate_words():
         "Readers asked about using the new tool in newsrooms around the world.\n"
         "The photo by the river showed how far the water had risen overnight.\n"
         "Officials said the advertisement campaign would run until the end of May.\n"
-        "About using the app offline, the team said support is still being planned."
+        "About using the app offline, the team said support is still being planned.\n"
+        "Read more atomic physics books if you want to understand the subject.\n"
+        "Advertisement spending increased across the country last year."
     )
 
     assert clean_extracted_text(text) == text.replace("\n", "\n\n")

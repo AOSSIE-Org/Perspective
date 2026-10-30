@@ -59,7 +59,7 @@ def clean_extracted_text(text: str):
         r"about us",
         r"contact us",
         r"share this article",
-        r"sign up for our newsletter",
+        r"sign up for our newsletter.*",
         r"report this ad",
         r"this story was originally published.*",
         r"originally appeared on.*",
@@ -90,13 +90,21 @@ def clean_extracted_text(text: str):
         r"powered by .*",
     ]
     for pattern in boilerplate_phrases:
-        # Only drop lines that start with a boilerplate phrase. Matching the
-        # phrases anywhere also cut them out of article sentences, and the
-        # patterns ending in ".*" removed the rest of the sentence after them
-        # (for example "an engine powered by hydrogen ...").
-        text = re.sub(
-            r"^[ \t]*(?:" + pattern + r")\b.*$", "", text, flags=re.IGNORECASE | re.MULTILINE
-        )
+        # Only drop whole boilerplate lines. Matching the phrases anywhere also
+        # cut them out of article sentences (for example "an engine powered by
+        # hydrogen ..."). A phrase ending in ".*" marks a line that starts with
+        # it, like "Read more at ...". Other phrases, like "advertisement",
+        # only match a line with nothing else on it, so a sentence that starts
+        # with one of them is kept.
+        if pattern.endswith(".*"):
+            phrase = pattern.removesuffix(".*")
+            # Without a boundary after the phrase, "read more at" would also
+            # match "Read more atomic ...".
+            boundary = r"\b" if phrase[-1:].isalnum() else ""
+            line_pattern = r"^[ \t]*(?:" + phrase + ")" + boundary + r".*$"
+        else:
+            line_pattern = r"^[ \t]*(?:" + pattern + r")[ \t]*[.!:]?[ \t]*$"
+        text = re.sub(line_pattern, "", text, flags=re.IGNORECASE | re.MULTILINE)
 
     # 3. Remove lines with too few characters (likely junk)
     lines = text.split("\n")
