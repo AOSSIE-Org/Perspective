@@ -90,7 +90,13 @@ def clean_extracted_text(text: str):
         r"powered by .*",
     ]
     for pattern in boilerplate_phrases:
-        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
+        # Only drop lines that start with a boilerplate phrase. Matching the
+        # phrases anywhere also cut them out of article sentences, and the
+        # patterns ending in ".*" removed the rest of the sentence after them
+        # (for example "an engine powered by hydrogen ...").
+        text = re.sub(
+            r"^[ \t]*(?:" + pattern + r")\b.*$", "", text, flags=re.IGNORECASE | re.MULTILINE
+        )
 
     # 3. Remove lines with too few characters (likely junk)
     lines = text.split("\n")
