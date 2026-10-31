@@ -21,6 +21,8 @@ def test_removes_boilerplate_lines():
         "Read more at example.com about the city council and its members\n"
         "Sign up for our newsletter to get the latest stories every morning\n"
         "© 2026 Example News Network, a part of Example Media Group\n"
+        "\u00a0Read more at example.com for more information about the budget\n"
+        "Privacy Policy | Terms of Service | Contact Us | About Us\n"
         "Residents will see the changes in their bills starting next month."
     )
 
