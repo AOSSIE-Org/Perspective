@@ -12,7 +12,8 @@
     "impact": "प्रभाव",
     "contribute": "योगदान",
     "about": "हमारे बारे में",
-    "getPerspective": "Perspective AI"
+    "getPerspective": "Perspective AI",
+    "support": "समर्थन करें"
   },
   "Hero": {
     "broughtToYouBy": "प्रस्तुतकर्ता",
@@ -26,6 +27,7 @@
     "noUrlError": "कृपया दृष्टिकोण प्राप्त करने के लिए एक मान्य लेख URL दर्ज करें या चुनें।",
     "invalidUrlError": "कृपया एक मान्य वेब यूआरएल दर्ज करें (उदा. https://example.com/article)",
     "noSignInRequired": "साइन इन की आवश्यकता नहीं है। यह पूरी तरह से मुफ़्त है।",
+    "legalNotice": "किसी लेख का विश्लेषण करके, आप हमारी <terms>सेवा की शर्तों</terms> और <privacy>गोपनीयता नीति</privacy> से सहमत होते हैं।",
     "fetchingArticle": "लेख लोड हो रहा है...",
     "analysing": "विश्लेषण जारी है...",
     "detectingBias": "पूर्वाग्रह की पहचान...",
@@ -131,6 +133,33 @@
     "step5Desc": "पाइनकोन में डेटा सुरक्षित करके इंटरैक्टिव प्रश्नोत्तरी सक्षम बनाता है।",
     "clickToAdvance": "अगली क्षमता देखने के लिए क्लिक करें",
     "footer": "© 2026 AOSSIE. एआई-संचालित दृष्टिकोण विश्लेषण के माध्यम से पूर्वाग्रह से मुकाबला।"
+  },
+  "Privacy": {
+    "title": "गोपनीयता नीति",
+    "description": "Perspective आपकी जानकारी को कैसे संभालता है।"
+  },
+  "Terms": {
+    "title": "सेवा की शर्तें",
+    "description": "Perspective के उपयोग की शर्तें।"
+  },
+  "Legal": {
+    "englishOnly": "यह दस्तावेज़ केवल अंग्रेज़ी में उपलब्ध है।"
+  },
+  "Share": {
+    "trigger": "यह पेज शेयर करें",
+    "share": "शेयर करें",
+    "close": "बंद करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "copyFailed": "विफल",
+    "urlLabel": "शेयर करने का URL"
+  },
+  "Support": {
+    "title": "Perspective का समर्थन करें",
+    "description": "Perspective को निःशुल्क और ओपन सोर्स बनाए रखने में मदद करें।",
+    "madeBy": "द्वारा बनाया गया प्रोजेक्ट",
+    "supportedBy": "समर्थक",
+    "aossieDescription": "AOSSIE एक ऑस्ट्रेलियाई गैर-लाभकारी संगठन है जो ओपन-सोर्स प्रोजेक्ट्स का समर्थन करता है और उन्हें एक साथ लाता है।"
   },
   "LanguageSwitcher": {
     "label": "भाषा"

@@ -3,10 +3,10 @@ name: Frontend CI
 on:
   push:
     branches: ["main"]
-    paths: ["frontend/**", ".github/workflows/frontend-ci.yml"]
+    paths: ["frontend/**", "PRIVACY.md", "TERMS.md", ".github/workflows/frontend-ci.yml"]
   pull_request:
     branches: ["main"]
-    paths: ["frontend/**", ".github/workflows/frontend-ci.yml"]
+    paths: ["frontend/**", "PRIVACY.md", "TERMS.md", ".github/workflows/frontend-ci.yml"]
 
 permissions:
   contents: read
