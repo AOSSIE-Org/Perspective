@@ -60,6 +60,21 @@ The server will be available at:
 http://localhost:8000/api/
 ```
 
+### 4. Run the tests
+
+```bash
+uv run pytest          # run the suite
+uv run pytest --cov    # also measure coverage of app/ and main.py
+```
+
+The tests in `tests/` fake Groq, Pinecone, web search and the embedding model, so they need no API keys or network access. `tests/test_properties.py` holds [Hypothesis](https://hypothesis.readthedocs.io/) property tests for the URL guard, chunk IDs, chunking and keyword extraction. New backend functionality must come with tests here (see [CONTRIBUTING.md](../CONTRIBUTING.md#-testing-policy)); CI runs them in [`backend-ci.yml`](../.github/workflows/backend-ci.yml) with `uv run pytest --cov`, which fails if total coverage drops below 90% (`fail_under` in `pyproject.toml`). `--cov` prints the uncovered lines of each file that is not fully covered.
+
+---
+
+## API Reference
+
+The endpoints (`GET /api/`, `POST /api/bias`, `POST /api/process`, `POST /api/chat`), their request and response bodies, errors, limits and required environment variables are documented in [API.md](API.md).
+
 ---
 
 ## Important Notes

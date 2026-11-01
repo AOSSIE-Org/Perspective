@@ -17,13 +17,13 @@
 
 | Category           | Met | N/A | Total (Applicable) | Status |
 |--------------------|-----|-----|--------------------|--------|
-| Basics             | 7   | 0   | 8                  | 🟡     |
+| Basics             | 8   | 0   | 8                  | 🟢     |
 | Change Control     | 1   | 5   | 1 (6)              | 🟢     |
 | Reporting          | 7   | 1   | 7 (8)              | 🟢     |
-| Quality            | 9   | 0   | 11                 | 🟡     |
+| Quality            | 11  | 0   | 11                 | 🟢     |
 | Security           | 3   | 6   | 3 (9)              | 🟢     |
 | Analysis           | 4   | 2   | 5 (7)              | 🟡     |
-| **Total**          | **31** | **14** | **35 (49)**    | **88.6%** |
+| **Total**          | **34** | **14** | **35 (49)**    | **97.1%** |
 
 *N/A items are excluded from the denominator.*
 
@@ -48,8 +48,8 @@
 - [x] 🔴 **documentation_basics** — Basic documentation exists for the software (README, Wiki, or docs folder).
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective#readme
 
-- [ ] 🔴 **documentation_interface** — Reference documentation describes the external interface (API inputs/outputs, CLI flags, config schema, etc.).
-  - *Not met yet:* the frontend configuration (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`) is documented in the [README](https://github.com/AOSSIE-Org/Perspective#readme) and `frontend/.env.example`, but the request and response shapes of the backend endpoints (`/api/process`, `/api/bias`, `/api/chat`) are not documented yet.
+- [x] 🔴 **documentation_interface** — Reference documentation describes the external interface (API inputs/outputs, CLI flags, config schema, etc.).
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/backend/API.md (every backend endpoint with request and response bodies, examples, error responses, limits and environment variables); the frontend configuration (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`) is documented in the [README](https://github.com/AOSSIE-Org/Perspective#readme) and `frontend/.env.example`.
 
 ### Other Basics
 
@@ -126,7 +126,7 @@
 ### Build System
 
 - [x] 🔴 **build** — If the project requires building, a working build system exists that can auto-rebuild from source.
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/frontend-ci.yml
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/frontend-ci.yml and https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/backend-ci.yml
 
 - [x] 🔵 **build_common_tools** — Common build tools are used (npm, Next.js). *(SUGGESTED)*
   - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/package.json and https://github.com/AOSSIE-Org/Perspective/blob/main/backend/pyproject.toml
@@ -137,23 +137,21 @@
 ### Automated Testing
 
 - [x] 🔵 **test_invocation** — The test suite can be invoked in a standard way. *(SUGGESTED)*
-  - *Evidence URL:* `npm test` / `npm run test:coverage` in `frontend/` (https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/package.json)
+  - *Evidence URL:* `npm test` / `npm run test:coverage` in `frontend/` (https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/package.json) and `uv run pytest` in `backend/` (https://github.com/AOSSIE-Org/Perspective/blob/main/backend/pyproject.toml)
 
-- [ ] 🔵 **test_most** — The test suite covers most code branches and functionality. *(SUGGESTED)*
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/vitest.config.mts (90% line/branch/function thresholds, enforced in CI, on the frontend config, metadata, sitemap and `lib/`)
-  - *Not met yet:* the frontend pages and components and the whole backend have no automated tests.
+- [x] 🔵 **test_most** — The test suite covers most code branches and functionality. *(SUGGESTED)*
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/frontend/vitest.config.mts (90% line/branch/function/statement thresholds on the whole frontend: every route, component, hook, config module, i18n helper and utility; the only exclusions are type declarations and unused shadcn/ui primitives, each with its reason) and https://github.com/AOSSIE-Org/Perspective/blob/main/backend/pyproject.toml (`fail_under = 90` with branch coverage on `app/` and `main.py`). Both are enforced in CI (https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/frontend-ci.yml, https://github.com/AOSSIE-Org/Perspective/blob/main/.github/workflows/backend-ci.yml), and both suites include property tests (fast-check, Hypothesis).
 
 ### New Functionality Testing Policy
 
-- [ ] 🔴 **test_policy** — The project has a general policy that new functionality must include tests in the automated test suite.
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-pull-request-guidelines
-  - *Not met yet:* CONTRIBUTING.md requires tests only for changes to `frontend/config/`, `frontend/i18n/metadata.ts`, `frontend/app/sitemap.ts` and `frontend/lib/`, not for all new functionality.
+- [x] 🔴 **test_policy** — The project has a general policy that new functionality must include tests in the automated test suite.
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-testing-policy (all new frontend and backend functionality must include tests; both suites run in CI)
 
 - [x] 🔴 **tests_are_added** — Evidence exists that the test policy has been followed in recent major changes.
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/tree/main/frontend/tests
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/tree/main/frontend/tests and https://github.com/AOSSIE-Org/Perspective/tree/main/backend/tests
 
 - [x] 🔵 **tests_documented_added** — The test policy is documented in contribution instructions. *(SUGGESTED)*
-  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-pull-request-guidelines (for the frontend logic modules listed there)
+  - *Evidence URL:* https://github.com/AOSSIE-Org/Perspective/blob/main/CONTRIBUTING.md#-testing-policy
 
 ### Linting / Warning Flags
 
@@ -219,7 +217,7 @@
 ### Dynamic Code Analysis
 
 - [ ] 🔵 **dynamic_analysis** — Dynamic analysis applied before major releases. *(SUGGESTED)*
-  - *Not met yet:* no fuzzer or input-varying scanner runs before deploys, and branch coverage above 80% is only measured on the scoped frontend modules (see `test_most`). Lighthouse audits are run on the deployed site, but they do not vary inputs.
+  - *Not met yet:* no fuzzer or input-varying scanner runs before deploys, although branch coverage is now measured (and kept above 90%) on the whole frontend and backend (see `test_most`). Lighthouse audits are run on the deployed site, but they do not vary inputs.
 
 - [x] 🔵 **dynamic_analysis_enable_assertions** — Dynamic analysis runs with assertions enabled. *(SUGGESTED)*
   - *Note:* Vitest executes hooks and modules in jsdom with React's development build, so runtime invariant checks are active.
