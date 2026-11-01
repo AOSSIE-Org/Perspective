@@ -9,6 +9,7 @@ import re
 from groq import Groq
 from dotenv import load_dotenv
 from app.logging.logging_config import setup_logger
+from app.config import JUDGE_MAX_TOKENS, JUDGE_MODEL, JUDGE_TEMPERATURE
 
 logger = setup_logger(__name__)
 load_dotenv()
@@ -35,9 +36,9 @@ def judge_perspective(state):
             messages=[
                 {"role": "user", "content": prompt},
             ],
-            model="openai/gpt-oss-20b",
-            temperature=0.0,
-            max_tokens=256,
+            model=JUDGE_MODEL,
+            temperature=JUDGE_TEMPERATURE,
+            max_tokens=JUDGE_MAX_TOKENS,
         )
 
         raw = (chat_completion.choices[0].message.content or "").strip()

@@ -27,6 +27,7 @@ from groq import Groq
 from dotenv import load_dotenv
 import json
 from app.logging.logging_config import setup_logger
+from app.config import BIAS_MAX_TOKENS, BIAS_MODEL, BIAS_TEMPERATURE
 
 logger = setup_logger(__name__)
 
@@ -63,9 +64,9 @@ def check_bias(text):
                     "content": f"Give bias score to the following article:\n\n{article_text}",
                 },
             ],
-            model="openai/gpt-oss-120b",
-            temperature=0.2,
-            max_tokens=32,
+            model=BIAS_MODEL,
+            temperature=BIAS_TEMPERATURE,
+            max_tokens=BIAS_MAX_TOKENS,
         )
         raw_score = (chat_completion.choices[0].message.content or "").strip()
         logger.info(f"Raw bias score calculated: {raw_score}")

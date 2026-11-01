@@ -29,6 +29,14 @@ from dotenv import load_dotenv
 import json
 import re
 from app.logging.logging_config import setup_logger
+from app.config import (
+    CLAIM_EXTRACTOR_MAX_TOKENS,
+    CLAIM_EXTRACTOR_MODEL,
+    CLAIM_EXTRACTOR_TEMPERATURE,
+    FACT_VERIFIER_MAX_TOKENS,
+    FACT_VERIFIER_MODEL,
+    FACT_VERIFIER_TEMPERATURE,
+)
 
 logger = setup_logger(__name__)
 
@@ -63,9 +71,9 @@ def run_claim_extractor_sdk(state):
                     ),
                 },
             ],
-            model="openai/gpt-oss-20b",
-            temperature=0.3,
-            max_tokens=512,
+            model=CLAIM_EXTRACTOR_MODEL,
+            temperature=CLAIM_EXTRACTOR_TEMPERATURE,
+            max_tokens=CLAIM_EXTRACTOR_MAX_TOKENS,
         )
 
         extracted_claims = chat_completion.choices[0].message.content.strip()
@@ -128,9 +136,9 @@ def run_fact_verifier_sdk(search_results):
                         ),
                     },
                 ],
-                model="openai/gpt-oss-20b",
-                temperature=0.3,
-                max_tokens=1024,
+                model=FACT_VERIFIER_MODEL,
+                temperature=FACT_VERIFIER_TEMPERATURE,
+                max_tokens=FACT_VERIFIER_MAX_TOKENS,
             )
 
             content = chat_completion.choices[0].message.content.strip()

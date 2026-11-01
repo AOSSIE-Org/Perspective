@@ -10,6 +10,7 @@ from groq import Groq
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from app.logging.logging_config import setup_logger
+from app.config import PERSPECTIVE_MODEL, PERSPECTIVE_TEMPERATURE
 
 logger = setup_logger(__name__)
 load_dotenv()
@@ -20,9 +21,6 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 class PerspectiveOutput(BaseModel):
     reasoning: str = Field(..., description="Chain-of-thought reasoning steps")
     perspective: str = Field(..., description="Generated opposite perspective")
-
-
-my_llm = "openai/gpt-oss-120b"
 
 
 def generate_perspective(state):
@@ -69,8 +67,8 @@ def generate_perspective(state):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
             ],
-            model=my_llm,
-            temperature=0.6,
+            model=PERSPECTIVE_MODEL,
+            temperature=PERSPECTIVE_TEMPERATURE,
             response_format={"type": "json_object"},
         )
 

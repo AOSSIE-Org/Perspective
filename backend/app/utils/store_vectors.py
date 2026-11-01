@@ -4,12 +4,12 @@ store_vectors.py
 Provides a utility for persisting vector embeddings into a Pinecone index.
 
 Functions:
-    store(vectors: List[Dict[str, Any]], namespace: str = "default") -> None
+    store(vectors: List[Dict[str, Any]], namespace: str = PINECONE_NAMESPACE) -> None
         - Validates and upserts a batch of vector embeddings into the 
           configured Pinecone namespace.
         - Parameters:
             vectors: List of dictionaries containing 'id', 'values', and 'metadata'.
-            namespace: Target namespace in Pinecone (default is "default").
+            namespace: Target namespace in Pinecone (default: PINECONE_NAMESPACE from app.config).
         - Raises:
             ValueError: If the vectors list is empty or malformed.
             RuntimeError: If the upsert operation to Pinecone fails.
@@ -22,6 +22,7 @@ Notes:
 
 
 from app.db.vector_store import index
+from app.config import PINECONE_NAMESPACE
 
 
 from typing import List, Dict, Any
@@ -30,13 +31,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def store(vectors: List[Dict[str, Any]], namespace: str = "default") -> None:
+def store(vectors: List[Dict[str, Any]], namespace: str = PINECONE_NAMESPACE) -> None:
     """
     Store vectors in the Pinecone index.
 
     Args:
         vectors: List of vector dictionaries to upsert
-        namespace: Namespace to store vectors in (default: "default")
+        namespace: Namespace to store vectors in (default: PINECONE_NAMESPACE)
 
     Raises:
         ValueError: If vectors is empty or invalid

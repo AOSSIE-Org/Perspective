@@ -6,7 +6,8 @@ private or internal hosts (server-side request forgery).
 
 Every URL, including each redirect target, must use http or https and resolve
 only to public IP addresses. Redirects are followed manually so each hop is
-checked, and the response body is capped in size.
+checked, and the response body is capped in size. The redirect, size and
+timeout limits are set in app.config.
 
 Functions:
     validate_public_url(url)
@@ -21,10 +22,14 @@ from urllib.parse import urljoin, urlsplit
 
 import requests
 
+from app.config import (
+    FETCH_CHUNK_BYTES,
+    FETCH_MAX_BYTES,
+    FETCH_MAX_REDIRECTS,
+    FETCH_TIMEOUT_SECONDS,
+)
+
 ALLOWED_SCHEMES = {"http", "https"}
-MAX_REDIRECTS = 5
-MAX_BYTES = 5 * 1024 * 1024
-TIMEOUT_SECONDS = 10
 
 
 class UnsafeURLError(ValueError):
@@ -48,12 +53,12 @@ def validate_public_url(url: str) -> None:
 
 def fetch_public_html(url: str, headers: dict | None = None) -> str:
     current = url
-    for _ in range(MAX_REDIRECTS + 1):
+    for _ in range(FETCH_MAX_REDIRECTS + 1):
         validate_public_url(current)
         with requests.get(
             current,
             headers=headers,
-            timeout=TIMEOUT_SECONDS,
+            timeout=FETCH_TIMEOUT_SECONDS,
             allow_redirects=False,
             stream=True,
         ) as res:
@@ -65,9 +70,9 @@ def fetch_public_html(url: str, headers: dict | None = None) -> str:
                 continue
             res.raise_for_status()
             body = b""
-            for chunk in res.iter_content(chunk_size=65536):
+            for chunk in res.iter_content(chunk_size=FETCH_CHUNK_BYTES):
                 body += chunk
-                if len(body) > MAX_BYTES:
+                if len(body) > FETCH_MAX_BYTES:
                     raise requests.RequestException("Response is too large.")
             return _decode(body, res)
     raise requests.RequestException("Too many redirects.")

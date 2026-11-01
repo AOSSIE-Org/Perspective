@@ -18,6 +18,12 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 from app.logging.logging_config import setup_logger
+from app.config import (
+    SENTIMENT_MAX_TOKENS,
+    SENTIMENT_MODEL,
+    SENTIMENT_REASONING_EFFORT,
+    SENTIMENT_TEMPERATURE,
+)
 
 logger = setup_logger(__name__)
 
@@ -49,10 +55,10 @@ def run_sentiment_sdk(state):
                     ),
                 },
             ],
-            model="openai/gpt-oss-20b",
-            temperature=0.2,
-            max_tokens=64,
-            extra_body={"reasoning_effort": "low"},
+            model=SENTIMENT_MODEL,
+            temperature=SENTIMENT_TEMPERATURE,
+            max_tokens=SENTIMENT_MAX_TOKENS,
+            extra_body={"reasoning_effort": SENTIMENT_REASONING_EFFORT},
         )
 
         sentiment = chat_completion.choices[0].message.content.strip()

@@ -10,6 +10,12 @@ from app.modules.facts_check.llm_processing import (
     run_fact_verifier_sdk,
 )
 from app.logging.logging_config import setup_logger
+from app.config import (
+    CLAIM_SEARCH_WORKERS,
+    MAX_CLAIMS,
+    MIN_CLAIM_CHARS,
+    MIN_FALLBACK_SENTENCE_CHARS,
+)
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -44,14 +50,14 @@ def run_fact_check_pipeline(state):
     for line in lines:
         cleaned = re.sub(r"^(?:(?:\d+[\.\)]|\*|\-|•)\s*)", "", line.strip()).strip()
         # Filter out meta headers and very short strings
-        if len(cleaned) > 15 and not cleaned.lower().startswith(("here are", "extracted claim", "verifiable claim")):
+        if len(cleaned) > MIN_CLAIM_CHARS and not cleaned.lower().startswith(("here are", "extracted claim", "verifiable claim")):
             claims.append(cleaned)
 
     # If regex/line splitting missed, fallback to top sentences from cleaned_text
     if not claims:
         text = state.get("cleaned_text", "")
-        sentences = [s.strip() for s in re.split(r"[.!?]\s+", text) if len(s.strip()) > 25]
-        claims = sentences[:3]
+        sentences = [s.strip() for s in re.split(r"[.!?]\s+", text) if len(s.strip()) > MIN_FALLBACK_SENTENCE_CHARS]
+        claims = sentences[:MAX_CLAIMS]
         logger.info(f"[CLAIMS FALLBACK] Using {len(claims)} sentences as claims: {claims}")
     else:
         logger.info(f"[CLAIMS] Extracted {len(claims)} claims: {claims}")
@@ -59,12 +65,12 @@ def run_fact_check_pipeline(state):
     if not claims:
         return [], "No verifiable claims found."
 
-    # Limit to top 3 claims for fast verification
-    claims = claims[:3]
+    # Limit the number of claims for fast verification
+    claims = claims[:MAX_CLAIMS]
 
-    # Step 2: Search claims in parallel (max 3 concurrent), preserving extracted order
+    # Step 2: Search claims in parallel, preserving extracted order
     search_results = [None] * len(claims)
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=CLAIM_SEARCH_WORKERS) as executor:
         future_to_index = {executor.submit(_search_single_claim, claim): i for i, claim in enumerate(claims)}
         for future in as_completed(future_to_index):
             idx = future_to_index[future]

@@ -18,8 +18,9 @@ Core Features:
       state, ensuring structured data flow between nodes.
     - Employs conditional edges to handle branching:
         * Routes to error handler if a node signals `"status": "error"`.
-        * Retries perspective generation up to 3 times if judged score
-          is below 70.
+        * Retries perspective generation up to PERSPECTIVE_MAX_RETRIES
+          times if the judged score is below PERSPECTIVE_MIN_SCORE
+          (both set in app.config).
         * Moves to storage once retries are exhausted or score passes
           the threshold.
     - Ensures the graph terminates only after successful storage.
@@ -42,6 +43,7 @@ from app.modules.langgraph_nodes import (
 )
 
 from typing_extensions import TypedDict
+from app.config import PERSPECTIVE_MAX_RETRIES, PERSPECTIVE_MIN_SCORE
 
 
 class MyState(TypedDict):
@@ -94,10 +96,10 @@ def build_langgraph():
             if state.get("status") == "error"
             else (
                 "store_and_send"
-                if state.get("retries", 0) >= 3
+                if state.get("retries", 0) >= PERSPECTIVE_MAX_RETRIES
                 else "generate_perspective"
             )
-            if state.get("score", 0) < 70
+            if state.get("score", 0) < PERSPECTIVE_MIN_SCORE
             else "store_and_send"
         ),
     )

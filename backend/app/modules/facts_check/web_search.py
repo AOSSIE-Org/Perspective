@@ -11,6 +11,13 @@ import requests
 from dotenv import load_dotenv
 from duckduckgo_search import DDGS
 from app.logging.logging_config import setup_logger
+from app.config import (
+    DDG_MAX_RESULTS,
+    GOOGLE_SEARCH_ENGINE_ID,
+    GOOGLE_SEARCH_TIMEOUT_SECONDS,
+    GOOGLE_SEARCH_URL,
+    SEARCH_KEY_PLACEHOLDER,
+)
 
 logger = setup_logger(__name__)
 load_dotenv()
@@ -20,12 +27,12 @@ GOOGLE_SEARCH = os.getenv("SEARCH_KEY")
 
 def search_google(query):
     # 1. Try Google Custom Search if a valid key is provided
-    if GOOGLE_SEARCH and GOOGLE_SEARCH != "your_google_search_api_key_here":
+    if GOOGLE_SEARCH and GOOGLE_SEARCH != SEARCH_KEY_PLACEHOLDER:
         try:
             results = requests.get(
-                "https://www.googleapis.com/customsearch/v1",
-                params={"key": GOOGLE_SEARCH, "cx": "f637ab77b5d8b4a3c", "q": query},
-                timeout=8,
+                GOOGLE_SEARCH_URL,
+                params={"key": GOOGLE_SEARCH, "cx": GOOGLE_SEARCH_ENGINE_ID, "q": query},
+                timeout=GOOGLE_SEARCH_TIMEOUT_SECONDS,
             )
             res = results.json()
             if "items" in res and len(res["items"]) > 0:
@@ -41,7 +48,7 @@ def search_google(query):
     # 2. Fallback to DuckDuckGo Search (no API key required)
     try:
         ddgs = DDGS()
-        ddg_results = list(ddgs.text(query, max_results=3))
+        ddg_results = list(ddgs.text(query, max_results=DDG_MAX_RESULTS))
         if ddg_results:
             first = {
                 "title": ddg_results[0].get("title", ""),

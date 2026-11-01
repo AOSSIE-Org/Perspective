@@ -26,6 +26,7 @@ import requests
 import logging
 import json
 from app.modules.scraper.safe_fetch import UnsafeURLError, fetch_public_html
+from app.config import SCRAPER_USER_AGENT
 
 # This class contains extractors that are more and more advanced from top to
 # bottom and they will try to extract any article.
@@ -34,13 +35,7 @@ from app.modules.scraper.safe_fetch import UnsafeURLError, fetch_public_html
 class Article_extractor:
     def __init__(self, url):
         self.url = url
-        self.headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                " AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/113.0 Safari/537.36"
-            )
-        }
+        self.headers = {"User-Agent": SCRAPER_USER_AGENT}
         self._html = None
 
     def _fetch_html(self):

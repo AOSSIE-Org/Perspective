@@ -27,6 +27,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 from app.logging.logging_config import setup_logger
+from app.config import CHAT_MODEL
 
 logger = setup_logger(__name__)
 
@@ -55,7 +56,7 @@ Question:
 """
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=CHAT_MODEL,
         messages=[
             {"role": "system", "content": "Use only the context to answer."},
             {"role": "user", "content": prompt},
