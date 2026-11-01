@@ -112,7 +112,6 @@ dependencies = [
     { name = "langchain-community" },
     { name = "langchain-groq" },
     { name = "langgraph" },
-    { name = "logging" },
     { name = "newspaper3k" },
     { name = "nltk" },
     { name = "pinecone" },
@@ -144,7 +143,6 @@ requires-dist = [
     { name = "langchain-community", specifier = ">=0.3.25" },
     { name = "langchain-groq", specifier = ">=0.3.2" },
     { name = "langgraph", specifier = ">=0.4.8" },
-    { name = "logging", specifier = ">=0.4.9.6" },
     { name = "newspaper3k", specifier = ">=0.2.8" },
     { name = "nltk", specifier = ">=3.9.1" },
     { name = "pinecone", specifier = ">=7.3.0" },
@@ -999,12 +997,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/be/86/b941012013260f95a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/f4/c206c0888f8a506404cb4f16ad89593bdc2f70cf00de26a1a0a7a76ad7a3/langsmith-0.3.45-py3-none-any.whl", hash = "sha256:5b55f0518601fa65f3bb6b1a3100379a96aa7b3ed5e9380581615ba9c65ed8ed", size = 363002, upload-time = "2025-06-05T05:10:27.228Z" },
 ]
-
-[[package]]
-name = "logging"
-version = "0.4.9.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/93/4b/979db9e44be09f71e85c9c8cfc42f258adfb7d93ce01deed2788b2948919/logging-0.4.9.6.tar.gz", hash = "sha256:26f6b50773f085042d301085bd1bf5d9f3735704db9f37c1ce6d8b85c38f2417", size = 96029, upload-time = "2013-06-04T23:43:22.086Z" }
 
 [[package]]
 name = "lxml"
