@@ -1,0 +1,45 @@
+name: Backend CI
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["backend/**", ".github/workflows/backend-ci.yml"]
+  pull_request:
+    branches: ["main"]
+    paths: ["backend/**", ".github/workflows/backend-ci.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      # Installs the Python version from backend/.python-version and the locked dependencies, including the dev group (pytest, pytest-cov, hypothesis).
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      # The suite fakes Groq, Pinecone, web search and the embedding model, so it needs no secrets or network.
+      # --cov fails the step if coverage of app/ and main.py drops below fail_under in pyproject.toml.
+      - name: Run tests with coverage (fails below 90%)
+        run: uv run pytest --cov
