@@ -23,6 +23,7 @@ def test_removes_boilerplate_lines():
         "© 2026 Example News Network, a part of Example Media Group\n"
         "\u00a0Read more at example.com for more information about the budget\n"
         "Privacy Policy | Terms of Service | Contact Us | About Us\n"
+        "Advertisement | Report this ad | Sponsored content\r\n"
         "Residents will see the changes in their bills starting next month."
     )
 

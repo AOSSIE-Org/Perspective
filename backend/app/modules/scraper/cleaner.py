@@ -97,6 +97,7 @@ def clean_extracted_text(text: str):
     # "Privacy Policy | Terms of Service", so a sentence that starts with one
     # of them is kept.
     # Spaces and tabs, including non-breaking spaces, but not line breaks.
+    # Marker lines may end in "\r" when the text uses CRLF line endings.
     space = r"[^\S\r\n]*"
     flags = re.IGNORECASE | re.MULTILINE
 
@@ -104,7 +105,7 @@ def clean_extracted_text(text: str):
     marker = r"(?:" + "|".join(markers) + r")"
     separator = space + r"[|/,\u00b7\u2022-]" + space
     text = re.sub(
-        r"^" + space + marker + r"(?:" + separator + marker + r")*" + space + r"[.!:]?" + space + r"$",
+        r"^" + space + marker + r"(?:" + separator + marker + r")*" + space + r"(?:[.!:]" + space + r")?\r?$",
         "",
         text,
         flags=flags,
