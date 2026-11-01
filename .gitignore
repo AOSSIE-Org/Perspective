@@ -180,3 +180,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Unremediated security review reports (never commit)
+unremediated-security-reviews/
