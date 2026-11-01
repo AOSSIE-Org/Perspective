@@ -93,7 +93,11 @@ def services(monkeypatch, fake_chat_client, fake_index):
             verdict(claims[1], "False"),
         ),
         "perspective": fake_chat_client(
-            *[json.dumps({"reasoning": f"Reasoning {i}.", "perspective": f"Perspective {i}."}) for i in range(1, 4)]
+            # One reply per allowed attempt, so a retry never runs out of queued replies
+            *[
+                json.dumps({"reasoning": f"Reasoning {i}.", "perspective": f"Perspective {i}."})
+                for i in range(1, PERSPECTIVE_MAX_RETRIES + 1)
+            ]
         ),
         "judge": fake_chat_client(str(PERSPECTIVE_MIN_SCORE + 10)),
     }

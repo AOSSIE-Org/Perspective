@@ -88,7 +88,8 @@ SCRAPER_USER_AGENT = (
 )
 FETCH_MAX_REDIRECTS = 5
 FETCH_MAX_BYTES = 5 * 1024 * 1024
-FETCH_TIMEOUT_SECONDS = 10
+FETCH_TIMEOUT_SECONDS = 10  # per connect and per read
+FETCH_TOTAL_TIMEOUT_SECONDS = 30  # whole fetch, all redirect hops and the body download together
 FETCH_CHUNK_BYTES = 65536
 MIN_LINE_CHARS = 30  # cleaned article lines this short or shorter are dropped
 MAX_KEYWORDS = 15

@@ -38,14 +38,46 @@ NON_PUBLIC_NETWORKS = [
     "169.254.0.0/16",  # link-local, including cloud metadata at 169.254.169.254
     "172.16.0.0/12",  # private
     "192.168.0.0/16",  # private
+    "192.0.2.0/24",  # TEST-NET-1 (documentation)
+    "198.18.0.0/15",  # benchmarking
+    "198.51.100.0/24",  # TEST-NET-2 (documentation)
+    "203.0.113.0/24",  # TEST-NET-3 (documentation)
+    "224.0.0.0/4",  # multicast
     "240.0.0.0/4",  # reserved
     "::1/128",  # IPv6 loopback
+    "2001:db8::/32",  # IPv6 documentation
     "fc00::/7",  # IPv6 unique local
     "fe80::/10",  # IPv6 link-local
+    "ff00::/8",  # IPv6 multicast
 ]
 
 non_public_ips = st.one_of(*[st.ip_addresses(network=net) for net in NON_PUBLIC_NETWORKS]).map(str)
-public_ips = st.ip_addresses().filter(lambda ip: ip.is_global).map(str)
+public_ips = st.ip_addresses().filter(lambda ip: ip.is_global and not ip.is_multicast).map(str)
+
+# One representative address inside each newly covered range, and its public neighbours just outside it.
+# These are fixed cases, so acceptance does not rest only on the is_global-based strategy above.
+RESERVED_EXAMPLES = [
+    "192.0.2.1",
+    "198.18.0.1",
+    "198.19.255.254",
+    "198.51.100.7",
+    "203.0.113.9",
+    "224.0.0.1",
+    "239.255.255.250",
+    "2001:db8::1",
+    "ff02::1",
+]
+ADJACENT_PUBLIC_EXAMPLES = [
+    "192.0.3.1",
+    "198.17.255.254",
+    "198.20.0.1",
+    "198.51.101.1",
+    "203.0.112.254",
+    "203.0.114.1",
+    "223.255.255.254",
+    "2001:db7:ffff::1",
+    "2001:db9::1",
+]
 url_paths = st.text(alphabet=string.ascii_letters + string.digits + "/-_.?=&", max_size=30).map(lambda p: "/" + p)
 
 
@@ -110,6 +142,21 @@ def test_a_host_with_only_public_addresses_is_accepted_and_looked_up_on_the_righ
         validate_public_url(f"{scheme}://{netloc}{path}")
     default_port = 443 if scheme == "https" else 80
     assert lookups == [(HOST, port or default_port)]
+
+
+@pytest.mark.parametrize("address", RESERVED_EXAMPLES)
+def test_benchmarking_documentation_and_multicast_addresses_are_rejected(address):
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(socket, "getaddrinfo", resolving([address], []))
+        with pytest.raises(UnsafeURLError, match="private or reserved"):
+            validate_public_url(f"https://{HOST}/")
+
+
+@pytest.mark.parametrize("address", ADJACENT_PUBLIC_EXAMPLES)
+def test_public_addresses_next_to_reserved_ranges_are_accepted(address):
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(socket, "getaddrinfo", resolving([address], []))
+        assert validate_public_url(f"https://{HOST}/") == address
 
 
 @settings(max_examples=150, deadline=None)

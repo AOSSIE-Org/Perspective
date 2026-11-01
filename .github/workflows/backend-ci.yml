@@ -37,7 +37,7 @@ jobs:
 
       # Installs the Python version from backend/.python-version and the locked dependencies, including the dev group (pytest, pytest-cov, hypothesis).
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --locked
 
       # The suite fakes Groq, Pinecone, web search and the embedding model, so it needs no secrets or network.
       # --cov fails the step if coverage of app/ and main.py drops below fail_under in pyproject.toml.

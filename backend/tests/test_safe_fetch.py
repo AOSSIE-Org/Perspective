@@ -8,11 +8,14 @@ from app.config import (
     FETCH_MAX_BYTES,
     FETCH_MAX_REDIRECTS,
     FETCH_TIMEOUT_SECONDS,
+    FETCH_TOTAL_TIMEOUT_SECONDS,
 )
 from app.modules.scraper import safe_fetch
 from app.modules.scraper.safe_fetch import (
+    PinnedHostAdapter,
     UnsafeURLError,
     fetch_public_html,
+    pin_to_address,
     validate_public_url,
 )
 
@@ -38,7 +41,8 @@ HTTP_NOT_FOUND = 404
 def test_accepts_public_http_and_https_urls(resolve_hosts, url, expected_port):
     lookups = resolve_hosts({"example.com": [PUBLIC_IP, PUBLIC_IPV6]})
 
-    validate_public_url(url)
+    # The first validated address is the one the request will connect to
+    assert validate_public_url(url) == PUBLIC_IP
 
     assert lookups == [("example.com", expected_port)]
 
@@ -156,15 +160,15 @@ class FakeResponse:
 
 @pytest.fixture
 def fake_get(monkeypatch):
-    """Serve queued FakeResponses from requests.get and record every request."""
+    """Serve queued FakeResponses from requests.Session.get and record every request."""
     calls = []
     responses = []
 
-    def get(url, **kwargs):
-        calls.append({"url": url, **kwargs})
+    def get(session, url, **kwargs):
+        calls.append({"url": url, **kwargs, "adapter": session.get_adapter(url)})
         return responses.pop(0)
 
-    monkeypatch.setattr(safe_fetch.requests, "get", get)
+    monkeypatch.setattr(safe_fetch.requests.Session, "get", get)
 
     def queue(*items):
         responses.extend(items)
@@ -182,15 +186,19 @@ def test_fetches_a_public_page_without_letting_requests_follow_redirects(resolve
     html = fetch_public_html("https://example.com/a", headers)
 
     assert html == "<html>hello</html>"
+    adapter = calls[0].pop("adapter")
+    # The request goes to the validated address; the Host header and TLS keep the original hostname
     assert calls == [
         {
-            "url": "https://example.com/a",
-            "headers": headers,
+            "url": f"https://{PUBLIC_IP}/a",
+            "headers": {**headers, "Host": "example.com"},
             "timeout": FETCH_TIMEOUT_SECONDS,
             "allow_redirects": False,
             "stream": True,
         }
     ]
+    assert isinstance(adapter, PinnedHostAdapter)
+    assert adapter.hostname == "example.com"
     assert response.requested_chunk_size == FETCH_CHUNK_BYTES
 
 
@@ -216,10 +224,13 @@ def test_follows_relative_redirects_and_validates_each_hop(resolve_hosts, fake_g
 
     assert html == "final page"
     assert [c["url"] for c in calls] == [
-        "https://example.com/start",
-        "https://example.com/moved",
-        "https://cdn.example.org/final",
+        f"https://{PUBLIC_IP}/start",
+        f"https://{PUBLIC_IP}/moved",
+        f"https://{PUBLIC_IP}/final",
     ]
+    # Every hop is pinned to the address validated for its own hostname, resolved once per hop
+    assert [c["headers"]["Host"] for c in calls] == ["example.com", "example.com", "cdn.example.org"]
+    assert [c["adapter"].hostname for c in calls] == ["example.com", "example.com", "cdn.example.org"]
     assert [host for host, _ in lookups] == ["example.com", "example.com", "cdn.example.org"]
 
 
@@ -233,7 +244,7 @@ def test_blocks_a_redirect_to_a_private_address(resolve_hosts, fake_get):
     with pytest.raises(UnsafeURLError, match="private or reserved"):
         fetch_public_html("https://example.com/start")
 
-    assert [c["url"] for c in calls] == ["https://example.com/start"]
+    assert [c["url"] for c in calls] == [f"https://{PUBLIC_IP}/start"]
 
 
 def test_rejects_a_redirect_without_a_location_header(resolve_hosts, fake_get):
@@ -290,6 +301,62 @@ def test_rejects_a_body_larger_than_the_size_limit(resolve_hosts, fake_get):
 
     # Reading stops as soon as the limit is passed instead of draining the stream.
     assert len(chunks_read) == FETCH_MAX_BYTES // FETCH_CHUNK_BYTES + 1
+
+
+def test_gives_up_when_the_download_runs_past_the_total_deadline(resolve_hosts, fake_get, monkeypatch):
+    resolve_hosts({"example.com": [PUBLIC_IP]})
+    clock = iter([0.0, 1.0, FETCH_TOTAL_TIMEOUT_SECONDS + 1.0])
+    monkeypatch.setattr(safe_fetch.time, "monotonic", lambda: next(clock))
+    chunks_read = []
+
+    def slow_body():
+        while True:
+            chunks_read.append(1)
+            yield b"a"
+
+    fake_get(FakeResponse(chunks=slow_body()))
+
+    with pytest.raises(requests.RequestException, match="took too long"):
+        fetch_public_html("https://example.com/slow")
+
+    # The deadline is checked as each chunk arrives: the second chunk is past it
+    assert len(chunks_read) == 2
+
+
+def test_plain_http_hops_use_the_default_transport(resolve_hosts, fake_get):
+    resolve_hosts({"example.com": [PUBLIC_IP]})
+    calls = fake_get(FakeResponse(body=b"ok"))
+
+    fetch_public_html("http://example.com/a")
+
+    assert calls[0]["url"] == f"http://{PUBLIC_IP}/a"
+    assert calls[0]["headers"]["Host"] == "example.com"
+    assert not isinstance(calls[0]["adapter"], PinnedHostAdapter)
+
+
+# --- pinning helpers ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("url", "address", "expected"),
+    [
+        ("https://example.com/a?b=1#c", PUBLIC_IP, (f"https://{PUBLIC_IP}/a?b=1#c", "example.com")),
+        ("http://example.com:8080/a", PUBLIC_IP, (f"http://{PUBLIC_IP}:8080/a", "example.com:8080")),
+        ("https://example.com/a", PUBLIC_IPV6, (f"https://[{PUBLIC_IPV6}]/a", "example.com")),
+        ("https://user:pw@example.com/a", PUBLIC_IP, (f"https://{PUBLIC_IP}/a", "example.com")),
+        ("http://[2606:4700::1111]:81/", "2606:4700::1111", ("http://[2606:4700::1111]:81/", "[2606:4700::1111]:81")),
+    ],
+)
+def test_pin_to_address_swaps_the_host_and_keeps_the_original_for_the_host_header(url, address, expected):
+    assert pin_to_address(url, address) == expected
+
+
+def test_pinned_adapter_checks_tls_against_the_original_hostname():
+    adapter = PinnedHostAdapter("example.com")
+
+    pool_kwargs = adapter.poolmanager.connection_pool_kw
+    assert pool_kwargs["server_hostname"] == "example.com"  # SNI
+    assert pool_kwargs["assert_hostname"] == "example.com"  # certificate check
 
 
 def test_decodes_with_the_declared_charset(resolve_hosts, fake_get):
