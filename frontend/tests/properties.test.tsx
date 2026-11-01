@@ -135,10 +135,20 @@ describe("properties", () => {
   });
 
   it("Landing form: only http(s) URLs reach the backend, and they are sent trimmed", () => {
-    const valid = fc.webUrl({ validSchemes: ["http", "https"] }).map((url) => ({ url, ok: true }));
+    // The form accepts whatever the URL parser reads as http(s), including forms without "//" such as http:example.com
+    const acceptedByForm = (value: string) => {
+      try {
+        return ["http:", "https:"].includes(new URL(value.trim()).protocol);
+      } catch {
+        return false;
+      }
+    };
+    const valid = fc
+      .oneof(fc.webUrl({ validSchemes: ["http", "https"] }), fc.constantFrom("http:example.com", "HTTPS:example.org/a"))
+      .map((url) => ({ url, ok: true }));
     const invalid = fc
       .oneof(
-        fc.string({ maxLength: 30 }).filter((s) => !/^\s*https?:\/\/\S/i.test(s)),
+        fc.string({ maxLength: 30 }).filter((s) => !acceptedByForm(s)),
         fc.webUrl().map((url) => url.replace(/^https?:/, "ftp:")),
         fc.constantFrom("javascript:alert(1)", "data:text/html,hi", "mailto:a@b.c", "file:///etc/passwd"),
       )

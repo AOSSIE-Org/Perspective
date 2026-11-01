@@ -27,19 +27,23 @@ export function SiteShareButton({ className }: { className: string }) {
     let cancelled = false;
     let instance: SocialShareButton | null = null;
 
-    import("@aossie-org/social-share-button").then((mod) => {
-      // The package is a classic script: bundlers expose it as the default export, or only on `window`
-      const Share = mod.default ?? window.SocialShareButton;
-      if (cancelled || !Share || !containerRef.current) return;
-      instance = new Share({
-        container: containerRef.current,
-        showButton: false,
-        platforms: SHARE_PLATFORMS,
-        theme,
-        labels: { share, close, copy, copied, copyFailed, urlLabel },
-      });
-      instanceRef.current = instance;
-    });
+    import("@aossie-org/social-share-button").then(
+      (mod) => {
+        // The package is a classic script: bundlers expose it as the default export, or only on `window`
+        const Share = mod.default ?? window.SocialShareButton;
+        if (cancelled || !Share || !containerRef.current) return;
+        instance = new Share({
+          container: containerRef.current,
+          showButton: false,
+          platforms: SHARE_PLATFORMS,
+          theme,
+          labels: { share, close, copy, copied, copyFailed, urlLabel },
+        });
+        instanceRef.current = instance;
+      },
+      // A failed chunk load (e.g. offline) leaves the button inert; report it instead of an unhandled rejection
+      (error: unknown) => console.error("Could not load the share dialog", error),
+    );
 
     return () => {
       cancelled = true;

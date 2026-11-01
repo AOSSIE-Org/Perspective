@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { LegalDocument, parseLegalMarkdown, resolveLegalHref } from "@/lib/legal-markdown";
@@ -35,6 +36,33 @@ describe("resolveLegalHref", () => {
     expect(resolveLegalHref("mailto:contact@aossie.org", links)).toBe("mailto:contact@aossie.org");
     expect(resolveLegalHref("javascript:alert(1)", links)).toBeNull();
     expect(resolveLegalHref("other.md", links)).toBeNull();
+  });
+
+  it("keeps site paths but drops protocol-relative links to other hosts", () => {
+    expect(resolveLegalHref("/support", links)).toBe("/support");
+    expect(resolveLegalHref("#contact", links)).toBe("#contact");
+    expect(resolveLegalHref("//example.org", links)).toBeNull();
+    expect(resolveLegalHref("/\\example.org", links)).toBeNull();
+  });
+
+  it("property: any resolved href is a legal page, http(s), mailto, a fragment or a single-slash path", () => {
+    const allowed = /^(https?:|mailto:|#|\/(?![/\\]))/i;
+    const href = fc.oneof(
+      fc.string(),
+      fc.webUrl(),
+      fc.string().map((s) => "/" + s),
+      fc.string().map((s) => "//" + s),
+      fc.string().map((s) => "/\\" + s),
+      fc.constantFrom("PRIVACY.md", "./TERMS.md", "javascript:alert(1)", "data:x", "//example.org", "/\\example.org"),
+    );
+    fc.assert(
+      fc.property(href, (input) => {
+        const out = resolveLegalHref(input, links);
+        if (out === null || out === links.privacy || out === links.terms) return;
+        expect(out).toMatch(allowed);
+        expect(out.startsWith("//") || out.startsWith("/\\")).toBe(false);
+      }),
+    );
   });
 });
 
