@@ -1,7 +1,17 @@
+<!-- Organization Logo -->
+<div align="center">
+  <img src="frontend/public/brand/icons/aossie_logo.svg" width="140" alt="AOSSIE logo" />
+  &nbsp;&nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/brand/icons/perspective_logo_light.svg" />
+    <img src="frontend/public/brand/icons/perspective_logo.svg" width="140" alt="Perspective logo" />
+  </picture>
+</div>
+
 # Perspective-AI
 ![Perspective banner](frontend/public/perspective_banner.jpg)
 
-[![Frontend CI](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml) [![Deploy frontend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml) [![Deploy backend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AOSSIE-Org/Perspective/badge)](https://scorecard.dev/viewer/?uri=github.com/AOSSIE-Org/Perspective)
+[![Frontend CI](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/frontend-ci.yml) [![Backend CI](https://github.com/AOSSIE-Org/Perspective/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/backend-ci.yml) [![Deploy frontend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-frontend-pages.yml) [![Deploy backend](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml/badge.svg)](https://github.com/AOSSIE-Org/Perspective/actions/workflows/deploy-backend-to-hf.yml) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AOSSIE-Org/Perspective/badge)](https://scorecard.dev/viewer/?uri=github.com/AOSSIE-Org/Perspective)
 
 ### Table of Contents
 - [Perspective-AI](#perspective-ai)
@@ -27,6 +37,7 @@
   - [Setup \& Deployment](#setup--deployment)
     - [Frontend Setup](#frontend-setup)
     - [Backend Setup](#backend-setup)
+    - [Backend API Reference](#backend-api-reference)
     - [Testing](#testing)
     - [Building & Deploying the Frontend](#building--deploying-the-frontend)
   - [Architecture Diagram](#architecture-diagram)
@@ -178,6 +189,10 @@ uv sync # Creating virtual environment at: .venv
 uv run main.py #Runs the backend server
 ```
 
+### Backend API Reference
+
+Every backend endpoint (`GET /api/`, `POST /api/bias`, `POST /api/process`, `POST /api/chat`) is documented in [`backend/API.md`](backend/API.md): request and response bodies with examples, error responses, limits and timeouts, and the environment variables the server needs.
+
 ### Testing
 
 ```bash
@@ -186,7 +201,17 @@ npm test                # run the Vitest suite once
 npm run test:coverage   # with coverage; fails below 90% (same as CI)
 ```
 
-Tests in [`frontend/tests/`](frontend/tests/) cover the backend API config, SEO metadata, the sitemap, translation-catalog parity and the integrity of the curated preset topics, including [fast-check](https://fast-check.dev) property tests. CI ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) runs lint, type-check, tests and build on pull requests and pushes to `main` that change `frontend/` or the workflow itself.
+```bash
+cd backend
+uv run pytest           # run the backend pytest suite
+uv run pytest --cov     # with coverage; fails below 90% (same as CI)
+```
+
+Coverage is measured on the whole code base, not a hand-picked list of files. In the frontend it covers every route, component, hook, config module, i18n helper and utility under `app/`, `components/`, `hooks/`, `config/`, `i18n/` and `lib/`; the only exclusions are type declarations and the shadcn/ui primitives that nothing imports, each listed with its reason in [`frontend/vitest.config.mts`](frontend/vitest.config.mts). In the backend it covers `app/` and `main.py` (`[tool.coverage.*]` in [`backend/pyproject.toml`](backend/pyproject.toml)). Both suites fail below 90%.
+
+Tests in [`frontend/tests/`](frontend/tests/) render every page and component with [React Testing Library](https://testing-library.com/react) in jsdom, inside the real English and Hindi message catalogs: the article form and its validation, the analyze flow (with the backend mocked), the results tabs and chat, the navbar (with its legal, support and share links), theme and language switchers, share dialog, support page and the interactive visuals. They also cover the backend API config, SEO metadata, the sitemap, translation-catalog parity and the curated preset topics, and include [fast-check](https://fast-check.dev) property tests (URL validation, active-link and locale-switch paths, bias bands, topic selection, fact rendering, the toast store). Only what jsdom cannot do is mocked (Next.js routing and images, WebGL, `ResizeObserver`); see [`frontend/tests/setup.ts`](frontend/tests/setup.ts). CI ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) runs lint, type-check, tests and build on pull requests and pushes to `main` that change `frontend/` or the workflow itself.
+
+Tests in [`backend/tests/`](backend/tests/) cover the URL safety checks and article fetching, the API routes, the LangGraph workflow routing, fact-check claim parsing, LLM reply parsing and vector-store chunking. It also covers article extraction, cleaning and keyword extraction, web search, the full LangGraph pipeline end to end, and [Hypothesis](https://hypothesis.readthedocs.io) property tests (URL safety, chunk IDs, RAG chunking, keyword extraction). Groq, Pinecone, web search and the embedding model are faked, so the suite needs no API keys or network access. CI ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) runs it with coverage on pull requests and pushes to `main` that change `backend/` or the workflow itself.
 
 ### Building & Deploying the Frontend
 

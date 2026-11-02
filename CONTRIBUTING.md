@@ -61,11 +61,32 @@ The FastAPI backend runs on [http://localhost:8000](http://localhost:8000).
    npm run test:coverage   # Vitest; fails below 90% coverage
    npm run build           # static export to frontend/out
    ```
-3. **Tests are required for new logic:** changes to `frontend/config/`, `frontend/i18n/metadata.ts`, `frontend/app/sitemap.ts` or `frontend/lib/` must add or update tests in `frontend/tests/`. Prefer [fast-check](https://fast-check.dev) property tests where the input space is large.
+   For backend changes:
+   ```bash
+   cd backend
+   uv run pytest --cov     # pytest; fails below 90% coverage
+   ```
+3. **Include tests:** every pull request that adds or changes functionality must add or update tests, as described in the [Testing Policy](#-testing-policy).
 4. **Commit Messages:**
    Use clear, descriptive commit messages following Conventional Commits (e.g., `feat: add preset topic card`, `fix: header logo alignment`).
 5. **Developer Certificate of Origin (DCO):**
    Ensure your commits adhere to our [`DCO.md`](DCO.md).
+
+---
+
+## 🧪 Testing Policy
+
+All new functionality, in the frontend and the backend, must include tests in the automated test suites, and bug fixes should add a test that fails without the fix. Pull requests that add behaviour without tests will not be merged.
+
+| Part | Tests live in | Run locally | Framework |
+|------|---------------|-------------|-----------|
+| Frontend | `frontend/tests/` | `npm test` in `frontend/` (`npm run test:coverage` for the CI coverage check) | [Vitest](https://vitest.dev) |
+| Backend | `backend/tests/` | `uv run pytest` in `backend/` (`uv run pytest --cov` for the CI coverage check) | [pytest](https://docs.pytest.org) |
+
+- **Coverage is measured on the whole code base** and must stay at or above 90% (lines, branches, functions and statements) in both parts. A new page, component, hook or module is counted automatically, so it needs its own tests.
+- **Frontend:** coverage includes everything under `app/`, `components/`, `hooks/`, `config/`, `i18n/` and `lib/`. The only exclusions are type declarations and shadcn/ui primitives that nothing imports, listed with their reasons in [`frontend/vitest.config.mts`](frontend/vitest.config.mts); when you start using one of those primitives, remove it from the list and test it. Render components with React Testing Library inside the real message catalogs (`renderWithIntl` in [`frontend/tests/helpers/intl.tsx`](frontend/tests/helpers/intl.tsx)), assert what the reader sees and can do, and mock only what jsdom cannot do (shared mocks are in [`frontend/tests/setup.ts`](frontend/tests/setup.ts)). Prefer [fast-check](https://fast-check.dev) property tests where the input space is large.
+- **Backend:** tests must not need API keys or network access. [`backend/tests/conftest.py`](backend/tests/conftest.py) sets placeholder API keys, fakes Pinecone, the embedding model and NLTK downloads, and blocks DNS lookups and outbound connections; use its fixtures (`fake_chat_client` for Groq, `fake_index` for Pinecone, `resolve_hosts` for DNS) and `monkeypatch` for other external calls. Coverage covers `app/` and `main.py` (`[tool.coverage.*]` in [`backend/pyproject.toml`](backend/pyproject.toml)); use [Hypothesis](https://hypothesis.readthedocs.io) property tests where the input space is large.
+- **CI enforces both suites:** [`frontend-ci.yml`](.github/workflows/frontend-ci.yml) runs lint, type-check, the Vitest suite with coverage and the build on changes to `frontend/`, and [`backend-ci.yml`](.github/workflows/backend-ci.yml) runs the pytest suite with coverage on changes to `backend/`. Pull requests are merged only when these checks pass.
 
 ---
 

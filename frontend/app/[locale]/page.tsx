@@ -2,13 +2,16 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link as LinkIcon, ExternalLink } from "lucide-react";
 import axios from "axios";
 import { apiUrl, API_TIMEOUT_MS } from "@/config/api";
+import { AOSSIE_URL } from "@/config/links";
+import { LEGAL_PAGES } from "@/config/site";
 import { PresetTopics, type PresetTopic } from "@/components/preset-topics";
 import { GetPerspectiveButton } from "@/components/get-perspective-button";
+import { getPrefillUrl } from "@/lib/prefill-url";
 
 
 const Globe = dynamic(() => import("@/components/globe").then((m) => m.Globe), {
@@ -84,11 +87,11 @@ export default function HomePage() {
 
     // Check query parameters on mount
     const params = new URLSearchParams(window.location.search);
-    const queryUrl = params.get("url");
+    const queryUrl = getPrefillUrl(window.location.search);
     const shouldFocus = params.get("focus");
 
     if (queryUrl) {
-      setUrl(decodeURIComponent(queryUrl));
+      setUrl(queryUrl);
       if (window.innerWidth >= 768) {
         inputRef.current?.focus();
       } else {
@@ -216,7 +219,7 @@ export default function HomePage() {
       <section className="relative flex flex-col items-center text-center w-full max-w-5xl mx-auto px-4 pt-3 sm:pt-6 md:pt-10 lg:pt-12 pb-2 shrink-0 z-10">
         {/* Token Badge (Exact same padding and properties as other pages) */}
         <a
-          href="https://aossie.org"
+          href={AOSSIE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-brand-border bg-card/60 hover:bg-card text-foreground text-xs font-medium tracking-wide transition-all shadow-sm mb-2 sm:mb-4 md:mb-5 group"
@@ -311,6 +314,21 @@ export default function HomePage() {
 
           <p className="mt-2.5 sm:mt-3 text-[11px] sm:text-xs text-foreground-muted opacity-75 text-center font-medium tracking-wide">
             {t("noSignInRequired")}
+          </p>
+
+          <p className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] text-foreground-muted opacity-75 text-center tracking-wide">
+            {t.rich("legalNotice", {
+              terms: (chunks) => (
+                <Link href={LEGAL_PAGES.terms.path} className="underline underline-offset-2 hover:text-foreground transition-colors">
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link href={LEGAL_PAGES.privacy.path} className="underline underline-offset-2 hover:text-foreground transition-colors">
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </form>
       </section>

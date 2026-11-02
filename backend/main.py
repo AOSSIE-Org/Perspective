@@ -28,6 +28,7 @@ from fastapi import FastAPI
 from app.routes.routes import router as article_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.logging.logging_config import setup_logger
+from app.config import CORS_ALLOW_ORIGINS, DEFAULT_PORT, SERVER_HOST
     
 # Setup logger for this module
 logger = setup_logger(__name__)
@@ -40,7 +41,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,6 +53,6 @@ if __name__ == "__main__":
     import uvicorn
     import os
 
-    port = int(os.environ.get("PORT", 7860))
+    port = int(os.environ.get("PORT", DEFAULT_PORT))
     logger.info(f" Server is running on http://localhost:{port}")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host=SERVER_HOST, port=port)

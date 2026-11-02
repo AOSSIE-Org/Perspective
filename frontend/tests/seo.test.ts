@@ -29,6 +29,9 @@ describe("sitemap", () => {
     const urls = sitemapUrls();
     expect(urls).toHaveLength(codes.length * PUBLIC_PAGES.length);
     expect(urls).toContain(`${SITE_URL}/en/about`);
+    expect(urls).toContain(`${SITE_URL}/hi/privacy`);
+    expect(urls).toContain(`${SITE_URL}/hi/terms`);
+    expect(urls).toContain(`${SITE_URL}/hi/support`);
     expect(urls.some((u) => u.includes("/analyze"))).toBe(false);
     expect(urls.some((u) => u.includes("/impact"))).toBe(false);
   });
@@ -64,19 +67,29 @@ describe("generateLocaleMetadata", () => {
 });
 
 describe("generatePageMetadata", () => {
-  const pages: PageKey[] = ["about", "contribute"];
+  const pages: PageKey[] = ["about", "contribute", "privacy", "terms", "support"];
+  const descriptions: Record<PageKey, { title: string; description: string }> = {
+    about: { title: en.About.title, description: en.About.subtitle },
+    contribute: { title: en.Contribute.title, description: en.Contribute.subtitle },
+    privacy: en.Privacy,
+    terms: en.Terms,
+    support: en.Support,
+  };
 
   it.each(pages)("gives /%s its own title, description and canonical", (page) => {
     const meta = generatePageMetadata("en", page);
-    const copy = page === "about" ? en.About : en.Contribute;
+    const copy = descriptions[page];
     expect(meta.title).toBe(`${copy.title} | Perspective AI`);
-    expect(meta.description).toBe(copy.subtitle);
+    expect(meta.description).toBe(copy.description);
     expect(meta.alternates?.canonical).toBe(`${SITE_URL}/en/${page}`);
     expect(meta.openGraph).toMatchObject({ title: meta.title, url: `${SITE_URL}/en/${page}` });
   });
 
   it("uses Hindi copy on Hindi pages", () => {
     expect(generatePageMetadata("hi", "about").title).toBe(`${hi.About.title} | Perspective AI`);
+    expect(generatePageMetadata("hi", "privacy").description).toBe(hi.Privacy.description);
+    expect(generatePageMetadata("hi", "support").title).toBe(`${hi.Support.title} | Perspective AI`);
+    expect(generatePageMetadata("hi", "support").description).toBe(hi.Support.description);
   });
 
   it("property: every page/locale canonical is listed in the sitemap", () => {

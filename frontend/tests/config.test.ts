@@ -1,8 +1,13 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import fc from "fast-check";
 import { apiUrl, API_BASE_URL, API_ENDPOINTS, API_TIMEOUT_MS, DEFAULT_API_BASE_URL, type ApiEndpoint } from "@/config/api";
 import { PRESET_TOPICS, TOPICS_CURATED_AT, TOPIC_MAX_AGE_DAYS } from "@/config/preset-topics";
 import { cn } from "@/lib/utils";
+import * as links from "@/config/links";
+import { SITE_URL, LEGAL_PAGES, PUBLIC_PAGES, SUPPORT_PAGE_PATH } from "@/config/site";
+import { SHARE_PLATFORMS, SUPPORT_LOGOS } from "@/config/support";
 
 const endpoints = Object.keys(API_ENDPOINTS) as ApiEndpoint[];
 
@@ -66,9 +71,54 @@ describe("preset topics", () => {
   });
 });
 
+describe("external links", () => {
+  const { CONTACT_EMAIL, SOCIAL_LINKS, ...urls } = links;
+  const all = Object.entries({ ...urls, ...SOCIAL_LINKS });
+
+  it.each(all)("%s is an HTTPS URL", (_, url) => {
+    expect(new URL(url).protocol).toBe("https:");
+  });
+
+  it("points the support page at AOSSIE GitHub Sponsors", () => {
+    expect(links.GITHUB_SPONSORS_URL).toBe("https://github.com/sponsors/AOSSIE-Org");
+  });
+
+  it("has a plain contact address for the mailto link", () => {
+    expect(CONTACT_EMAIL).toMatch(/^[^\s@:/]+@[^\s@:/]+\.[a-z]+$/);
+  });
+
+  it("keeps SITE_URL without a trailing slash", () => {
+    expect(SITE_URL).not.toMatch(/\/$/);
+  });
+});
+
 describe("cn", () => {
   it("merges conditional classes and lets later Tailwind utilities win", () => {
     expect(cn("px-2", false && "hidden", "px-4")).toBe("px-4");
     expect(cn("text-sm", ["font-bold", { underline: true, italic: false }])).toBe("text-sm font-bold underline");
+  });
+});
+
+describe("legal pages", () => {
+  it.each(Object.entries(LEGAL_PAGES))("%s renders a Markdown file that exists at the repository root", (_, page) => {
+    expect(fs.existsSync(path.join(process.cwd(), page.source))).toBe(true);
+  });
+});
+
+describe("support page", () => {
+  it("is a public page ranked like the legal pages", () => {
+    expect(SUPPORT_PAGE_PATH).toMatch(/^\/[a-z-]+$/);
+    expect(PUBLIC_PAGES.find((page) => page.path === SUPPORT_PAGE_PATH)?.priority).toBe(
+      PUBLIC_PAGES.find((page) => page.path === LEGAL_PAGES.privacy.path)?.priority,
+    );
+  });
+
+  it.each(Object.entries(SUPPORT_LOGOS))("shows the %s logo from public/brand", (_, logo) => {
+    expect(logo).toMatch(/^\/brand\//);
+    expect(fs.existsSync(path.join(process.cwd(), "public", logo))).toBe(true);
+  });
+
+  it("offers a fixed set of share networks", () => {
+    expect(SHARE_PLATFORMS).toEqual(["whatsapp", "twitter", "linkedin", "telegram", "email"]);
   });
 });

@@ -21,10 +21,10 @@ COPY . /app
 USER appuser
 
 # Install dependencies
-RUN uv sync --locked --no-cache
+RUN uv sync --locked --no-cache --no-dev
 
 # Expose the port Hugging Face looks for
 EXPOSE 7860
 
 # Start the app
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "--no-dev", "main.py"]
