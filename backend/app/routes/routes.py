@@ -30,8 +30,9 @@ Core Components:
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from app.modules.scraper.safe_fetch import UnsafeURLError, validate_public_url
 from app.modules.pipeline import run_scraper_pipeline
 from app.modules.pipeline import run_langgraph_workflow
 from app.modules.bias_detection.check_bias import check_bias
@@ -59,8 +60,17 @@ async def home():
     return {"message": "Perspective API is live!"}
 
 
+async def require_public_url(url: str) -> None:
+    """Reject URLs that are not public http(s) pages before any scraping starts."""
+    try:
+        await asyncio.to_thread(validate_public_url, url)
+    except UnsafeURLError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 @router.post("/bias")
 async def bias_detection(request: URlRequest):
+    await require_public_url(request.url)
     content = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     bias_score = await asyncio.to_thread(check_bias, (content))
     logger.info(f"Bias detection result: {bias_score}")
@@ -69,6 +79,7 @@ async def bias_detection(request: URlRequest):
 
 @router.post("/process")
 async def run_pipelines(request: URlRequest):
+    await require_public_url(request.url)
     article_text = await asyncio.to_thread(run_scraper_pipeline, (request.url))
     logger.debug(f"Scraper output: {json.dumps(article_text, indent=2, ensure_ascii=False)}")
     data = await asyncio.to_thread(run_langgraph_workflow, (article_text))

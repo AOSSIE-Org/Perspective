@@ -12,7 +12,8 @@
     "impact": "IMPACT",
     "contribute": "CONTRIBUTE",
     "about": "ABOUT",
-    "getPerspective": "Perspective AI"
+    "getPerspective": "Perspective AI",
+    "support": "Support us"
   },
   "Hero": {
     "broughtToYouBy": "BROUGHT TO YOU BY",
@@ -26,6 +27,7 @@
     "noUrlError": "Please enter or select a valid article URL to get perspectives.",
     "invalidUrlError": "Please enter a valid web URL (e.g. https://example.com/article)",
     "noSignInRequired": "No sign in required. It’s completely free.",
+    "legalNotice": "By analysing an article, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "fetchingArticle": "Fetching Article...",
     "analysing": "Analysing...",
     "detectingBias": "Detecting Bias...",
@@ -131,6 +133,33 @@
     "step5Desc": "Vectorizes perspectives into Pinecone to enable real-time interactive Q&A.",
     "clickToAdvance": "Click to advance next capability",
     "footer": "© 2026 AOSSIE. Combating bias through AI-powered perspective analysis."
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "description": "How Perspective handles your information."
+  },
+  "Terms": {
+    "title": "Terms of Service",
+    "description": "The terms for using Perspective."
+  },
+  "Legal": {
+    "englishOnly": "This document is available in English only."
+  },
+  "Share": {
+    "trigger": "Share this page",
+    "share": "Share",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyFailed": "Failed",
+    "urlLabel": "URL to share"
+  },
+  "Support": {
+    "title": "Support Perspective",
+    "description": "Help keep Perspective free and open source.",
+    "madeBy": "A project made by",
+    "supportedBy": "Supported by",
+    "aossieDescription": "AOSSIE is an Australian not-for-profit organisation that supports and brings together open-source projects."
   },
   "LanguageSwitcher": {
     "label": "Language"

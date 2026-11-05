@@ -8,7 +8,7 @@ Workflow:
     1. Validates that each chunk is a dictionary containing the 'text'
        field.
     2. Extracts all chunk texts and generates embeddings using the
-       "all-MiniLM-L6-v2" model.
+       embedding model named by EMBEDDING_MODEL in app.config.
     3. Packages each embedding with its corresponding chunk ID and
        metadata for downstream storage in a vector database.
 
@@ -24,8 +24,9 @@ Functions:
 
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Any
+from app.config import EMBEDDING_MODEL
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+embedder = SentenceTransformer(EMBEDDING_MODEL)
 
 
 def embed_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

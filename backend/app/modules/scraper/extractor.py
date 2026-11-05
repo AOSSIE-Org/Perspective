@@ -9,7 +9,9 @@ approaches in order:
     3. BeautifulSoup + Readability
 
 If one method fails, it falls back to the next until a valid article
-body is found.
+body is found. The page is fetched once through safe_fetch, which only
+allows public http(s) hosts, and every extractor parses that HTML instead
+of making its own request.
 
 Classes:
     ArticleExtractor
@@ -23,6 +25,8 @@ from readability import Document
 import requests
 import logging
 import json
+from app.modules.scraper.safe_fetch import UnsafeURLError, fetch_public_html
+from app.config import SCRAPER_USER_AGENT
 
 # This class contains extractors that are more and more advanced from top to
 # bottom and they will try to extract any article.
@@ -31,25 +35,20 @@ import json
 class Article_extractor:
     def __init__(self, url):
         self.url = url
-        self.headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                " AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/113.0 Safari/537.36"
-            )
-        }
+        self.headers = {"User-Agent": SCRAPER_USER_AGENT}
+        self._html = None
 
     def _fetch_html(self):
-        try:
-            res = requests.get(self.url, self.headers, timeout=10)
-            res.raise_for_status()
-            return res.text
-        except requests.RequestException as e:
-            logging.error(f"failed to fetch: {self.url}-{e}")
-            return ""
+        if self._html is None:
+            try:
+                self._html = fetch_public_html(self.url, self.headers)
+            except (UnsafeURLError, requests.RequestException) as e:
+                logging.error(f"failed to fetch: {self.url}-{e}")
+                self._html = ""
+        return self._html
 
     def extract_with_trafilatura(self):
-        downloaded = trafilatura.fetch_url(self.url)
+        downloaded = self._fetch_html()
         if not downloaded:
             return {}
         result = trafilatura.extract(
@@ -65,9 +64,13 @@ class Article_extractor:
         return {}
 
     def extract_with_newspaper(self) -> dict:
+        html = self._fetch_html()
+        if not html:
+            return {}
         try:
-            article = Article(self.url)
-            article.download()
+            # fetch_images=False stops newspaper from requesting image URLs found in the page
+            article = Article(self.url, fetch_images=False)
+            article.download(input_html=html)
             article.parse()
             return {
                 "title": article.title,

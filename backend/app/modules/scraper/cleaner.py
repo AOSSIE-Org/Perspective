@@ -19,6 +19,7 @@ Functions:
 
 import re
 import nltk
+from app.config import MIN_LINE_CHARS
 
 try:
     nltk.data.find("corpora/stopwords")
@@ -122,7 +123,7 @@ def clean_extracted_text(text: str):
 
     # 3. Remove lines with too few characters (likely junk)
     lines = text.split("\n")
-    cleaned_lines = [line.strip() for line in lines if len(line.strip()) > 30]
+    cleaned_lines = [line.strip() for line in lines if len(line.strip()) > MIN_LINE_CHARS]
 
     # 4. Join lines back with a double newline for paragraphs
     cleaned_text = "\n\n".join(cleaned_lines)

@@ -7,6 +7,7 @@ Module for extracting key phrases from text using the RAKE
 
 from typing import Dict, List
 import logging
+from app.config import MAX_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ except Exception:
     STOPWORDS_SET = DEFAULT_STOPWORDS
 
 
-def extract_keywords(text: str, max_keywords: int = 15) -> List[str]:
+def extract_keywords(text: str, max_keywords: int = MAX_KEYWORDS) -> List[str]:
     """
     Extracts important keywords from the input text using RAKE algorithm.
     """

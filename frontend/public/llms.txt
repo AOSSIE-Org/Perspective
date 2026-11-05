@@ -13,6 +13,8 @@ Perspective AI is an open-source platform by AOSSIE designed to combat echo cham
 - **`app/[locale]/about/`**: Mission statement and multi-agent AI pipeline architecture.
 - **`app/[locale]/contact/`**: Community feedback channels (Discord, GitHub).
 - **`app/[locale]/analyze/`**: Article URL submission, loading progress, and structured result scorecard with RAG chat.
+- **`app/[locale]/privacy/`, `app/[locale]/terms/`**: Privacy Policy and Terms of Service, rendered at build time from the repository's `PRIVACY.md` and `TERMS.md`.
+- **`app/[locale]/support/`**: Support page with AOSSIE's GitHub Sponsors link, built with the `support-us-button` widget.
 - **`public/brand/`**: Repository branding folder containing logos, favicon, and brand specifications (`Brand.md`).
 - **`config/languages.ts`**: Supported locales configuration list (`en`, `hi`).
 - **`messages/`**: Translation catalogs (`en.json`, `hi.json`).

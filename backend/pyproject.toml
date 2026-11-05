@@ -15,7 +15,6 @@ dependencies = [
     "langchain-community>=0.3.25",
     "langchain-groq>=0.3.2",
     "langgraph>=0.4.8",
-    "logging>=0.4.9.6",
     "newspaper3k>=0.2.8",
     "nltk>=3.9.1",
     "pinecone>=7.3.0",
@@ -25,4 +24,32 @@ dependencies = [
     "sentence-transformers>=5.0.0",
     "trafilatura>=2.0.0",
     "uvicorn>=0.34.3",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "hypothesis>=6.170.14",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+# "app" is the package directory; "main" is the main.py module. Listing them as
+# sources also reports app/ files that no test imports (at 0%).
+source = ["app", "main"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_also = [
+    # Script entry point (`uv run main.py`); starts a real uvicorn server.
+    'if __name__ == "__main__":',
 ]

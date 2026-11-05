@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { ExternalLink } from "lucide-react";
+import { REPO_URL, SOCIAL_LINKS } from "@/config/links";
 
 const OrbitingTechStack = dynamic(() => import("@/components/orbiting-tech-stack"), {
   ssr: false,
@@ -61,7 +62,7 @@ export default function ContributePage() {
         {/* Action Buttons — shrink padding/text on mobile to prevent wrapping */}
         <div className="flex items-center justify-center gap-2 sm:gap-3">
           <a
-            href="https://github.com/AOSSIE-Org/Perspective"
+            href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-[4px] bg-primary text-primary-foreground font-medium text-[11px] sm:text-sm shadow hover:opacity-95 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap"
@@ -72,7 +73,7 @@ export default function ContributePage() {
           </a>
 
           <a
-            href="https://discord.gg/hjUhu33uAn"
+            href={SOCIAL_LINKS.discord}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-[4px] border border-border/70 bg-card/60 hover:bg-card text-foreground font-medium text-[11px] sm:text-sm shadow transition-all transform hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap"

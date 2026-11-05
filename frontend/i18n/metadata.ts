@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { languages, defaultLanguage } from "@/config/languages";
-import { SITE_URL, OG_IMAGE } from "@/config/site";
+import { SITE_URL, OG_IMAGE, LEGAL_PAGES, SUPPORT_PAGE_PATH } from "@/config/site";
+import { AOSSIE_URL } from "@/config/links";
 import enMessages from "../messages/en.json";
 import hiMessages from "../messages/hi.json";
 
@@ -57,7 +58,7 @@ export function generateStructuredData(locale: string) {
   const { title, description } = metadataCatalog[locale] ?? metadataCatalog[defaultLanguage];
   const lang = metadataCatalog[locale] ? locale : defaultLanguage;
   const url = `${SITE_URL}/${lang}`;
-  const publisher = { "@type": "Organization", name: "AOSSIE", url: "https://aossie.org" };
+  const publisher = { "@type": "Organization", name: "AOSSIE", url: AOSSIE_URL };
 
   return {
     "@context": "https://schema.org",
@@ -89,6 +90,9 @@ export function serializeJsonLd(data: unknown): string {
 const pageCatalog = {
   about: { path: "/about", en: enMessages.About, hi: hiMessages.About },
   contribute: { path: "/contribute", en: enMessages.Contribute, hi: hiMessages.Contribute },
+  privacy: { path: LEGAL_PAGES.privacy.path, en: enMessages.Privacy, hi: hiMessages.Privacy },
+  terms: { path: LEGAL_PAGES.terms.path, en: enMessages.Terms, hi: hiMessages.Terms },
+  support: { path: SUPPORT_PAGE_PATH, en: enMessages.Support, hi: hiMessages.Support },
 } as const;
 
 export type PageKey = keyof typeof pageCatalog;
@@ -99,11 +103,13 @@ export function generatePageMetadata(locale: string, page: PageKey): Metadata {
   const copy = locale === "hi" ? entry.hi : entry.en;
   const base = generateLocaleMetadata(locale, entry.path);
   const title = `${copy.title} | Perspective AI`;
+  // The legal and support pages have no on-page subtitle, so they carry their own description
+  const description = "description" in copy ? copy.description : copy.subtitle;
   return {
     ...base,
     title,
-    description: copy.subtitle,
-    openGraph: { ...base.openGraph, title, description: copy.subtitle },
-    twitter: { ...base.twitter, title, description: copy.subtitle },
+    description,
+    openGraph: { ...base.openGraph, title, description },
+    twitter: { ...base.twitter, title, description },
   };
 }

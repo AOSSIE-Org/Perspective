@@ -66,7 +66,9 @@ export default async function LocaleLayout({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateStructuredData(locale)) }}
         />
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          {/* disableTransitionOnChange: colours switch instantly, so the Support Us widget ("auto" theme), which reads
+              the page's computed colours right after a theme change, sees the new theme rather than a mid-fade value. */}
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <NavigationProgress />
             <RoutePreloader />
             <div className="relative flex flex-col h-screen max-h-[100dvh] w-full overflow-hidden">
