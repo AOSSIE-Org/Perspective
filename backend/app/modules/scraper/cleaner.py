@@ -111,6 +111,16 @@ def clean_extracted_text(text: str):
         text,
         flags=flags,
     )
+    # Inside a line, markers are removed only when they stand alone between
+    # two sentences: after the start of the line or the end of a sentence, and
+    # before a capital letter, like "Advertisement" in "... on Tuesday.
+    # Advertisement The budget ...". "Advertisement spending rose." is kept.
+    text = re.sub(
+        r"(?:^|(?<=[.!?]))" + space + marker + r"(?:" + separator + marker + r")*\b" + space + r"(?=(?-i:[A-Z]))",
+        " ",
+        text,
+        flags=flags,
+    )
 
     for pattern in boilerplate_phrases:
         if not pattern.endswith(".*"):
