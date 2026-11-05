@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@aossie-org/social-share-button": "file:local-packages/aossie-org-social-share-button-1.1.0.tgz",
+    "@aossie-org/social-share-button": "^1.1.1",
+    "@aossie-org/support-us-button": "^2.3.1",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -63,7 +64,6 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
     "sonner": "^1.7.1",
-    "support-us-button": "file:local-packages/support-us-button-2.3.0.tgz",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",

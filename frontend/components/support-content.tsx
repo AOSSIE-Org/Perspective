@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import SupportUsButton from "support-us-button";
+import SupportUsButton from "@aossie-org/support-us-button";
 import { AOSSIE_URL, GITHUB_SPONSORS_URL } from "@/config/links";
 import { SUPPORT_LOGOS, SUPPORTERS } from "@/config/support";
 

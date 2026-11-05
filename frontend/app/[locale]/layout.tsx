@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { messagesMap, defaultMessages } from "@/i18n/messages";
 import { generateLocaleMetadata, generateStructuredData, serializeJsonLd } from "@/i18n/metadata";
 import { ThemeProvider } from "@/components/theme-provider";
+import { DEFAULT_THEME, THEME_STORAGE_KEY, themeInitScript } from "@/components/theme-script";
 import { Navbar } from "@/components/navbar";
 import { MarqueeTicker } from "@/components/marquee-ticker";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -59,6 +60,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${inter.variable} h-full overflow-hidden antialiased`} suppressHydrationWarning>
+      <head>
+        {/* Sets the theme class before <body> is parsed, so the first paint is never the wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="h-full max-h-[100dvh] w-full overflow-hidden bg-background text-foreground transition-colors selection:bg-primary/20 selection:text-primary">
         <script
           type="application/ld+json"
@@ -68,7 +73,13 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
           {/* disableTransitionOnChange: colours switch instantly, so the Support Us widget ("auto" theme), which reads
               the page's computed colours right after a theme change, sees the new theme rather than a mid-fade value. */}
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <ThemeProvider
+            attribute="class"
+            storageKey={THEME_STORAGE_KEY}
+            defaultTheme={DEFAULT_THEME}
+            enableSystem
+            disableTransitionOnChange
+          >
             <NavigationProgress />
             <RoutePreloader />
             <div className="relative flex flex-col h-screen max-h-[100dvh] w-full overflow-hidden">

@@ -8,6 +8,7 @@ import { createTranslator } from "next-intl";
 import { renderWithIntl, catalogs } from "./helpers/intl";
 import { NavigationSignal, notFound, redirect } from "./helpers/next-navigation";
 import { SITE_URL } from "@/config/site";
+import { themeInitScript } from "@/components/theme-script";
 
 // The server half of next-intl needs the Next.js request scope; translations come from the real catalogs
 vi.mock("next-intl/server", () => ({
@@ -18,7 +19,7 @@ vi.mock("next-intl/server", () => ({
 }));
 
 // The support widget is a third-party component; it gets its own test in components.test.tsx
-vi.mock("support-us-button", () => ({
+vi.mock("@aossie-org/support-us-button", () => ({
   default: ({ heading }: { heading: string }) => <section data-testid="support-widget">{heading}</section>,
 }));
 
@@ -102,6 +103,9 @@ describe("locale layout", () => {
     expect(html).toContain(home);
     expect(html).toContain(support);
     expect(html).toContain(`href="/${locale}/support"`);
+    // The theme is applied from <head>, before <body> exists, so the first paint is never the wrong theme
+    const head = new DOMParser().parseFromString(html, "text/html").head;
+    expect(head.querySelector("script")?.textContent).toBe(themeInitScript);
   });
 });
 

@@ -10,7 +10,7 @@ export const SUPPORT_LOGOS = {
 export const SHARE_PLATFORMS = ["whatsapp", "twitter", "linkedin", "telegram", "email"] as const;
 
 /** The widget's stylesheet (scoped to `.sub-root`), read at build time relative to frontend/. */
-export const SUPPORT_STYLESHEET = "node_modules/support-us-button/dist/style.css";
+export const SUPPORT_STYLESHEET = "node_modules/@aossie-org/support-us-button/dist/style.css";
 
 /**
  * Organisations that support Perspective, shown as links on the support page. Names are proper nouns and are not
