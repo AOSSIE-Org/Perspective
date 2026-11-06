@@ -60,7 +60,7 @@ def clean_extracted_text(text: str):
         r"about us",
         r"contact us",
         r"share this article",
-        r"sign up for our newsletter",
+        r"sign up for our newsletter.*",
         r"report this ad",
         r"this story was originally published.*",
         r"originally appeared on.*",
@@ -90,8 +90,50 @@ def clean_extracted_text(text: str):
         r"post a job on.*",
         r"powered by .*",
     ]
+    # Only drop whole boilerplate lines. Matching the phrases anywhere also cut
+    # them out of article sentences (for example "an engine powered by
+    # hydrogen ..."). A phrase ending in ".*" marks a line that starts with it,
+    # like "Read more at ...". Other phrases, like "advertisement", only match
+    # a line made of such markers alone, like "Advertisement" or
+    # "Privacy Policy | Terms of Service", so a sentence that starts with one
+    # of them is kept.
+    # Spaces and tabs, including non-breaking spaces, but not line breaks.
+    # Marker lines may end in "\r" when the text uses CRLF line endings.
+    space = r"[^\S\r\n]*"
+    flags = re.IGNORECASE | re.MULTILINE
+
+    markers = [p for p in boilerplate_phrases if not p.endswith(".*")]
+    marker = r"(?:" + "|".join(markers) + r")"
+    separator = space + r"[|/,\u00b7\u2022-]" + space
+    text = re.sub(
+        r"^" + space + marker + r"(?:" + separator + marker + r")*" + space + r"(?:[.!:]" + space + r")?\r?$",
+        "",
+        text,
+        flags=flags,
+    )
+    # Inside a line, only ad labels are removed, and only when they stand alone
+    # between two sentences: after the end of a sentence, and before a
+    # capitalised word followed by a lowercase one, like "Advertisement" in
+    # "... on Tuesday. Advertisement The budget ...". Anything else could be
+    # article text, so it is kept: "Advertisement spending rose." or a sentence
+    # that starts with another marker, like "Privacy Policy Changes are coming."
+    ad_label = r"(?:advertisement|sponsored content|report this ad)"
+    next_sentence = r"(?=(?-i:[A-Z][\w'\u2019-]*[^\S\r\n]+[a-z]))"
+    text = re.sub(
+        r"(?<=[.!?])" + space + ad_label + r"(?:" + separator + ad_label + r")*\b" + space + next_sentence,
+        " ",
+        text,
+        flags=flags,
+    )
+
     for pattern in boilerplate_phrases:
-        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
+        if not pattern.endswith(".*"):
+            continue
+        phrase = pattern.removesuffix(".*")
+        # Without a boundary after the phrase, "read more at" would also
+        # match "Read more atomic ...".
+        boundary = r"\b" if phrase[-1:].isalnum() else ""
+        text = re.sub(r"^" + space + r"(?:" + phrase + ")" + boundary + r".*$", "", text, flags=flags)
 
     # 3. Remove lines with too few characters (likely junk)
     lines = text.split("\n")
