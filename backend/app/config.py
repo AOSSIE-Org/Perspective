@@ -65,6 +65,8 @@ PINECONE_METRIC = "cosine"
 PINECONE_CLOUD = "aws"
 PINECONE_REGION = "us-east-1"
 PINECONE_NAMESPACE = "default"
+PINECONE_INDEX_READY_TIMEOUT_SECONDS = 60  # wait for a new index to finish provisioning
+PINECONE_INDEX_READY_POLL_SECONDS = 1
 RAG_TOP_K = 5
 
 # --- Fact checking (utils/fact_check_utils.py) ------------------------------
