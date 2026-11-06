@@ -111,15 +111,16 @@ def clean_extracted_text(text: str):
         text,
         flags=flags,
     )
-    # Inside a line, markers are removed only when they stand alone between
-    # two sentences: after the end of a sentence, and before a capitalised word
-    # followed by a lowercase one, like "Advertisement" in "... on Tuesday.
-    # Advertisement The budget ...". Anything else could be article text, so it
-    # is kept: "Advertisement spending rose." or a title like "Privacy Policy
-    # Changes Will Affect Residents".
+    # Inside a line, only ad labels are removed, and only when they stand alone
+    # between two sentences: after the end of a sentence, and before a
+    # capitalised word followed by a lowercase one, like "Advertisement" in
+    # "... on Tuesday. Advertisement The budget ...". Anything else could be
+    # article text, so it is kept: "Advertisement spending rose." or a sentence
+    # that starts with another marker, like "Privacy Policy Changes are coming."
+    ad_label = r"(?:advertisement|sponsored content|report this ad)"
     next_sentence = r"(?=(?-i:[A-Z][\w'\u2019-]*[^\S\r\n]+[a-z]))"
     text = re.sub(
-        r"(?<=[.!?])" + space + marker + r"(?:" + separator + marker + r")*\b" + space + next_sentence,
+        r"(?<=[.!?])" + space + ad_label + r"(?:" + separator + ad_label + r")*\b" + space + next_sentence,
         " ",
         text,
         flags=flags,
