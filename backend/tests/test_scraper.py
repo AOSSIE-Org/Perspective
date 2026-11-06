@@ -74,7 +74,10 @@ def test_cleaning_keeps_sentences_that_contain_boilerplate_words():
         "About using the app offline, the team said support is still being planned.\n"
         "Read more atomic physics books if you want to understand the subject.\n"
         "Advertisement spending increased across the country last year.\n"
-        "The firm cut its costs again. Advertisement revenue fell by a third."
+        "The firm cut its costs again. Advertisement revenue fell by a third.\n"
+        "Privacy Policy Changes Will Affect Millions Of Residents\n"
+        "Terms of Service Updates are due next week for most local residents.\n"
+        "The firm cut its costs again. Privacy Policy Changes Will Affect Millions Of Residents."
     )
 
     assert clean_extracted_text(text) == text.replace("\n", "\n\n")

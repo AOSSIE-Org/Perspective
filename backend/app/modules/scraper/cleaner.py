@@ -112,11 +112,14 @@ def clean_extracted_text(text: str):
         flags=flags,
     )
     # Inside a line, markers are removed only when they stand alone between
-    # two sentences: after the start of the line or the end of a sentence, and
-    # before a capital letter, like "Advertisement" in "... on Tuesday.
-    # Advertisement The budget ...". "Advertisement spending rose." is kept.
+    # two sentences: after the end of a sentence, and before a capitalised word
+    # followed by a lowercase one, like "Advertisement" in "... on Tuesday.
+    # Advertisement The budget ...". Anything else could be article text, so it
+    # is kept: "Advertisement spending rose." or a title like "Privacy Policy
+    # Changes Will Affect Residents".
+    next_sentence = r"(?=(?-i:[A-Z][\w'\u2019-]*[^\S\r\n]+[a-z]))"
     text = re.sub(
-        r"(?:^|(?<=[.!?]))" + space + marker + r"(?:" + separator + marker + r")*\b" + space + r"(?=(?-i:[A-Z]))",
+        r"(?<=[.!?])" + space + marker + r"(?:" + separator + marker + r")*\b" + space + next_sentence,
         " ",
         text,
         flags=flags,
