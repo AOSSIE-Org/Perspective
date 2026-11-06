@@ -89,8 +89,8 @@ async def run_pipelines(request: URlRequest):
 @router.post("/chat")
 async def answer_query(request: ChatQuery):
     query = request.message
-    results = search_pinecone(query)
-    answer = ask_llm(query, results)
+    results = await asyncio.to_thread(search_pinecone, query)
+    answer = await asyncio.to_thread(ask_llm, query, results)
     logger.info(f"Chat answer generated: {answer}")
 
     return {"answer": answer}
