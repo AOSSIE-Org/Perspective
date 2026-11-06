@@ -150,13 +150,35 @@ def pinecone_client(monkeypatch):
     return config, calls, index
 
 
+def test_importing_vector_store_does_not_connect_or_require_a_key(monkeypatch, pinecone_client, fresh_module):
+    _, calls, _ = pinecone_client
+    monkeypatch.delenv("PINECONE_API_KEY")
+
+    module = fresh_module("app.db.vector_store")
+
+    # The whole point of lazy connection: importing must be free of
+    # credentials and network, however the module is reached.
+    assert calls == {"init": [], "create_index": [], "index": []}
+    assert callable(module.get_index)
+
+
 def test_vector_store_connects_to_an_existing_index(pinecone_client, fresh_module):
     _, calls, index = pinecone_client
 
     module = fresh_module("app.db.vector_store")
 
-    assert module.index is index
+    assert module.get_index() is index
     assert calls == {"init": ["test-pinecone-key"], "create_index": [], "index": [PINECONE_INDEX_NAME]}
+
+
+def test_vector_store_caches_the_connection(pinecone_client, fresh_module):
+    _, calls, index = pinecone_client
+
+    module = fresh_module("app.db.vector_store")
+
+    assert module.get_index() is index
+    assert module.get_index() is index
+    assert calls["init"] == ["test-pinecone-key"]
 
 
 def test_vector_store_creates_the_index_when_it_is_missing(pinecone_client, fresh_module):
@@ -164,23 +186,38 @@ def test_vector_store_creates_the_index_when_it_is_missing(pinecone_client, fres
     config["has_index"] = False
 
     module = fresh_module("app.db.vector_store")
+    assert module.get_index() is index
 
     [created] = calls["create_index"]
     assert created["name"] == PINECONE_INDEX_NAME
     assert created["dimension"] == PINECONE_DIMENSIONS
     assert created["metric"] == PINECONE_METRIC
     assert (created["spec"].cloud, created["spec"].region) == (PINECONE_CLOUD, PINECONE_REGION)
-    assert module.index is index
 
 
 def test_vector_store_requires_an_api_key(monkeypatch, pinecone_client, fresh_module):
     _, calls, _ = pinecone_client
     monkeypatch.delenv("PINECONE_API_KEY")
 
+    module = fresh_module("app.db.vector_store")
     with pytest.raises(ValueError, match="PINECONE_API_KEY environment variable is required"):
-        fresh_module("app.db.vector_store")
+        module.get_index()
 
     assert calls["init"] == []
+
+
+def test_vector_store_retries_after_a_failed_attempt(monkeypatch, pinecone_client, fresh_module):
+    config, calls, index = pinecone_client
+    monkeypatch.delenv("PINECONE_API_KEY")
+
+    module = fresh_module("app.db.vector_store")
+    with pytest.raises(ValueError):
+        module.get_index()
+
+    # Nothing was cached by the failed call, so fixing the environment lets
+    # the next get_index() succeed without a restart.
+    monkeypatch.setenv("PINECONE_API_KEY", "test-pinecone-key")
+    assert module.get_index() is index
 
 
 @pytest.mark.parametrize(
@@ -191,8 +228,9 @@ def test_vector_store_reports_connection_failures(pinecone_client, fresh_module,
     config, _, _ = pinecone_client
     config[failure] = ConnectionError("pinecone unreachable")
 
+    module = fresh_module("app.db.vector_store")
     with pytest.raises(RuntimeError, match=message) as raised:
-        fresh_module("app.db.vector_store")
+        module.get_index()
 
     assert "pinecone unreachable" in str(raised.value)
 

@@ -21,7 +21,7 @@ Notes:
 """
 
 
-from app.db.vector_store import index
+from app.db.vector_store import get_index
 from app.config import PINECONE_NAMESPACE
 
 
@@ -47,7 +47,7 @@ def store(vectors: List[Dict[str, Any]], namespace: str = PINECONE_NAMESPACE) ->
         raise ValueError("Vectors list cannot be empty")
 
     try:
-        index.upsert(vectors, namespace=namespace)
+        get_index().upsert(vectors, namespace=namespace)
         logger.info(
             f"Successfully stored {len(vectors)} vectors in namespace '{namespace}'"
         )

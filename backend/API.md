@@ -246,7 +246,7 @@ Copy [`.env.example`](.env.example) to `.env` in `backend/`. Model names, sampli
 | Variable | Required | Used for |
 |----------|----------|----------|
 | `GROQ_API_KEY` | yes | All LLM calls. The Groq clients are created at startup, so the server does not start without it. |
-| `PINECONE_API_KEY` | yes | Storing and searching analyses. Checked at startup ([`app/db/vector_store.py`](app/db/vector_store.py)), which also creates the `perspective` index (384 dimensions, cosine, AWS `us-east-1` serverless) if it does not exist. |
+| `PINECONE_API_KEY` | yes | Storing and searching analyses. Required on the first store or search ([`app/db/vector_store.py`](app/db/vector_store.py)), which lazily connects and also creates the `perspective` index (384 dimensions, cosine, AWS `us-east-1` serverless) if it does not exist. The server starts without it; only requests that need vector storage then fail. |
 | `SEARCH_KEY` | no | Google Custom Search key for fact checking. When unset or left as the `.env.example` placeholder, DuckDuckGo is used instead. |
 | `PORT` | no | Listening port; defaults to `7860`. The server binds to `0.0.0.0`. |
 | `HF_TOKEN` | no | Not read by the backend code. The Hugging Face Hub library uses it, if set, when downloading the embedding model. Deploying to Hugging Face Spaces uses the `HF_TOKEN` GitHub Actions secret. |

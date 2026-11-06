@@ -5,10 +5,12 @@ Provides functionality to perform semantic search queries on the Pinecone
 vector database for Retrieval-Augmented Generation (RAG) workflows.
 
 This module:
-    - Loads Pinecone credentials from environment variables.
-    - Connects to the Pinecone index named in app.config.
     - Defines `search_pinecone()` to search stored vector embeddings and
       retrieve the most relevant matches.
+    - Connects through app.db.vector_store.get_index(), which opens the
+      Pinecone connection lazily on the first store or search instead of at
+      import, so a missing PINECONE_API_KEY does not stop the API from
+      starting.
 
 Functions:
     search_pinecone(query: str, top_k: int = RAG_TOP_K) -> list[dict]:
@@ -20,26 +22,19 @@ Environment Variables:
 
 Dependencies:
     - app.modules.chat.embed_query (for generating embeddings)
-    - pinecone (Pinecone client library)
+    - app.db.vector_store (for the shared Pinecone index connection)
 """
 
 
-from pinecone import Pinecone
-from dotenv import load_dotenv
+from app.db.vector_store import get_index
 from app.modules.chat.embed_query import embed_query
-from app.config import PINECONE_INDEX_NAME, PINECONE_NAMESPACE, RAG_TOP_K
-import os
-
-load_dotenv()
-
-pc = Pinecone(os.getenv("PINECONE_API_KEY"))
-index = pc.Index(PINECONE_INDEX_NAME)
+from app.config import PINECONE_NAMESPACE, RAG_TOP_K
 
 
 def search_pinecone(query: str, top_k: int = RAG_TOP_K):
     embeddings = embed_query(query)
 
-    results = index.query(
+    results = get_index().query(
         vector=embeddings, top_k=top_k, include_metadata=True, namespace=PINECONE_NAMESPACE
     )
 

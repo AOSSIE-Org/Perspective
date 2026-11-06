@@ -4,8 +4,7 @@ conftest.py
 Shared setup for the backend test suite.
 
 Several app modules create API clients as soon as they are imported: the Groq
-clients read GROQ_API_KEY, app.db.vector_store and app.modules.chat.get_rag_data
-connect to Pinecone, the embedding modules download a sentence-transformers
+clients read GROQ_API_KEY, the embedding modules download a sentence-transformers
 model, and the scraper cleaner downloads NLTK corpora. The suite must run
 without API keys or network access, so before any app module is imported this
 file:
