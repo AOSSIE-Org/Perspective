@@ -16,6 +16,7 @@ if BACKEND_ROOT not in sys.path:
 
 
 def _reload_vector_store():
+    """Reload vector_store with a cleared client cache for an isolated test."""
     import app.db.vector_store as vs
 
     vs.reset_index_for_tests()
@@ -23,6 +24,7 @@ def _reload_vector_store():
 
 
 def test_import_without_pinecone_api_key_does_not_raise(monkeypatch):
+    """Importing vector_store succeeds when PINECONE_API_KEY is unset."""
     monkeypatch.delenv("PINECONE_API_KEY", raising=False)
     vs = _reload_vector_store()
     assert vs.INDEX_NAME == "perspective"
@@ -30,6 +32,7 @@ def test_import_without_pinecone_api_key_does_not_raise(monkeypatch):
 
 
 def test_get_index_without_api_key_raises_value_error(monkeypatch):
+    """get_index() raises ValueError when PINECONE_API_KEY is missing."""
     monkeypatch.delenv("PINECONE_API_KEY", raising=False)
     vs = _reload_vector_store()
     with pytest.raises(ValueError, match="PINECONE_API_KEY"):
@@ -37,6 +40,7 @@ def test_get_index_without_api_key_raises_value_error(monkeypatch):
 
 
 def test_get_index_initializes_once_and_reuses_cached_index(monkeypatch):
+    """The Pinecone client is constructed once and the same index is reused."""
     monkeypatch.setenv("PINECONE_API_KEY", "test-key")
     vs = _reload_vector_store()
 
@@ -56,6 +60,7 @@ def test_get_index_initializes_once_and_reuses_cached_index(monkeypatch):
 
 
 def test_get_index_creates_missing_index(monkeypatch):
+    """get_index() creates the Pinecone index when it does not already exist."""
     monkeypatch.setenv("PINECONE_API_KEY", "test-key")
     vs = _reload_vector_store()
 
@@ -82,7 +87,47 @@ def test_get_index_creates_missing_index(monkeypatch):
     assert kwargs["metric"] == vs.METRIC
 
 
+def test_direct_import_of_index_does_not_initialize(monkeypatch):
+    """``from app.db.vector_store import index`` must not construct the client."""
+    monkeypatch.delenv("PINECONE_API_KEY", raising=False)
+    _reload_vector_store()
+
+    with patch("pinecone.Pinecone") as pinecone_ctor:
+        from app.db.vector_store import index
+
+        assert index is not None
+        pinecone_ctor.assert_not_called()
+        with pytest.raises(ValueError, match="PINECONE_API_KEY"):
+            index.query(vector=[0.1], top_k=1)
+        pinecone_ctor.assert_not_called()
+
+
+def test_index_and_pc_proxies_forward_on_first_use(monkeypatch):
+    """Proxy attribute access initializes once and forwards to the real objects."""
+    monkeypatch.setenv("PINECONE_API_KEY", "test-key")
+    vs = _reload_vector_store()
+
+    fake_index = MagicMock(name="Index")
+    fake_pc = MagicMock(name="Pinecone")
+    fake_pc.has_index.return_value = True
+    fake_pc.Index.return_value = fake_index
+
+    with patch("pinecone.Pinecone", return_value=fake_pc) as pinecone_ctor:
+        bound_index = vs.index
+        bound_pc = vs.pc
+        pinecone_ctor.assert_not_called()
+
+        bound_index.upsert([{"id": "1"}], namespace="default")
+        assert bound_pc.has_index(vs.INDEX_NAME) is True
+
+    pinecone_ctor.assert_called_once_with(api_key="test-key")
+    fake_index.upsert.assert_called_once_with(
+        [{"id": "1"}], namespace="default"
+    )
+
+
 def test_store_vectors_uses_lazy_get_index(monkeypatch):
+    """store_vectors.store() fetches the index via get_index(), not at import."""
     monkeypatch.setenv("PINECONE_API_KEY", "test-key")
     vs = _reload_vector_store()
 

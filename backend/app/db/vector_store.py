@@ -8,6 +8,10 @@ This module:
     - Creates the Pinecone index if it does not exist.
     - Connects to the specified index for vector operations.
 
+``index`` and ``pc`` are module-level proxy objects. Importing them (including
+``from app.db.vector_store import index``) does not connect to Pinecone; the
+client is created on the first attribute access, such as ``index.upsert(...)``.
+
 Attributes:
     INDEX_NAME (str): Name of the Pinecone index used for storing vectors.
     DIMENSIONS (int): Dimensionality of vector embeddings.
@@ -22,7 +26,7 @@ from __future__ import annotations
 
 import os
 import threading
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from dotenv import load_dotenv
 
@@ -41,6 +45,31 @@ METRIC = "cosine"
 _pc: Optional[Any] = None
 _index: Optional[Any] = None
 _init_lock = threading.Lock()
+
+
+class _LazyProxy:
+    """Forward attribute access to a factory result on first real use.
+
+    The factory is not called when the proxy is created or imported, so
+    ``from app.db.vector_store import index`` stays cheap and does not
+    require Pinecone credentials or network access.
+    """
+
+    def __init__(self, factory: Callable[[], Any]) -> None:
+        """Store ``factory`` without calling it."""
+        object.__setattr__(self, "_factory", factory)
+
+    def __getattr__(self, name: str) -> Any:
+        """Resolve the underlying object and return the named attribute."""
+        return getattr(object.__getattribute__(self, "_factory")(), name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Resolve the underlying object and set the named attribute."""
+        setattr(object.__getattribute__(self, "_factory")(), name, value)
+
+    def __repr__(self) -> str:
+        """Return a static description that does not trigger initialization."""
+        return f"<LazyProxy factory={object.__getattribute__(self, '_factory').__name__}>"
 
 
 def get_index() -> Any:
@@ -95,6 +124,12 @@ def get_index() -> Any:
         return _index
 
 
+def _get_pc() -> Any:
+    """Return the cached Pinecone client, initializing it on first use."""
+    get_index()
+    return _pc
+
+
 def reset_index_for_tests() -> None:
     """Clear cached Pinecone client/index state (test helper only)."""
     global _pc, _index
@@ -103,17 +138,13 @@ def reset_index_for_tests() -> None:
         _index = None
 
 
-def __getattr__(name: str) -> Any:
-    """Lazy attribute access for backward-compatible ``index`` / ``pc`` imports.
+# Module-level proxies so ``from … import index`` / ``pc`` stay lazy.
+index = _LazyProxy(get_index)
+pc = _LazyProxy(_get_pc)
 
-    Note: ``from app.db.vector_store import index`` still triggers initialization.
-    Prefer ``get_index()`` at the call site so importing the module stays cheap.
-    """
-    if name == "index":
-        return get_index()
-    if name == "pc":
-        get_index()
-        return _pc
+
+def __getattr__(name: str) -> Any:
+    """Lazy attribute access for backward-compatible ``PINECONE_API_KEY`` reads."""
     if name == "PINECONE_API_KEY":
         return os.getenv("PINECONE_API_KEY")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

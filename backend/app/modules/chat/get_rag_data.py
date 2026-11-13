@@ -32,6 +32,15 @@ load_dotenv()
 
 
 def search_pinecone(query: str, top_k: int = 5):
+    """Search the Pinecone index for vectors similar to ``query``.
+
+    Args:
+        query: Natural-language text to embed and look up.
+        top_k: Maximum number of matches to return (default: 5).
+
+    Returns:
+        A list of dicts with ``id``, ``score``, and ``metadata`` for each match.
+    """
     embeddings = embed_query(query)
 
     results = get_index().query(
