@@ -45,23 +45,34 @@ def _keenable_enabled():
     return SEARCH_PROVIDER == "keenable"
 
 
+def _keenable_hit(item):
+    """Keep the first ranked hit that has a usable URL and evidence text."""
+    if not isinstance(item, dict):
+        return None
+    url = item.get("url") or item.get("link") or ""
+    if not isinstance(url, str) or not url.strip():
+        return None
+    snippet = item.get("snippet") or item.get("content") or item.get("description") or ""
+    if not isinstance(snippet, str) or not snippet.strip():
+        return None
+    return {
+        "title": item.get("title") or "",
+        "link": url,
+        "snippet": snippet,
+    }
+
+
 def _first_keenable_result(payload):
     if not isinstance(payload, dict):
         return None
     items = payload.get("results") or []
-    if not items:
+    if not isinstance(items, list):
         return None
-    first = items[0]
-    if not isinstance(first, dict):
-        return None
-    url = first.get("url") or first.get("link") or ""
-    if not url:
-        return None
-    return {
-        "title": first.get("title") or "",
-        "link": url,
-        "snippet": first.get("snippet") or first.get("content") or first.get("description") or "",
-    }
+    for item in items:
+        hit = _keenable_hit(item)
+        if hit:
+            return hit
+    return None
 
 
 def _search_keenable(query):
@@ -75,7 +86,11 @@ def _search_keenable(query):
         headers["X-API-Key"] = api_key
     response = requests.post(
         url,
-        json={"query": query, "max_results": KEENABLE_SEARCH_MAX_RESULTS},
+        json={
+            "query": query,
+            "max_results": KEENABLE_SEARCH_MAX_RESULTS,
+            "disable_cards": True,
+        },
         headers=headers,
         timeout=KEENABLE_SEARCH_TIMEOUT_SECONDS,
     )
@@ -90,8 +105,11 @@ def search_google(query):
             first = _search_keenable(query)
             if first:
                 return [first]
-        except Exception as e:
-            logger.warning(f"Keenable search error, falling back to DuckDuckGo: {e}")
+        except Exception as exc:
+            logger.warning(
+                "Keenable search error, falling back to DuckDuckGo: %s",
+                type(exc).__name__,
+            )
 
     # 1. Try Google Custom Search if a valid key is provided
     elif GOOGLE_SEARCH and GOOGLE_SEARCH != SEARCH_KEY_PLACEHOLDER:
