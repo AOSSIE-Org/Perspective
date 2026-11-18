@@ -79,6 +79,15 @@ GOOGLE_SEARCH_ENGINE_ID = "f637ab77b5d8b4a3c"
 GOOGLE_SEARCH_TIMEOUT_SECONDS = 8
 SEARCH_KEY_PLACEHOLDER = "your_google_search_api_key_here"  # value from .env.example
 DDG_MAX_RESULTS = 3
+# Opt-in Keenable Search (SEARCH_PROVIDER=keenable). Off by default so Google
+# CSE and the DuckDuckGo fallback keep their current behaviour.
+# Google's Custom Search JSON API is scheduled to shut down on 1 January 2027:
+# https://developers.google.com/custom-search/v1/overview
+KEENABLE_PUBLIC_SEARCH_URL = "https://api.keenable.ai/v1/search/public"
+KEENABLE_SEARCH_URL = "https://api.keenable.ai/v1/search"
+KEENABLE_SEARCH_TIMEOUT_SECONDS = 8
+KEENABLE_SEARCH_TITLE = "Perspective"
+KEENABLE_SEARCH_MAX_RESULTS = 3
 
 # --- Scraping ---------------------------------------------------------------
 SCRAPER_USER_AGENT = (
