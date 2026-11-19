@@ -85,7 +85,7 @@ Errors: [400](#400-bad-request-unsafe-url) for an unsafe URL, [422](#422-unproce
 Fetches and cleans the article, then runs the LangGraph workflow ([`app/modules/langgraph_builder.py`](app/modules/langgraph_builder.py)):
 
 1. **Sentiment** of the article (`SENTIMENT_MODEL`).
-2. **Fact checking:** extract claims (`CLAIM_EXTRACTOR_MODEL`), search the web for each (Google Custom Search when `SEARCH_KEY` is set, otherwise DuckDuckGo), and verify each claim against the top result (`FACT_VERIFIER_MODEL`). At most `MAX_CLAIMS` (3) claims are checked. If no claims can be parsed, the first sentences of the article are used.
+2. **Fact checking:** extract claims (`CLAIM_EXTRACTOR_MODEL`), search the web for each (Keenable Search first when `SEARCH_PROVIDER=keenable`, otherwise Google Custom Search when `SEARCH_KEY` is set; DuckDuckGo is the fallback), and verify each claim against the top result (`FACT_VERIFIER_MODEL`). At most `MAX_CLAIMS` (3) claims are checked. If no claims can be parsed, the first sentences of the article are used.
 3. **Counter-perspective** generation (`PERSPECTIVE_MODEL`).
 4. **Judging** the perspective with a 0 to 100 score (`JUDGE_MODEL`). A score below `PERSPECTIVE_MIN_SCORE` (70) regenerates the perspective, up to `PERSPECTIVE_MAX_RETRIES` (3) attempts in total; the last attempt is returned even if it scores below 70.
 5. **Storage:** the perspective and each fact are embedded (`EMBEDDING_MODEL`) and upserted into the Pinecone index `perspective`, namespace `default`. `/api/chat` searches this data. A storage failure is logged and does not change the response.
@@ -247,6 +247,8 @@ Copy [`.env.example`](.env.example) to `.env` in `backend/`. Model names, sampli
 |----------|----------|----------|
 | `GROQ_API_KEY` | yes | All LLM calls. The Groq clients are created at startup, so the server does not start without it. |
 | `PINECONE_API_KEY` | yes | Storing and searching analyses. Checked at startup ([`app/db/vector_store.py`](app/db/vector_store.py)), which also creates the `perspective` index (384 dimensions, cosine, AWS `us-east-1` serverless) if it does not exist. |
-| `SEARCH_KEY` | no | Google Custom Search key for fact checking. When unset or left as the `.env.example` placeholder, DuckDuckGo is used instead. |
+| `SEARCH_KEY` | no | Google Custom Search key for fact checking. When unset or left as the `.env.example` placeholder, DuckDuckGo is used instead, unless `SEARCH_PROVIDER=keenable`. |
+| `SEARCH_PROVIDER` | no | Set to `keenable` to use Keenable Search first for fact checking, with DuckDuckGo as the fallback. Unset or any other value keeps the Google Custom Search then DuckDuckGo path. |
+| `KEENABLE_API_KEY` | no | Keenable Search API key, used only when `SEARCH_PROVIDER=keenable`. Optional: without it, the backend uses the keyless public endpoint. |
 | `PORT` | no | Listening port; defaults to `7860`. The server binds to `0.0.0.0`. |
 | `HF_TOKEN` | no | Not read by the backend code. The Hugging Face Hub library uses it, if set, when downloading the embedding model. Deploying to Hugging Face Spaces uses the `HF_TOKEN` GitHub Actions secret. |
