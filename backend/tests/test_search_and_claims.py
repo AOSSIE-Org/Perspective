@@ -222,6 +222,26 @@ def test_duckduckgo_is_used_when_keenable_finds_nothing_or_fails(search, monkeyp
     assert calls["google"] == []
 
 
+def test_keenable_coerces_non_string_titles(search, monkeypatch):
+    config, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    config["keenable"] = {
+        "results": [
+            {"title": None, "url": "https://keenable.example/none"},
+            {"title": 42, "url": "https://keenable.example/num", "snippet": "Numeric title."},
+        ]
+    }
+
+    assert web_search.search_google(QUERY) == [
+        {
+            "title": "",
+            "link": "https://keenable.example/num",
+            "snippet": "Numeric title.",
+        }
+    ]
+    assert calls["ddg"] == []
+
+
 def test_keenable_skips_hits_without_evidence_and_falls_back(search, monkeypatch):
     config, calls = search
     monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")

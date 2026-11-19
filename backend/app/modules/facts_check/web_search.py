@@ -55,8 +55,10 @@ def _keenable_hit(item):
     snippet = item.get("snippet") or item.get("content") or item.get("description") or ""
     if not isinstance(snippet, str) or not snippet.strip():
         return None
+    raw_title = item.get("title")
+    title = raw_title if isinstance(raw_title, str) else ""
     return {
-        "title": item.get("title") or "",
+        "title": title,
         "link": url,
         "snippet": snippet,
     }
