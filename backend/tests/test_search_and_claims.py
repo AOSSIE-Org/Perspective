@@ -9,6 +9,11 @@ from app.config import (
     GOOGLE_SEARCH_ENGINE_ID,
     GOOGLE_SEARCH_TIMEOUT_SECONDS,
     GOOGLE_SEARCH_URL,
+    KEENABLE_PUBLIC_SEARCH_URL,
+    KEENABLE_SEARCH_MAX_RESULTS,
+    KEENABLE_SEARCH_TIMEOUT_SECONDS,
+    KEENABLE_SEARCH_TITLE,
+    KEENABLE_SEARCH_URL,
     SEARCH_KEY_PLACEHOLDER,
 )
 from app.modules.facts_check import llm_processing
@@ -22,24 +27,60 @@ DDG_ITEM = {"title": "DDG bridge", "href": "https://ddg.example/bridge", "body":
 DDG_RESULT = [{"title": "DDG bridge", "link": "https://ddg.example/bridge", "snippet": "Opened in March."}]
 
 
+KEENABLE_ITEM = {
+    "title": "Keenable bridge",
+    "url": "https://keenable.example/bridge",
+    "snippet": "It cost 40M according to Keenable.",
+}
+KEENABLE_RESULT = [
+    {
+        "title": "Keenable bridge",
+        "link": "https://keenable.example/bridge",
+        "snippet": "It cost 40M according to Keenable.",
+    }
+]
+
+
 @pytest.fixture
 def search(monkeypatch):
     """Fake both search providers; `config` sets their replies and `calls` records the requests."""
-    calls = {"google": [], "ddg": []}
-    config = {"google": {"items": [GOOGLE_ITEM]}, "ddg": [DDG_ITEM]}
+    calls = {"google": [], "ddg": [], "keenable": []}
+    config = {
+        "google": {"items": [GOOGLE_ITEM]},
+        "ddg": [DDG_ITEM],
+        "keenable": {"results": [KEENABLE_ITEM]},
+    }
 
     class FakeResponse:
-        def __init__(self, payload):
+        def __init__(self, payload, status=200):
             self.payload = payload
+            self.status_code = status
 
         def json(self):
             return self.payload
+
+        def raise_for_status(self):
+            if isinstance(self.payload, Exception):
+                raise self.payload
+            if self.status_code >= 400:
+                raise RuntimeError(f"status {self.status_code}")
 
     def fake_get(url, params, timeout):
         calls["google"].append({"url": url, "params": params, "timeout": timeout})
         if isinstance(config["google"], Exception):
             raise config["google"]
         return FakeResponse(config["google"])
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["keenable"].append(
+            {"url": url, "json": json, "headers": headers, "timeout": timeout}
+        )
+        if isinstance(config["keenable"], Exception):
+            raise config["keenable"]
+        if isinstance(config["keenable"], tuple):
+            payload, status = config["keenable"]
+            return FakeResponse(payload, status=status)
+        return FakeResponse(config["keenable"])
 
     class FakeDDGS:
         def text(self, query, max_results):
@@ -49,8 +90,11 @@ def search(monkeypatch):
             return iter(config["ddg"])
 
     monkeypatch.setattr(web_search.requests, "get", fake_get)
+    monkeypatch.setattr(web_search.requests, "post", fake_post)
     monkeypatch.setattr(web_search, "DDGS", FakeDDGS)
     monkeypatch.setattr(web_search, "GOOGLE_SEARCH", "configured-google-key")
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "google")
+    monkeypatch.setattr(web_search, "KEENABLE_API_KEY", "")
     return config, calls
 
 
@@ -111,7 +155,124 @@ def test_returns_nothing_when_both_providers_come_up_empty(search, ddg_reply):
     assert web_search.search_google(QUERY) == []
 
 
+
+def test_google_is_still_used_when_keenable_is_not_selected(search):
+    _, calls = search
+
+    assert web_search.search_google(QUERY) == [
+        {"title": "Bridge budget", "link": "https://news.example/budget", "snippet": "It cost 40M."}
+    ]
+    assert calls["keenable"] == []
+    assert calls["ddg"] == []
+
+
+def test_keenable_is_used_when_search_provider_is_keenable(search, monkeypatch):
+    _, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+
+    assert web_search.search_google(QUERY) == KEENABLE_RESULT
+    assert calls["keenable"] == [
+        {
+            "url": KEENABLE_PUBLIC_SEARCH_URL,
+            "json": {
+                "query": QUERY,
+                "max_results": KEENABLE_SEARCH_MAX_RESULTS,
+                "disable_cards": True,
+            },
+            "headers": {
+                "Content-Type": "application/json",
+                "X-Keenable-Title": KEENABLE_SEARCH_TITLE,
+            },
+            "timeout": KEENABLE_SEARCH_TIMEOUT_SECONDS,
+        }
+    ]
+    assert calls["google"] == []
+    assert calls["ddg"] == []
+
+
+def test_keenable_sends_api_key_on_the_keyed_endpoint(search, monkeypatch):
+    _, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    monkeypatch.setattr(web_search, "KEENABLE_API_KEY", "test-keenable-key")
+
+    assert web_search.search_google(QUERY) == KEENABLE_RESULT
+    assert calls["keenable"][0]["url"] == KEENABLE_SEARCH_URL
+    assert calls["keenable"][0]["headers"]["X-API-Key"] == "test-keenable-key"
+    assert calls["keenable"][0]["headers"]["X-Keenable-Title"] == KEENABLE_SEARCH_TITLE
+    assert calls["google"] == []
+
+
+@pytest.mark.parametrize(
+    "keenable_reply",
+    [
+        {"results": []},
+        ({"results": [KEENABLE_ITEM]}, 502),
+        RuntimeError("timeout"),
+    ],
+    ids=["no-results", "api-error", "request-fails"],
+)
+def test_duckduckgo_is_used_when_keenable_finds_nothing_or_fails(search, monkeypatch, keenable_reply):
+    config, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    config["keenable"] = keenable_reply
+
+    assert web_search.search_google(QUERY) == DDG_RESULT
+    assert len(calls["keenable"]) == 1
+    assert len(calls["ddg"]) == 1
+    assert calls["google"] == []
+
+
+def test_keenable_coerces_non_string_titles(search, monkeypatch):
+    config, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    config["keenable"] = {
+        "results": [
+            {"title": None, "url": "https://keenable.example/none"},
+            {"title": 42, "url": "https://keenable.example/num", "snippet": "Numeric title."},
+        ]
+    }
+
+    assert web_search.search_google(QUERY) == [
+        {
+            "title": "",
+            "link": "https://keenable.example/num",
+            "snippet": "Numeric title.",
+        }
+    ]
+    assert calls["ddg"] == []
+
+
+def test_keenable_skips_hits_without_evidence_and_falls_back(search, monkeypatch):
+    config, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    config["keenable"] = {
+        "results": [
+            {"title": "Title only", "url": "https://keenable.example/empty", "snippet": "  "},
+            {"title": "No URL", "snippet": "Has text but no link"},
+            KEENABLE_ITEM,
+        ]
+    }
+
+    assert web_search.search_google(QUERY) == KEENABLE_RESULT
+    assert calls["ddg"] == []
+
+
+def test_keenable_falls_back_when_no_hit_has_evidence(search, monkeypatch):
+    config, calls = search
+    monkeypatch.setattr(web_search, "SEARCH_PROVIDER", "keenable")
+    config["keenable"] = {
+        "results": [
+            {"title": "Title only", "url": "https://keenable.example/empty"},
+            {"title": "Blank snippet", "url": "https://keenable.example/blank", "snippet": ""},
+        ]
+    }
+
+    assert web_search.search_google(QUERY) == DDG_RESULT
+    assert len(calls["ddg"]) == 1
+
+
 # --- claim extractor ---------------------------------------------------------------------
+
 
 
 def test_claim_extractor_returns_the_model_output_with_the_state(monkeypatch, fake_chat_client):
