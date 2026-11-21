@@ -130,7 +130,12 @@ def fetch_public_html(url: str, headers: dict | None = None) -> str:
 def _decode(body: bytes, res: requests.Response) -> str:
     # requests assumes ISO-8859-1 for text/* without a charset, which garbles most pages
     if "charset=" in res.headers.get("Content-Type", "").lower() and res.encoding:
-        return body.decode(res.encoding, errors="replace")
+        try:
+            return body.decode(res.encoding, errors="replace")
+        except LookupError:
+            # requests does not validate charset labels; an unknown name is not
+            # a decoding failure and must fall through to the normal fallback.
+            pass
     try:
         return body.decode("utf-8")
     except UnicodeDecodeError:

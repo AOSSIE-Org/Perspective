@@ -372,6 +372,19 @@ def test_decodes_with_the_declared_charset(resolve_hosts, fake_get):
     assert fetch_public_html("https://example.com/") == "café"
 
 
+def test_unknown_charset_falls_back_to_utf8_then_latin1(resolve_hosts, fake_get):
+    resolve_hosts({"example.com": [PUBLIC_IP]})
+    fake_get(
+        FakeResponse(
+            body="café".encode("latin-1"),
+            headers={"Content-Type": "text/html; charset=utf-8-bogus"},
+            encoding="utf-8-bogus",
+        )
+    )
+
+    assert fetch_public_html("https://example.com/") == "café"
+
+
 def test_decodes_utf8_when_no_charset_is_declared(resolve_hosts, fake_get):
     # requests would guess ISO-8859-1 for text/html without a charset and garble UTF-8.
     resolve_hosts({"example.com": [PUBLIC_IP]})
