@@ -87,4 +87,8 @@ def run_fact_check_pipeline(state):
 
     # Step 3: Verify facts using LLM
     final = run_fact_verifier_sdk(search_results)
+    if final.get("status") != "success":
+        message = final.get("message") or "Fact verification failed."
+        logger.error(f"[ERROR] Fact verification failed: {message}")
+        return [], message
     return final.get("verifications", []), None

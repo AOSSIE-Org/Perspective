@@ -144,6 +144,46 @@ def test_does_not_verify_without_any_search_evidence(pipeline):
     assert seen["verified"] is None
 
 
+def test_reports_the_verifier_error_instead_of_an_empty_success(pipeline, monkeypatch):
+    config, seen = pipeline
+    config["claims_output"] = "1. The bridge cost 40 million dollars."
+    monkeypatch.setattr(
+        fact_check_utils,
+        "run_fact_verifier_sdk",
+        lambda results: {"status": "error", "error_from": "fact_verification", "message": "Groq rate limit"},
+    )
+
+    verifications, error = run_fact_check_pipeline(state())
+
+    assert verifications == []
+    assert error == "Groq rate limit"
+
+
+def test_reports_a_generic_error_when_the_verifier_gives_no_message(pipeline, monkeypatch):
+    config, seen = pipeline
+    config["claims_output"] = "1. The bridge cost 40 million dollars."
+    monkeypatch.setattr(fact_check_utils, "run_fact_verifier_sdk", lambda results: {"status": "error"})
+
+    verifications, error = run_fact_check_pipeline(state())
+
+    assert verifications == []
+    assert error == "Fact verification failed."
+
+
+def test_node_reports_a_failed_verification_as_an_error(pipeline, monkeypatch):
+    config, seen = pipeline
+    config["claims_output"] = "1. The bridge cost 40 million dollars."
+    monkeypatch.setattr(
+        fact_check_utils,
+        "run_fact_verifier_sdk",
+        lambda results: {"status": "error", "error_from": "fact_verification", "message": "Groq rate limit"},
+    )
+
+    result = run_fact_check(state())
+
+    assert result == {"status": "error", "error_from": "fact_checking", "message": "Groq rate limit"}
+
+
 # --- LangGraph node wrapper ---------------------------------------------------------
 
 
