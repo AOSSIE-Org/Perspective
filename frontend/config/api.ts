@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   process: "/api/process",
   bias: "/api/bias",
   chat: "/api/chat",
+  trending: "/api/trending",
 } as const;
 
 export type ApiEndpoint = keyof typeof API_ENDPOINTS;
@@ -15,6 +16,7 @@ export type ApiEndpoint = keyof typeof API_ENDPOINTS;
 export const API_TIMEOUT_MS = {
   analysis: 90_000,
   chat: 30_000,
+  trending: 15_000,
 } as const;
 
 export function apiUrl(endpoint: ApiEndpoint, baseUrl: string = API_BASE_URL): string {

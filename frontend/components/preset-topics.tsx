@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { PRESET_TOPICS, type PresetTopic } from "@/config/preset-topics";
+import { apiUrl, API_TIMEOUT_MS } from "@/config/api";
 import { ArrowPointer } from "@/components/arrow-pointer";
 import { FingerPointer } from "@/components/finger-pointer";
 
@@ -24,17 +25,50 @@ export function PresetTopics({ onSelectTopic }: PresetTopicsProps) {
   const [topics, setTopics] = useState<PresetTopic[]>(() => PRESET_TOPICS.slice(0, 4));
 
   useEffect(() => {
-    // Sort by publication date descending and take the freshest 16 topics
-    const freshestPool = [...PRESET_TOPICS]
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-      .slice(0, 16);
+    let isMounted = true;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS.trending);
 
-    // Fisher-Yates shuffle to pick 4 completely unique random topics on each refresh
-    for (let i = freshestPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [freshestPool[i], freshestPool[j]] = [freshestPool[j], freshestPool[i]];
+    async function loadDynamicTopics() {
+      try {
+        const response = await fetch(apiUrl("trending"), {
+          signal: controller.signal,
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (isMounted && Array.isArray(data.topics) && data.topics.length >= 4) {
+            setTopics(data.topics.slice(0, 4));
+            clearTimeout(timeoutId);
+            return;
+          }
+        }
+      } catch {
+        // Network or fetch error: gracefully fall back to static pool
+      }
+      clearTimeout(timeoutId);
+
+      if (!isMounted) return;
+
+      // Sort by publication date descending and take the freshest 16 topics
+      const freshestPool = [...PRESET_TOPICS]
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+        .slice(0, 16);
+
+      // Fisher-Yates shuffle to pick 4 completely unique random topics on each refresh
+      for (let i = freshestPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [freshestPool[i], freshestPool[j]] = [freshestPool[j], freshestPool[i]];
+      }
+      setTopics(freshestPool.slice(0, 4));
     }
-    setTopics(freshestPool.slice(0, 4));
+
+    loadDynamicTopics();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const getTopicTitle = (topic: PresetTopic) => {

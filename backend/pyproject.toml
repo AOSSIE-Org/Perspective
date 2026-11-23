@@ -34,6 +34,12 @@ dev = [
     "pytest-cov>=7.1.0",
 ]
 
+[tool.uv.extra-build-dependencies]
+sgmllib3k = ["setuptools"]
+feedfinder2 = ["setuptools"]
+tinysegmenter = ["setuptools"]
+google-search-results = ["setuptools"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

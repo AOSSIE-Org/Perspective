@@ -21,6 +21,7 @@ describe("backend API config", () => {
     expect(apiUrl("process")).toBe(`${DEFAULT_API_BASE_URL}/api/process`);
     expect(apiUrl("bias")).toBe(`${DEFAULT_API_BASE_URL}/api/bias`);
     expect(apiUrl("chat")).toBe(`${DEFAULT_API_BASE_URL}/api/chat`);
+    expect(apiUrl("trending")).toBe(`${DEFAULT_API_BASE_URL}/api/trending`);
   });
 
   it("gives analysis a longer timeout than chat", () => {
