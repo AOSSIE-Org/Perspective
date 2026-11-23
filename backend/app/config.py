@@ -93,3 +93,16 @@ FETCH_TOTAL_TIMEOUT_SECONDS = 30  # whole fetch, all redirect hops and the body 
 FETCH_CHUNK_BYTES = 65536
 MIN_LINE_CHARS = 30  # cleaned article lines this short or shorter are dropped
 MAX_KEYWORDS = 15
+
+# --- Dynamic trending topics engine (modules/trending) ---------------------
+TRENDING_FEEDS = [
+    "https://feeds.npr.org/1001/rss.xml",
+    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "https://feeds.bbci.co.uk/news/world/rss.xml",
+]
+TRENDING_CACHE_TTL_SECONDS = 3600  # 1 hour cache duration
+TRENDING_MAX_STORIES_PER_FEED = 5
+TRENDING_MAX_TOPICS = 8
+TRENDING_EVAL_MODEL = GROQ_SMALL_MODEL
+TRENDING_EVAL_TEMPERATURE = 0.2
+TRENDING_EVAL_MAX_TOKENS = 512
